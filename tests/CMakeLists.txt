@@ -1,0 +1,28 @@
+set(CMAKE_FOLDER Tests)
+
+file(GLOB_RECURSE CATCH2_SRC catch2/*.*)
+add_library(Catch2 STATIC ${CATCH2_SRC})
+target_include_directories(Catch2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/catch2)
+
+function(dump_cmake_variables)
+    get_cmake_property(_variableNames VARIABLES)
+    list (SORT _variableNames)
+    foreach (_variableName ${_variableNames})
+        if ((NOT DEFINED ARGV0) OR _variableName MATCHES ${ARGV0})
+            message(STATUS "==> ${_variableName}=${${_variableName}}")
+        endif()
+    endforeach()
+endfunction()
+
+function(AddTest)
+    set(options)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRC LINK)
+    cmake_parse_arguments(arg_add_test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    dump_cmake_variables(arg_add_test)
+    add_executable(${arg_add_test_NAME} ${arg_add_test_SRC})
+    target_link_libraries(${arg_add_test_NAME} PRIVATE Catch2 ${arg_add_test_LINK})
+    add_test(${arg_add_test_NAME} COMMAND ${arg_add_test_NAME})
+endfunction()
+
+AddTest(NAME foo_test SRC foo_test.cpp LINK libmeta)
