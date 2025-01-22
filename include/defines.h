@@ -22,4 +22,7 @@ typedef double f64;
 #undef U
 #undef S
 
+#define PASTE(X) PASTE_(X)
+#define PASTE_(X) X
+
 #endif /* DEFINES_H */
