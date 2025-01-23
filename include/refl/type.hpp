@@ -24,13 +24,21 @@ namespace Meta {
         Type(const Type &) = delete;
         Type &operator=(const Type &) = delete;
 
+        // 类型基本信息
         inline sview  Name() const { return name_; }
         inline size_t Size() const { return size_; }
+
+        // 类型特性
         inline bool   IsPod() const { return flags_ & eTypeIsPod; }
         inline bool   IsConst() const { return flags_ & eTypeIsConst; }
         inline bool   IsRef() const { return flags_ & eTypeIsRef; }
         inline bool   IsPtr() const { return flags_ & eTypeIsPtr; }
         inline bool   IsVirtual() const { return flags_ & eTypeIsVirtual; }
+
+        // 成员信息
+
+        // 函数信息
+        
 
     private:
         sview  const name_;
