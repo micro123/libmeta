@@ -108,7 +108,7 @@ namespace Meta
     {
     public:
         // 一般构造函数
-        Ref () : ptr_ (details::RefCounted<T>::Create ()) {}
+        Ref () : ptr_ (nullptr) {}
         template <typename U>
             requires details::PtrCastable<T, U>
         Ref (U *u) : ptr_ (details::RefCounted<T>::Create (u))

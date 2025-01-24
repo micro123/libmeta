@@ -24,6 +24,6 @@ namespace Meta {
     };
 }
 
-#include "refl/field.inl"
+#include "field.inl"
 
 #endif /* LIBMETA_FIELD_HPP */

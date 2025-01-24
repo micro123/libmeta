@@ -22,6 +22,9 @@
 namespace Meta
 {
     FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
+
+    // void type
+    LINKAGE_TYPEID(void);
 }
 
 #undef LINKAGE_TYPEID

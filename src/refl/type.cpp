@@ -36,6 +36,8 @@ Meta::MethodPtr Meta::Type::GetMethods (sview name) const
 namespace Meta
 {
     FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
+
+    LINKAGE_TYPEID(void);
 }
 
 Meta::TypePtr Meta::TypeOf (Meta::TypeId tid)

@@ -4,12 +4,7 @@
 #include "refl/type.hpp"
 #include "utility/constexpr.hpp"
 
-#define REGISTER(type)                                                                \
-    do                                                                                \
-    {                                                                                 \
-        auto t = new Meta::Type {#type, sizeof (type), Meta::CalcTypeFlags<type> ()}; \
-        RegisterType (t, Meta::GetTypeId<type> ());                                   \
-    } while (0)
+#include "basic_types.hpp"
 
 class Meta::Registry::Private
 {
@@ -26,7 +21,7 @@ public:
 
 Meta::Registry::Registry () : d (new Private)
 {
-    FUNDAMENTAL_TYPES (REGISTER);
+    details::RegisterFundamentalTypes(this);
 }
 
 Meta::Registry::~Registry ()

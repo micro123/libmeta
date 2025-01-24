@@ -16,6 +16,7 @@ namespace Meta
     FWDC (Method);
     FWDC (Field);
     class Variant;
+    class Registry;
 
     using TypeId = const void *;
     using sview  = std::string_view;
