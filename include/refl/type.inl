@@ -4,29 +4,33 @@
 #include <type_traits>
 
 #define FUNDAMENTAL_TYPES(X) \
-    X(s8);   \
-    X(s16);  \
-    X(s32);  \
-    X(s64);  \
-    X(u8);   \
-    X(u16);  \
-    X(u32);  \
-    X(u64);  \
-    X(bool); \
-    X(char)
+    X (s8);                  \
+    X (s16);                 \
+    X (s32);                 \
+    X (s64);                 \
+    X (u8);                  \
+    X (u16);                 \
+    X (u32);                 \
+    X (u64);                 \
+    X (bool);                \
+    X (char)
 
-#define LINKAGE_TYPEID(type) template <> TypeId LIBMETA_API GetTypeId<type>()
+#define LINKAGE_TYPEID(type) \
+    template <>              \
+    TypeId LIBMETA_API GetTypeId<type> ()
 
-namespace Meta{
-    FUNDAMENTAL_TYPES(LINKAGE_TYPEID);
+namespace Meta
+{
+    FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
 }
 
 #undef LINKAGE_TYPEID
 
-
-namespace Meta {
-    namespace details {
-        template<bool v, u32 f>
+namespace Meta
+{
+    namespace details
+    {
+        template <bool v, u32 f>
         struct cond_value {
             static constexpr u32 value = v ? f : 0;
         };
@@ -45,14 +49,14 @@ namespace Meta {
 
         template <typename T>
         constexpr u32 f_virtual = cond_value<std::is_abstract_v<T>, eTypeIsVirtual>::value;
-    }
+    }  // namespace details
 
     template <typename T>
-    constexpr u32 CalcTypeFlags() {
+    constexpr u32 CalcTypeFlags ()
+    {
         using namespace details;
         return f_pod<T> + f_const<T> + f_ptr<T> + f_ref<T> + f_virtual<T>;
     }
-}
-
+}  // namespace Meta
 
 #endif /* LIBMETA_TYPE_INL */

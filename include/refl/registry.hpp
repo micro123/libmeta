@@ -3,20 +3,24 @@
 
 #include "fwd.hpp"
 
-namespace Meta {
-    class LIBMETA_API Registry {
-        Registry();
-        ~Registry();
+namespace Meta
+{
+    class LIBMETA_API Registry
+    {
+        Registry ();
+        ~Registry ();
+
     public:
-        static Registry &Instance();
+        static Registry &Instance ();
 
-        bool RegisterType(Type *type, TypeId tid);
+        bool RegisterType (TypePtr type, TypeId tid);
 
-        Type *Get(TypeId tid);
+        TypePtr Get (TypeId tid);
+
     private:
         class Private;
-        Private * const d;
+        Private *const d;
     };
-}
+}  // namespace Meta
 
 #endif /* LIBMETA_REGISTRY_HPP */
