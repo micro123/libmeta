@@ -2,7 +2,7 @@
 #define LIBMETA_FIELD_HPP
 
 #include "refl/fwd.hpp"
-#include "utility/variant.hpp"
+#include "refl/any.hpp"
 
 #include <string_view>
 
@@ -17,8 +17,8 @@ namespace Meta {
         virtual bool IsMember() const = 0;
         virtual bool IsConst() const = 0;
 
-        virtual Variant Get(Variant object) const = 0;
-        virtual Variant Set(Variant object, Variant value) const = 0;
+        virtual Any Get(Any object) const = 0;
+        virtual Any Set(Any object, Any value) const = 0;
     private:
         sview const name_;
     };

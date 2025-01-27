@@ -20,7 +20,7 @@ namespace Meta {
             bool IsConst() const override { return false; }
             bool IsVolatile() const override { return false; }
 
-            Variant Invoke(const Variant *args, u32 cnt) const override { return {}; } // TODO: Impl
+            Any Invoke(const Any *args, u32 cnt) const override { return {}; } // TODO: Impl
         private:
             R(*ptr_)(Param...);
         };
@@ -41,7 +41,7 @@ namespace Meta {
             bool IsConst() const override { return false; }
             bool IsVolatile() const override { return false; }
 
-            Variant Invoke(const Variant *args, u32 cnt) const override { return {}; } // TODO: Impl
+            Any Invoke(const Any *args, u32 cnt) const override { return {}; } // TODO: Impl
         private:
             Ptr ptr_;
         };
@@ -62,7 +62,7 @@ namespace Meta {
             bool IsConst() const override { return true; }
             bool IsVolatile() const override { return false; }
 
-            Variant Invoke(const Variant *args, u32 cnt) const override { return {}; } // TODO: Impl
+            Any Invoke(const Any *args, u32 cnt) const override { return {}; } // TODO: Impl
         private:
             Ptr ptr_;
         };
@@ -83,7 +83,7 @@ namespace Meta {
             bool IsConst() const override { return false; }
             bool IsVolatile() const override { return true; }
 
-            Variant Invoke(const Variant *args, u32 cnt) const override { return {}; } // TODO: Impl
+            Any Invoke(const Any *args, u32 cnt) const override { return {}; } // TODO: Impl
         private:
             Ptr ptr_;
         };

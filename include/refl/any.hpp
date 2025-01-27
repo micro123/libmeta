@@ -2,11 +2,11 @@
 #define LIBMETA_VARIANT_HPP
 
 #include "exports.h"
+#include "refl/ref.hpp"
 #include "refl/type.hpp"
-#include "utility/ref.hpp"
 
 /**
- * 期望 Variant 可以:
+ * 期望 Any 可以:
  * 1. 从任意类型 T 构造
  * 2. 从任意类型 T 赋值
  * 3. 有值时可以转换为 T& / T*
@@ -19,87 +19,107 @@
 
 namespace Meta
 {
-    class LIBMETA_API Variant
+    class LIBMETA_API Any
     {
     public:
         // MARK: Constructors
         // Empty
-        Variant () {}
-        
+        Any () {}
+
         // Ref
-        template<typename T>
-        Variant (T &value): value_type_(TypeOf<T>()) {}
+        template <typename T>
+        Any (T &value) : value_type_ (TypeOf<T> ())
+        {
+        }
 
         // Copy / ConstRef / Construct
-        template<typename T>
-        Variant (const T &value): value_type_(TypeOf<T>()) {}
+        template <typename T>
+        Any (const T &value) : value_type_ (TypeOf<T> ())
+        {
+        }
 
         // Construct
-        template<typename T>
-        Variant (T &&value): value_type_(TypeOf<T>()) {}
+        template <typename T>
+        Any (T &&value) : value_type_ (TypeOf<T> ())
+        {
+        }
 
         // Ref<T>
-        template<typename T>
-        Variant(Ref<T> ref) {}
+        template <typename T>
+        Any (Ref<T> ref)
+        {
+        }
 
-        Variant (const Variant& var) {}
-        Variant (Variant &&var) {}
+        Any (const Any &var) {}
+        Any (Any &&var) {}
 
         // MARK: Assignment
         template <typename T>
-        Variant &operator=(T &t) { // New Ref
+        Any &operator= (T &t)
+        {  // New Ref
             return *this;
         }
         template <typename T>
-        Variant &operator=(T &&t) { // Move Value
+        Any &operator= (T &&t)
+        {  // Move Value
             return *this;
         }
         template <typename T>
-        Variant &operator=(const T &t) { // Const Ref
+        Any &operator= (const T &t)
+        {  // Const Ref
             return *this;
         }
         template <typename T>
-        Variant &operator=(Ref<T> ref) { // Const Ref
+        Any &operator= (Ref<T> ref)
+        {  // Const Ref
             return *this;
         }
-        Variant &operator=(const Variant &var) {
+        Any &operator= (const Any &var)
+        {
             return *this;
         }
-        Variant &operator=(Variant &&var) {
+        Any &operator= (Any &&var)
+        {
             return *this;
         }
 
         template <typename T>
-        T *ValuePtr() const {
-
+        T *ValuePtr () const
+        {
         }
 
         template <typename T>
-        T &ValueRef() const {
-
+        T &ValueRef () const
+        {
         }
 
-        bool Valid() const {
+        bool Valid () const
+        {
             return false;
         }
 
-        operator bool() const {
-            return Valid();
+        operator bool () const
+        {
+            return Valid ();
         }
 
-        bool operator==(decltype(nullptr)) const {
-            return !Valid();
+        bool operator== (decltype (nullptr)) const
+        {
+            return !Valid ();
         }
 
-        bool operator!=(decltype(nullptr)) const {
-            return Valid();
+        bool operator!= (decltype (nullptr)) const
+        {
+            return Valid ();
         }
 
-        inline TypePtr Type() const { return value_type_; }
+        inline TypePtr Type () const
+        {
+            return value_type_;
+        }
 
     private:
-        TypePtr      value_type_ {};
-        
+        TypePtr value_type_ {};
     };
 }  // namespace Meta
 

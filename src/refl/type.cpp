@@ -27,7 +27,7 @@ Meta::MethodPtr Meta::Type::GetMethods (sview name) const
 
 #define LINKAGE_TYPEID(type)                         \
     template <>                                      \
-    TypeId GetTypeId<type> ()                        \
+    TypeId details::GetTypeId<type> ()                        \
     {                                                \
         static u8 internal {1};                      \
         return reinterpret_cast<TypeId> (&internal); \
@@ -37,8 +37,11 @@ namespace Meta
 {
     FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
 
-    LINKAGE_TYPEID(void);
-}
+    LINKAGE_TYPEID (void);
+    LINKAGE_TYPEID (cstr);
+    LINKAGE_TYPEID (str);
+
+}  // namespace Meta
 
 Meta::TypePtr Meta::TypeOf (Meta::TypeId tid)
 {

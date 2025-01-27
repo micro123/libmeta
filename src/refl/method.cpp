@@ -25,12 +25,12 @@ Meta::sview Meta::Method::ParameterName (u32 index) const
     return params_.at (index).name;
 }
 
-Meta::Variant Meta::Method::ParameterDefault (u32 index) const
+Meta::Any Meta::Method::ParameterDefault (u32 index) const
 {
     assert (index < params_.size ());
     return params_.at (index).def;
 }
 
-void Meta::Method::AddParam (sview name, TypePtr type, Variant def) {
+void Meta::Method::AddParam (sview name, TypePtr type, Any def) {
     params_.emplace_back(name, std::move(type), std::move(def));
 }

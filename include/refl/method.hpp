@@ -4,14 +4,14 @@
 #include "exports.h"
 #include "refl/fwd.hpp"
 #include "refl/method.hpp"
-#include "utility/variant.hpp"
+#include "refl/any.hpp"
 
 #include <vector>
 namespace Meta {
     struct ParameterInfo {
         sview   name;
         TypePtr type;
-        Variant def;
+        Any def;
     };
 
     using Params = std::vector<ParameterInfo>;
@@ -27,22 +27,22 @@ namespace Meta {
         u32     ParameterCount() const;
         TypePtr ParameterType(u32 index) const;
         sview   ParameterName(u32 index) const;
-        Variant ParameterDefault(u32 index) const;
+        Any ParameterDefault(u32 index) const;
 
         virtual bool IsMember() const = 0;
         virtual bool IsConst() const = 0;
         virtual bool IsVolatile() const = 0;
 
-        virtual Variant Invoke(const Variant *args, u32 cnt) const = 0;
+        virtual Any Invoke(const Any *args, u32 cnt) const = 0;
 
         template<typename ... Args>
-        Variant Invoke(Args ... args) {
-            const Variant va_arr[] = { Variant{} }; // TODO: sizeof...(args) + 1
+        Any Invoke(Args ... args) {
+            const Any va_arr[] = { Any{} }; // TODO: sizeof...(args) + 1
             return Invoke(va_arr, (u32)std::size(va_arr));
         }
 
     protected:
-        void AddParam(sview name, TypePtr type, Variant def);
+        void AddParam(sview name, TypePtr type, Any def);
 
     private:
         sview    name_;

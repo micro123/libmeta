@@ -1,5 +1,5 @@
 #include <catch_amalgamated.hpp>
-#include <utility/ref.hpp>
+#include <refl/ref.hpp>
 
 struct Foo {
     Foo (int)

@@ -17,6 +17,8 @@ namespace Meta
 
         TypePtr Get (TypeId tid);
 
+        TypePtr Get (const str name);
+        
     private:
         class Private;
         Private *const d;

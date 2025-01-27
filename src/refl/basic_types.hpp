@@ -15,6 +15,16 @@ namespace Meta::details {
         VoidType();
     };
 
+    class CStringType final : public Type {
+    public:
+        CStringType();
+    };
+
+    class StringType final :public Type {
+    public:
+        StringType();
+    };
+
     void RegisterFundamentalTypes(Registry *reg);
 }
 

@@ -1,5 +1,5 @@
-#ifndef LIBMETA_REF_HPP
-#define LIBMETA_REF_HPP
+#ifndef REF_HPP
+#define REF_HPP
 
 #include <exports.h>
 #include <atomic>
@@ -205,4 +205,4 @@ namespace Meta
     }
 }  // namespace Meta
 
-#endif /* LIBMETA_REF_HPP */
+#endif /* REF_HPP */

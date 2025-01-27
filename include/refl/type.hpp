@@ -1,5 +1,5 @@
-#ifndef LIBMETA_TYPE_HPP
-#define LIBMETA_TYPE_HPP
+#ifndef TYPE_HPP
+#define TYPE_HPP
 
 #include <string_view>
 #include <vector>
@@ -71,11 +71,34 @@ namespace Meta
         u32 const    flags_;
     };
 
+    namespace details {
+        template <typename T>
+        TypeId GetTypeId ();
+
+        // template <typename T, size_t N>
+        // TypeId GetTypeId<T(&)[N]> () {
+        //     return GetTypeId<T>();
+        // }
+
+        // template <typename T>
+        // TypeId GetTypeId<T*> () {
+        //     return GetTypeId<T>();
+        // }
+
+        template <typename T>
+        TypeId GetTypeId ()
+        {
+            static u8 store;
+            return reinterpret_cast<TypeId> (&store);
+        }
+    }
+
     template <typename T>
     TypeId GetTypeId ()
     {
-        static u8 store;
-        return reinterpret_cast<TypeId> (&store);
+        using no_pointer_t = std::remove_pointer_t<T>;
+        using no_cvref_t = std::remove_cvref_t<no_pointer_t>;
+        return details::GetTypeId<no_cvref_t>();
     }
 
     LIBMETA_API
@@ -93,4 +116,4 @@ namespace Meta
 
 #include "type.inl"
 
-#endif /* LIBMETA_TYPE_HPP */
+#endif /* TYPE_HPP */

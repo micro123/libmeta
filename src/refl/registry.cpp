@@ -1,15 +1,15 @@
 #include "refl/registry.hpp"
 #include <mutex>
 #include <unordered_map>
+#include "basic_types.hpp"
 #include "refl/type.hpp"
 #include "utility/constexpr.hpp"
-
-#include "basic_types.hpp"
 
 class Meta::Registry::Private
 {
 public:
-    std::unordered_map<Meta::TypeId, Meta::TypePtr> db;
+    std::unordered_map<Meta::TypeId, Meta::TypePtr> db_tid2type;
+    std::unordered_map<sview, Meta::TypePtr>        db_name2type;
     std::recursive_mutex                            mtx;
     using lock_guard = std::lock_guard<decltype (mtx)>;
 
@@ -21,7 +21,7 @@ public:
 
 Meta::Registry::Registry () : d (new Private)
 {
-    details::RegisterFundamentalTypes(this);
+    details::RegisterFundamentalTypes (this);
 }
 
 Meta::Registry::~Registry ()
@@ -37,19 +37,45 @@ Meta::Registry &Meta::Registry::Instance ()
 
 bool Meta::Registry::RegisterType (TypePtr type, TypeId tid)
 {
+    assert (type); // 这个不能为空
     auto l  = d->AutoLock ();
-    auto it = d->db.find (tid);
-    if (it != d->db.end ())
+    //  需要确保两个都没有重复
+    auto const it1 = d->db_tid2type.find(tid);
+    auto const it2 = d->db_name2type.find(type->Name());
+
+    if (it1 != end(d->db_tid2type))
+    {
+        assert(0 && "duplicated type id!!");
         return false;
-    d->db.insert ({tid, type});
+    }
+
+    if (it2 != end(d->db_name2type))
+    {
+        assert(0 && "duplicated type name!!");
+        return false;
+    }
+
+    d->db_tid2type.insert({tid, type});
+    d->db_name2type.insert({type->Name(), type});
+
     return true;
 }
 
 Meta::TypePtr Meta::Registry::Get (TypeId tid)
 {
     auto l  = d->AutoLock ();
-    auto it = d->db.find (tid);
-    if (it != d->db.end ())
+    auto it = d->db_tid2type.find (tid);
+    if (it != d->db_tid2type.end ())
         return it->second;
     return {};
+}
+
+Meta::TypePtr Meta::Registry::Get (const str name)
+{
+    auto l  = d->AutoLock ();
+    auto it = d->db_name2type.find (name);
+    if (it != d->db_name2type.end ())
+        return it->second;
+    return {};
+
 }

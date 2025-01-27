@@ -18,10 +18,10 @@ namespace Meta
             bool IsMember () const override { return false; }
             bool IsConst () const  override { return std::is_const_v<T>; }
 
-            Variant Get (Variant object) const                override {
+            Any Get (Any object) const                override {
                 return {};
             }
-            Variant Set (Variant object, Variant value) const override {
+            Any Set (Any object, Any value) const override {
                 return {};
             }
 
@@ -39,10 +39,10 @@ namespace Meta
             bool IsMember () const override { return true; }
             bool IsConst () const  override { return std::is_const_v<T>; }
 
-            Variant Get (Variant object) const                override {
+            Any Get (Any object) const                override {
                 return {};
             }
-            Variant Set (Variant object, Variant value) const override {
+            Any Set (Any object, Any value) const override {
                 return {};
             }
         private:
