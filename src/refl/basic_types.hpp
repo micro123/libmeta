@@ -25,6 +25,11 @@ namespace Meta::details {
         StringType();
     };
 
+    class NullType final : public Type {
+    public:
+        NullType();
+    };
+
     void RegisterFundamentalTypes(Registry *reg);
 }
 

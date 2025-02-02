@@ -22,8 +22,12 @@ void Meta::details::RegisterFundamentalTypes (Registry *reg)
     assert (ret);
     ret =reg->RegisterType(new StringType, GetTypeId<str>());
     assert (ret);
+    ret = reg->RegisterType(new NullType, Meta::NULL_TYPE_ID);
+    assert (ret);
 }
 
 Meta::details::CStringType::CStringType () : Type ("cstr", sizeof (cstr), CalcTypeFlags<cstr> ()) {}
 
 Meta::details::StringType::StringType () : Type ("str", sizeof (str), CalcTypeFlags<str> ()) {}
+
+Meta::details::NullType::NullType () : Type("nil", 0, 0) {}

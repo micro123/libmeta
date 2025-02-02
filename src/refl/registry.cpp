@@ -79,3 +79,15 @@ Meta::TypePtr Meta::Registry::Get (const str name)
     return {};
 
 }
+
+void Meta::Registry::VisitTypes (const std::function<bool (TypeId, TypePtr)> &visitor) const {
+    if (!visitor)
+        return;
+    auto l = d->AutoLock();
+    auto it = begin(d->db_tid2type);
+    while (it != end(d->db_tid2type)) {
+        if (!visitor(it->first, it->second))
+            break;
+        ++it;
+    }
+}

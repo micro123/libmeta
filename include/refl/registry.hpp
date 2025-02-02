@@ -1,7 +1,8 @@
-#ifndef LIBMETA_REGISTRY_HPP
-#define LIBMETA_REGISTRY_HPP
+#ifndef REGISTRY_HPP
+#define REGISTRY_HPP
 
 #include "fwd.hpp"
+#include <functional>
 
 namespace Meta
 {
@@ -18,6 +19,8 @@ namespace Meta
         TypePtr Get (TypeId tid);
 
         TypePtr Get (const str name);
+
+        void VisitTypes(const std::function<bool(TypeId, TypePtr)> &visitor) const;
         
     private:
         class Private;
@@ -25,4 +28,4 @@ namespace Meta
     };
 }  // namespace Meta
 
-#endif /* LIBMETA_REGISTRY_HPP */
+#endif /* REGISTRY_HPP */

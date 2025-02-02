@@ -110,6 +110,8 @@ namespace Meta
         return TypeOf (GetTypeId<T> ());
     }
 
+    inline TypePtr NilType() { return TypeOf(NULL_TYPE_ID); }
+
     template <typename T>
     constexpr u32 CalcTypeFlags ();
 }  // namespace Meta
