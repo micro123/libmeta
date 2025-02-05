@@ -17,8 +17,8 @@ namespace Meta {
         virtual bool IsMember() const = 0;
         virtual bool IsConst() const = 0;
 
-        virtual Any Get(Any object) const = 0;
-        virtual Any Set(Any object, Any value) const = 0;
+        virtual Any Get(Any *object) const = 0;
+        virtual Any Set(Any *object, Any value) const = 0;
     private:
         sview const name_;
     };

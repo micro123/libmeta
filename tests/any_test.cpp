@@ -9,5 +9,6 @@ TEST_CASE("Any Basic")
     REQUIRE(v.Type() == TypeOf<decltype(42)>());
     v = 3.14;
     REQUIRE(v.Type() == TypeOf<decltype(3.14)>());
+    REQUIRE(3.14 == (decltype(3.14))v);
 }
 

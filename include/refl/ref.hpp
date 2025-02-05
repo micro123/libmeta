@@ -135,7 +135,7 @@ namespace Meta
         }
         Ref &operator= (Ref &&other)
         {
-            if (ptr_ != &other.ptr_)
+            if (ptr_ != other.ptr_)
             {
                 std::swap (ptr_, other.ptr_);
             }

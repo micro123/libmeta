@@ -18,11 +18,15 @@ namespace Meta
             bool IsMember () const override { return false; }
             bool IsConst () const  override { return std::is_const_v<T>; }
 
-            Any Get (Any object) const                override {
-                return {};
+            Any Get (Any*) const                override {
+                return *ptr_;
             }
-            Any Set (Any object, Any value) const override {
-                return {};
+            Any Set (Any*, Any value) const override {
+                if constexpr (std::is_const_v<T>) {
+                    return Get(nullptr);
+                } else {
+                    return *ptr_ = value.ValueRef<T>();
+                }
             }
 
         private:
@@ -39,11 +43,15 @@ namespace Meta
             bool IsMember () const override { return true; }
             bool IsConst () const  override { return std::is_const_v<T>; }
 
-            Any Get (Any object) const                override {
-                return {};
+            Any Get (Any *object) const                override {
+                return object->ValuePtr<C>()->*ptr_;
             }
-            Any Set (Any object, Any value) const override {
-                return {};
+            Any Set (Any *object, Any value) const override {
+                if constexpr (std::is_const_v<T>) {
+                    return Get(object);
+                } else {
+                    return object->ValuePtr<C>()->*ptr_ = value.ValueRef<T>();
+                }
             }
         private:
             Ptr ptr_;
