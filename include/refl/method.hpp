@@ -33,12 +33,12 @@ namespace Meta {
         virtual bool IsConst() const = 0;
         virtual bool IsVolatile() const = 0;
 
-        virtual Any Invoke(const Any *args, u32 cnt) const = 0;
+        virtual Any Invoke(Any *args, u32 cnt) const = 0;
 
         template<typename ... Args>
-        Any Invoke(Args ... args) {
-            const Any va_arr[] = { Any{} }; // TODO: sizeof...(args) + 1
-            return Invoke(va_arr, (u32)std::size(va_arr));
+        Any Invoke(Args ... args) const {
+            Any va_arr[] = { args..., {} }; // TODO: sizeof...(args)
+            return Invoke(va_arr, (u32)std::size(va_arr) - 1);
         }
 
     protected:

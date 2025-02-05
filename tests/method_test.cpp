@@ -1,12 +1,12 @@
 #include <catch_amalgamated.hpp>
 #include <refl/method.hpp>
 
-void foo() {}
+void foo(int x, int y, int z) { printf("in %s, x = %d, y = %d, z = %d\n", __FUNCTION__, x, y, z); }
 struct A {
-    void a() {}
-    void b() const {}
-    void c() volatile {}
-    static void d() {}
+    void a() { puts(__FUNCTION__); }
+    void b() const { puts(__FUNCTION__); }
+    void c() volatile { puts(__FUNCTION__); }
+    static void d() { puts(__FUNCTION__); }
 };
 
 TEST_CASE ("Method Simple")
@@ -29,4 +29,25 @@ TEST_CASE ("Method Simple")
     REQUIRE(!d->IsMember());
     REQUIRE(!d->IsConst());
     REQUIRE(!d->IsVolatile());
+}
+
+TEST_CASE ("Method Call")
+{
+    A obj;
+
+    auto f = Meta::MakeMethod("foo", &foo);
+    f->Invoke(1, 2, 3);
+
+    auto a = Meta::MakeMethod("a", &A::a);
+    a->Invoke(obj);
+
+    auto b = Meta::MakeMethod("b", &A::b);
+    b->Invoke(obj);
+    
+    auto c = Meta::MakeMethod("c", &A::c);
+    c->Invoke(obj);
+    
+    auto d = Meta::MakeMethod("d", &A::d);
+    d->Invoke();
+    
 }

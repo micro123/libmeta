@@ -181,9 +181,18 @@ namespace Meta
         T *ValuePtr () const
         {
             assert(Valid());
-            if (type_id_ != GetTypeId<T>())
-                return nullptr;
-            return (T*)data_;
+            if constexpr (std::is_same_v<void, T>)
+            {
+                return data_;
+            }
+            else
+            {
+                if (type_id_ != GetTypeId<T>())
+                {
+                    return nullptr;
+                }
+                return (T*)data_;
+            }
         }
 
         template <typename T>
