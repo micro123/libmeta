@@ -6,6 +6,10 @@
 
 namespace Meta
 {
+    // fwd
+    template <typename T>
+    class Ref;
+
     namespace details
     {
         // 这个类只负责计数 和 调用析构（Dispose）
@@ -74,16 +78,9 @@ namespace Meta
         public:
             template <typename U = T>
                 requires PtrCastable<U, T>
-            inline U *Ptr ()
+            inline U *Ptr () const
             {
                 return (U *) data_;
-            }
-
-            template <typename U = T>
-                requires PtrCastable<U, T>
-            inline const U *Ptr () const
-            {
-                return (const U *) data_;
             }
 
             static RefCounted<T> *Create ()
@@ -101,10 +98,42 @@ namespace Meta
             T          *data_;
             DisposeFunc dispose_;
         };
+
+        // -> and *
+        template <typename T, bool = std::is_void_v<T>>
+        struct PtrAccess {
+            T* operator->() const noexcept {
+                return _Get();
+            }
+
+            T& operator*() const noexcept {
+                return *_Get();
+            }
+        private:
+            T* _Get() const
+            {
+                return static_cast<const Ref<T>*>(this)->Get();
+            }
+        };
+
+        // only ->
+        template <typename T>
+        struct PtrAccess<T,true> {
+            T* operator->() const noexcept {
+                return _Get();
+            }
+        private:
+            T* _Get() const
+            {
+                return static_cast<Ref<T>*>(this)->Get();
+            }
+        };
+
+
     }  // namespace details
 
     template <typename T>
-    class Ref
+    class Ref: public details::PtrAccess<T>
     {
     public:
         // 一般构造函数
@@ -142,26 +171,16 @@ namespace Meta
             return *this;
         }
 
-        inline T *operator->()
-        {
-            return ptr_->Ptr ();
-        }
-        inline const T *operator->() const
-        {
-            return ptr_->Ptr ();
-        }
-        inline T &operator* ()
-        {
-            return *ptr_->Ptr ();
-        }
-        inline const T &operator* () const
-        {
-            return *ptr_->Ptr ();
-        }
-
         inline s32 RefCount () const
         {
             return ptr_->RefCount ();
+        }
+
+        inline T* Get() const noexcept
+        {
+            if (ptr_)
+                return ptr_->template Ptr<T>();
+            return nullptr;
         }
 
         operator bool () const
@@ -202,6 +221,12 @@ namespace Meta
     Ref<T> MakeRef (Args &&...args)
     {
         return Ref<T> (new T {std::forward<Args> (args)...});
+    }
+
+    template <typename T>
+    Ref<T> MakeRef (T *obj)
+    {
+        return {obj};
     }
 }  // namespace Meta
 

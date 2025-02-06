@@ -41,6 +41,9 @@ namespace Meta
             f32  _f32;
             f64  _f64;
             cstr _cstr;
+            void*_ptr;
+
+            char _pad[sizeof(Ref<void>) * 4];
         };
 
         struct LIBMETA_API AnyOps {
@@ -75,41 +78,6 @@ namespace Meta
 
             static AnyOps Empty();
         };
-
-        // class LIBMETA_API AnyBase {
-        // public:
-        //     virtual ~AnyBase();
-
-        //     virtual TypePtr GetType() = 0;
-
-        //     virtual AnyBase* Clone(void *stack) = 0;
-
-        //     virtual void*    Ptr() = 0;
-        // };
-
-        // template <typename T>
-        // class AnyDerivedStack: public AnyBase {
-        //     T value_;
-        // public:
-        //     template<typename U>
-        //     AnyDerivedStack(U t, std::enable_if_t<std::is_nothrow_constructible_v<T, U>> * = nullptr): value_(t) {}
-        //     ~AnyDerivedStack() override = default;
-        //     TypePtr  GetType() override { return TypeOf<T>(); }
-        //     AnyBase *Clone(void *stack) override { return new(stack) AnyDerivedStack(value_); }
-        //     void    *Ptr() override { return &value_; }
-        // };
-
-        // template <typename T>
-        // class AnyDerivedHeap: public AnyBase {
-        //     T value_;
-        // public:
-        //     template<typename U>
-        //     AnyDerivedHeap(U t, std::enable_if_t<std::is_nothrow_constructible_v<T, U>> * = nullptr): value_(t) {}
-        //     ~AnyDerivedHeap() override = default;
-        //     TypePtr  GetType() override { return TypeOf<T>(); }
-        //     AnyBase *Clone(void *) override { return new AnyDerivedHeap(value_); }
-        //     void    *Ptr() override { return &value_; }
-        // };
     }
 
     class LIBMETA_API Any
@@ -133,7 +101,7 @@ namespace Meta
         template <typename T>
         Any (Ref<T> ref)
         {
-            // TODO: 
+            Construct(std::move(ref));
         }
 
         Any (const Any &var) {
@@ -263,6 +231,14 @@ namespace Meta
             } else {
                 data_ = new T{t};
             }
+        }
+
+        template <typename T>
+        void Construct(Ref<T> ref)
+        {
+            type_id_ = GetTypeId<T>();
+            ops_ = details::AnyOps::OfRef<T>();
+            data_ = ops_.Construct(&buffer_, &ref);
         }
 
         void Assign(const Any &any)
