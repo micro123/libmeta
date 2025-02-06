@@ -47,8 +47,10 @@ namespace Meta
         };
 
         struct LIBMETA_API AnyOps {
+            void* (*Construct)(void*, void*) = nullptr;
             void  (*Destroy)(void*) = nullptr;
             void* (*Clone)(void*, void*) = nullptr;
+            void* (*Get)(void*) = nullptr;
 
             // helpers
             template <typename T>
@@ -72,8 +74,12 @@ namespace Meta
             template <typename T>
             static AnyOps OfRef()
             {
-                // TODO:
-                return {};
+                return {
+                    .Construct = +[](void* stack, void* data) -> void* { return new(stack)Ref<T>{*(Ref<T>*)data}; },
+                    .Destroy = +[](void* data) { ((Ref<T>*)data)->~Ref(); },
+                    .Clone = +[](void* stack, void* data) -> void* { return new(stack)Ref<T>{*(Ref<T>*)data}; },
+                    .Get = +[](void* data) -> void* { return ((Ref<T>*)data)->Get(); },
+                };
             }
 
             static AnyOps Empty();
@@ -151,7 +157,7 @@ namespace Meta
             assert(Valid());
             if constexpr (std::is_same_v<void, T>)
             {
-                return data_;
+                return Get();
             }
             else
             {
@@ -159,7 +165,7 @@ namespace Meta
                 {
                     return nullptr;
                 }
-                return (T*)data_;
+                return (T*)Get();
             }
         }
 
@@ -169,7 +175,7 @@ namespace Meta
             assert(Valid());
             if (type_id_ != GetTypeId<T>())
                 throw std::bad_cast();
-            return *(T*)data_;
+            return *(T*)Get();
         }
 
         template<typename T>
@@ -266,7 +272,11 @@ namespace Meta
         template <typename T>
         void Assign(Ref<T> &&ref)
         {
-            // TODO:
+            Construct(ref);
+        }
+
+        void* Get() const {
+            return ops_.Get ? ops_.Get(data_) : data_;
         }
 
         details::BufferView                  buffer_; // for small object
