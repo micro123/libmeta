@@ -17,11 +17,13 @@ namespace Meta {
     using Params = std::vector<ParameterInfo>;
 
     class LIBMETA_API Method {
+        friend class MethodBuilder;
     public:
         Method(sview name, TypePtr rtype);
         virtual ~Method();
 
-        inline sview Name() const { return name_; }
+        [[nodiscard]] inline sview Name() const { return name_; }
+        [[nodiscard]] inline sview Description() const { return desc_; }
 
         TypePtr ResultType() const;
         u32     ParameterCount() const;
@@ -37,15 +39,16 @@ namespace Meta {
 
         template<typename ... Args>
         Any Invoke(Args ... args) const {
-            Any va_arr[] = { args..., {} }; // TODO: sizeof...(args)
+            Any va_arr[] = { args..., {} };
             return Invoke(va_arr, (u32)std::size(va_arr) - 1);
         }
 
-    protected:
+    private:
         void AddParam(sview name, TypePtr type, Any def);
 
     private:
         sview    name_;
+        sview    desc_;
         TypePtr  result_type_;
         Params   params_;
     };

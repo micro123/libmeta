@@ -3,7 +3,7 @@
 
 Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
 
-Meta::Type::~Type () {}
+Meta::Type::~Type () = default;
 
 std::vector<Meta::FieldPtr> Meta::Type::GetFields () const
 {
@@ -20,7 +20,17 @@ std::vector<Meta::MethodPtr> Meta::Type::GetMethods () const
     return {};
 }
 
-Meta::MethodPtr Meta::Type::GetMethods (sview name) const
+Meta::MethodPtr Meta::Type::GetMethod (sview name) const
+{
+    return {};
+}
+
+std::vector<Meta::ConstantPtr> Meta::Type::GetConstants () const
+{
+    return {};
+}
+
+Meta::ConstantPtr              Meta::Type::GetConstant (sview name) const
 {
     return {};
 }

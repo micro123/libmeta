@@ -63,7 +63,11 @@ namespace Meta
 
         // 函数信息
         virtual std::vector<MethodPtr> GetMethods () const;
-        virtual MethodPtr              GetMethods (sview name) const;
+        virtual MethodPtr              GetMethod (sview name) const;
+
+        // 常量信息（枚举）
+        virtual std::vector<ConstantPtr> GetConstants () const;
+        virtual ConstantPtr              GetConstant (sview name) const;
 
     private:
         sview const  name_;

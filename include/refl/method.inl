@@ -49,7 +49,7 @@ namespace Meta
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
-                    return {};
+                    return Any::Void;
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace Meta
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
-                    return {};
+                    return Any::Void;
                 }
                 else
                 {
@@ -156,7 +156,7 @@ namespace Meta
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
-                    return {};
+                    return Any::Void;
                 }
                 else
                 {
@@ -209,7 +209,7 @@ namespace Meta
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
-                    return {};
+                    return Any::Void;
                 }
                 else
                 {

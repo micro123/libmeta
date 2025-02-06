@@ -92,9 +92,7 @@ namespace Meta
     public:
         // MARK: Constructors
         // Empty
-        Any () {
-            ops_ = details::AnyOps::Empty();
-        }
+        Any ();
 
         // Ref
         template <typename T>
@@ -110,18 +108,11 @@ namespace Meta
             Construct(std::move(ref));
         }
 
-        Any (const Any &var) {
-            Assign(var);
-        }
+        Any (const Any &var);
 
-        Any (Any &&var) {
-            Assign(var);
-        }
+        Any (Any &&var) noexcept;
 
-        ~Any ()
-        {
-            Destroy();
-        }
+        ~Any ();
 
         // MARK: Assignment
         template <typename T>
@@ -138,18 +129,8 @@ namespace Meta
             Assign(std::move(ref));
             return *this;
         }
-        Any &operator= (const Any &var)
-        {
-            Destroy();
-            Assign(var);
-            return *this;
-        }
-        Any &operator= (Any &&var)
-        {
-            Destroy();
-            Assign(var);
-            return *this;
-        }
+        Any &operator= (const Any &var);
+        Any &operator= (Any &&var) noexcept;
 
         template <typename T>
         T *ValuePtr () const
@@ -178,54 +159,64 @@ namespace Meta
             return *(T*)Get();
         }
 
+        template <typename T>
+        T Value() const
+        {
+            assert(Valid());
+            if (type_id_ != GetTypeId<T>())
+            {
+                // TODO: check cast map
+                return T{};
+            }
+            else
+                return *ValuePtr<T>();
+        }
+
         template<typename T>
-        inline operator T*() const {
+        [[nodiscard]] inline operator T*() const {
             return ValuePtr<T>();
         }
 
         template<typename T>
-        inline operator T() const {
-            return *ValuePtr<T>();
+        [[nodiscard]] inline operator T() const {
+            return Value<T>();
         }
 
-        bool Valid () const
+        [[nodiscard]] inline bool Valid () const noexcept
         {
             return type_id_ != NULL_TYPE_ID;
         }
 
-        operator bool () const
+        [[nodiscard]] operator bool () const noexcept
         {
             return Valid ();
         }
 
-        bool operator== (decltype (nullptr)) const
+        bool operator== (decltype (nullptr)) const noexcept
         {
             return !Valid ();
         }
 
-        bool operator!= (decltype (nullptr)) const
+        bool operator!= (decltype (nullptr)) const noexcept
         {
             return Valid ();
         }
 
-        inline TypePtr Type () const
-        {
-            return TypeOf(type_id_);
-        }
+        [[nodiscard]] TypePtr Type () const;
+
+        static const Any Void;
 
     private:
+        // special ctor
+        explicit Any (TypeId tid);
+
         // MARK: Helpers
-        bool IsSmallObj() const 
+        [[nodiscard]] bool IsSmallObj() const
         {
             return data_ == &buffer_;
         }
 
-        void Destroy()
-        {
-            if (data_) {
-                ops_.Destroy(data_);
-            }
-        }
+        void Destroy () const;
 
         template <typename T>
         void Construct(const T &t)
@@ -247,27 +238,9 @@ namespace Meta
             data_ = ops_.Construct(&buffer_, &ref);
         }
 
-        void Assign(const Any &any)
-        {
-            if (any.Valid()) {
-                type_id_ = any.type_id_;
-                ops_ = any.ops_;
-                data_ = any.ops_.Clone(&buffer_, any.data_);
-            }
-        }
+        void Assign (const Any &any);
 
-        void Assign(Any &&any)
-        {
-            if (any.Valid()) {
-                type_id_ = any.type_id_;
-                ops_ = any.ops_;
-                if (any.IsSmallObj()) {
-                    data_ = any.ops_.Clone(&buffer_, any.data_);
-                } else {
-                    std::swap(data_, any.data_);
-                }
-            }
-        }
+        void Assign (Any &&any);
 
         template <typename T>
         void Assign(Ref<T> &&ref)
@@ -275,11 +248,11 @@ namespace Meta
             Construct(ref);
         }
 
-        void* Get() const {
+        [[nodiscard]] inline void* Get() const {
             return ops_.Get ? ops_.Get(data_) : data_;
         }
 
-        details::BufferView                  buffer_; // for small object
+        details::BufferView                  buffer_{}; // for small object
         void                                *data_{};
         TypeId                               type_id_{NULL_TYPE_ID};
         details::AnyOps                      ops_;

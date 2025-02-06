@@ -16,8 +16,10 @@ namespace Meta
     FWDC (Type);
     FWDC (Method);
     FWDC (Field);
+    FWDC (Constant);
     class Any;
     class Registry;
+    class TypeBuilder;
 
     using TypeId = uintptr_t;
     using sview  = std::string_view;

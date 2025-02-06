@@ -23,7 +23,7 @@ namespace Meta
             RefCountedBase &operator= (RefCountedBase &&)      = delete;
 
             // 获取当前计数
-            s32 RefCount () const
+            [[nodiscard]] s32 RefCount () const
             {
                 return ref_count_.load ();
             }
@@ -49,6 +49,8 @@ namespace Meta
         template <typename T>
         class RefCounted : public RefCountedBase
         {
+            template <typename> friend class RefCounted;
+
             using DisposeFunc = void (*) (void *);
 
             RefCounted () : data_ (nullptr), dispose_ (nullptr) {}
@@ -75,12 +77,21 @@ namespace Meta
                     dispose_ (data_);
             }
 
+            RefCounted (T *ptr, DisposeFunc d) : RefCountedBase (ptr), dispose_ (d) {}
+
         public:
             template <typename U = T>
                 requires PtrCastable<U, T>
             inline U *Ptr () const
             {
                 return (U *) data_;
+            }
+
+            template <typename U> requires PtrCastable<U, T>
+            RefCounted<U> *Clone()
+            {
+                AddRef();
+                return new RefCounted<U> (static_cast<U *> (data_));
             }
 
             static RefCounted<T> *Create ()
@@ -135,6 +146,7 @@ namespace Meta
     template <typename T>
     class Ref: public details::PtrAccess<T>
     {
+        template <typename> friend class Ref;
     public:
         // 一般构造函数
         Ref () : ptr_ (nullptr) {}
@@ -156,6 +168,14 @@ namespace Meta
         {
             std::swap (ptr_, other.ptr_);
         }
+        template <typename U> requires details::PtrCastable<T, U>
+        Ref (const Ref<U> &other)
+        {
+            if (other.ptr_)
+            {
+                ptr_ = other.ptr_->template Clone<T> ();
+            }
+        }
 
         Ref &operator= (const Ref &other)
         {
@@ -167,6 +187,16 @@ namespace Meta
             if (ptr_ != other.ptr_)
             {
                 std::swap (ptr_, other.ptr_);
+            }
+            return *this;
+        }
+        template <typename U> requires details::PtrCastable<T, U>
+        Ref &operator= (const Ref<U> &other)
+        {
+            if (Get() != other.Get())
+            {
+                ptr_->UnRef ();
+                ptr_ = other.ptr_->template Clone<T> ();
             }
             return *this;
         }
