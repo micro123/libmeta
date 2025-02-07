@@ -8,3 +8,99 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE libclang)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+# 注册目标需要生成反射代码
+function(meta_codegen tgt)
+  # message(STATUS "Setting up target ${tgt} code gen")
+  # 1. 获取代码生成目录
+  get_target_property(BIN_DIR ${tgt} BINARY_DIR)
+  set(CODE_GEN_DIR "${BIN_DIR}/_generated")
+  # 2. 便利所有的源文件，准备生成代码
+  get_target_property(SRC_DIR ${tgt} SOURCE_DIR)
+  get_target_property(SRC_FILES ${tgt} SOURCES)
+  set(ALL_HEADERS)
+  foreach(file ${SRC_FILES})
+    # 需要 .h/.hpp
+    get_filename_component(suffix ${file} EXT)
+    if (suffix MATCHES ".h|.hpp")
+      list(APPEND ALL_HEADERS ${file})
+    endif ()
+  endforeach()
+  # 3. 判断是否需要生成代码
+  if (ALL_HEADERS)
+    # set(cmp_opts "${BIN_DIR}/compile_options.txt")
+    set(cmp_hdrs "${BIN_DIR}/compile_headers.txt")
+    set(reg_file "${CODE_GEN_DIR}/auto_register.cpp")
+
+    # 3.1 compile_options.txt
+    # add_custom_command(
+    #   OUTPUT ${cmp_opts}
+    #   COMMAND write-file
+    #     ARGS ${cmp_opts}
+    #          "-I$<JOIN:$<TARGET_PROPERTY:${tgt},INCLUDE_DIRECTORIES>, -I>"
+    #          "-D$<JOIN:$<TARGET_PROPERTY:${tgt},COMPILE_DEFINITIONS>, -D>"
+    #          "-H$<JOIN:$<TARGET_PROPERTY:${tgt},PRECOMPILE_HEADERS>, -H>"
+    #   COMMENT " >>> Generating ${tgt} compile_options.txt"
+    #   DEPENDS ${ALL_HEADERS} write-file
+    # )
+
+    # 3.2 compile_headers.txt
+    set(GENERATED_FILES)
+    file(WRITE ${cmp_hdrs} "")
+    foreach(file ${ALL_HEADERS})
+      get_filename_component(sdir ${file} DIRECTORY)
+      get_filename_component(sname ${file} NAME_WE)
+      file(RELATIVE_PATH rpath ${SRC_DIR} ${sdir})
+      if (rpath)
+        set(rpath "${rpath}/")
+      endif()
+      set(generated_file ${CODE_GEN_DIR}/${rpath}${sname}.meta.cpp)
+      list(APPEND GENERATED_FILES ${generated_file})
+      get_filename_component(generated_dir ${generated_file} DIRECTORY)
+      file(MAKE_DIRECTORY ${generated_dir})
+      
+      # message (STATUS ">> CodeGen: ${file} -> ${generated_file}")
+      # append line
+      set(line "${file}|>${generated_file}\n")
+      file(APPEND ${cmp_hdrs} ${line})
+
+      # add_custom_command(
+      #   OUTPUT  ${generated_file}
+      #   COMMAND meta-parser
+      #     ARGS "${file}" "${generated_file}"
+      #          "-I$<JOIN:$<TARGET_PROPERTY:${tgt},INCLUDE_DIRECTORIES>, -I>"
+      #          "-D$<JOIN:$<TARGET_PROPERTY:${tgt},COMPILE_DEFINITIONS>, -D>"
+      #          "-H$<JOIN:$<TARGET_PROPERTY:${tgt},PRECOMPILE_HEADERS>, -H>"
+      #   COMMAND ${CMAKE_COMMAND} -E touch ${generated_file}
+      #   COMMENT "meta-parser for source ${file}"
+      #   DEPENDS meta-parser ${file}
+      # )
+    endforeach()
+
+    if (GENERATED_FILES)
+      list(APPEND GENERATED_FILES ${reg_file})
+      add_custom_command(
+        OUTPUT ${GENERATED_FILES}
+        COMMAND meta-parser
+          ARGS
+            ${cmp_hdrs} ${reg_file}
+            "-I$<JOIN:$<TARGET_PROPERTY:${tgt},INCLUDE_DIRECTORIES>, -I>"
+            "-D$<JOIN:$<TARGET_PROPERTY:${tgt},COMPILE_DEFINITIONS>, -D>"
+            "-H$<JOIN:$<TARGET_PROPERTY:${tgt},PRECOMPILE_HEADERS>, -H>"
+        COMMENT " >>> Executing mete-parser for ${tgt}"
+        DEPENDS ${ALL_HEADERS} meta-parser
+      )
+      target_sources(${tgt} PRIVATE ${GENERATED_FILES})
+      source_group(TREE ${CODE_GEN_DIR} PREFIX "Generated Files" FILES ${GENERATED_FILES})
+      add_custom_target(
+        ${tgt}_codegen
+        COMMENT " >>> Code generation for target ${tgt}"
+        DEPENDS ${GENERATED_FILES}
+      )
+      set_property(TARGET ${tgt} PROPERTY FOLDER "CodeGen")
+      add_dependencies(
+        ${tgt} ${tgt}_codegen
+      )
+    endif ()
+  endif()
+endfunction()

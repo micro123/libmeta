@@ -14,7 +14,7 @@ add_library(
 
 target_link_libraries(
     ${PROJECT_NAME}
-    PRIVATE
+    PUBLIC
     libmeta_headers
 )
 

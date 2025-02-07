@@ -24,5 +24,7 @@ target_include_directories(libmeta_headers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 add_subdirectory(src)
 add_subdirectory(tools)
 
+add_subdirectory(example)
+
 enable_testing()
 add_subdirectory(tests)
