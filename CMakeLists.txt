@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 project(libmeta CXX)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
@@ -21,6 +22,7 @@ add_library(libmeta_headers INTERFACE)
 target_include_directories(libmeta_headers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(src)
+add_subdirectory(tools)
 
 enable_testing()
 add_subdirectory(tests)
