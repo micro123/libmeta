@@ -5,11 +5,41 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) 启动",
+            "name": "Debug CMake Launch Target",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/bin",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "为 gdb 启用整齐打印",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "将反汇编风格设置为 Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Debug meta-parser",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/meta-parser",
+            "args": [
+                "${workspaceFolder}/build/example/some_lib/compile_headers.txt",
+                "${workspaceFolder}/build/example/some_lib/_generated/auto_register.cpp",
+                "-I/home/tang/Workspace/libmeta/include -I/usr/include",
+                "-DLIB_EXPORT",
+                "-H"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/bin",
             "environment": [],

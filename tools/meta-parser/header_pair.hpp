@@ -2,9 +2,9 @@
 #define HEADER_PAIR_HPP
 
 #include <string>
-#include <vector>
+#include <list>
 #include <utility>
 
-std::pair<std::string, std::string> ParseHeaderPairFile(const char *path);
+std::list<std::pair<std::string, std::string>> ParseHeaderPairFile(const char *path);
 
 #endif /* HEADER_PAIR_HPP */

@@ -9,6 +9,19 @@ add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE libclang)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
+if (NOT WIN32)
+  execute_process(COMMAND clang -v ERROR_VARIABLE CLANG_V)
+  string(REGEX MATCH "Selected GCC installation: .*" CLANG_V ${CLANG_V})
+  string(FIND ${CLANG_V} "\n" END_POS)
+  string(SUBSTRING ${CLANG_V} 0 ${END_POS} CLANG_V)
+  string(REPLACE "Selected GCC installation: " "" SYS_INCLUDE_PATH ${CLANG_V})
+else ()
+  set (SYS_INCLUDE_PATH "*")
+endif ()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/system_include.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
+target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
+
 # 注册目标需要生成反射代码
 function(meta_codegen tgt)
   # message(STATUS "Setting up target ${tgt} code gen")
