@@ -4,6 +4,7 @@
 #include <clang-c/Index.h>
 
 #include <list>
+#include <string>
 
 class Cursor final
 {
@@ -11,14 +12,17 @@ public:
     using Visitor = CXCursorVisitor;
     using List = std::list<Cursor>;
 
-    Cursor(CXCursor cursor);
+    Cursor (const CXCursor &cursor);
 
-    List Children(bool filtered = false) const;
+    [[nodiscard]] List Children(bool filtered = false) const;
     void visitChildren(Visitor visitor, void* data = nullptr) const;
     operator CXCursor() const { return cursor_; }
+    [[nodiscard]] std::string DisplayName() const;
 
-    bool IsUserType() const;
-    bool IsNamespace() const;
+    [[nodiscard]] bool IsUserType() const;
+    [[nodiscard]] bool IsDataType() const;
+    [[nodiscard]] bool IsEnumType() const;
+    [[nodiscard]] bool IsNamespace() const;
 
 private:
     CXCursor cursor_;
