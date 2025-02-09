@@ -1,29 +1,28 @@
 #include "code_parser.hpp"
+#include <format>
 #include <iostream>
 #include <list>
 #include <ostream>
 #include "clang/cursor.hpp"
 #include "clang/translate_unit.hpp"
+#include "types/user_type.hpp"
 #include "utilities/clang_utils.hpp"
 
 class MetaParser::Private {
 public:
 
-    void VisitAst(Cursor c);
+    void VisitAst (const Cursor &c);
 
     void GenCode();
 
-    void RecordTypes();
+    void RecordTypes() const;
 
     std::string in_, out_;
-    std::list<std::string> current_ns_;
-    std::list<std::string> types_;
+    Namespace   current_ns_;
+    std::list<LanguageType> types_;
 
     static std::vector<const char*> clang_args_;
     static std::list<std::string>   auto_register_types_;
-
-private:
-    std::string BuildNS() const;
 };
 
 std::vector<const char*> MetaParser::Private::clang_args_;
@@ -34,7 +33,10 @@ MetaParser::MetaParser (std::string input, std::string output): d{new Private} {
     d->out_ = std::move(output);
 }
 
-MetaParser::~MetaParser () = default;
+MetaParser::~MetaParser ()
+{
+    delete d;
+}
 
 bool MetaParser::Generate () const
 {
@@ -65,21 +67,20 @@ bool MetaParser::GenerateRegisterFile (const std::string &path)
     return false;
 }
 
-void MetaParser::Private::VisitAst (Cursor c)
+void MetaParser::Private::VisitAst (const Cursor &c)
 {
     auto children = c.Children (true);
     for (auto const &child : children)
     {
         if (child.IsNamespace ())
         {
-            current_ns_.emplace_back (child.DisplayName ());
+            current_ns_.Push (child.Spelling ());
             VisitAst (child);
-            current_ns_.pop_back ();
+            current_ns_.Pop ();
         }
         else if (child.IsUserType ())
         {
-            std::string full_name = BuildNS () + "::" + child.DisplayName ();
-            types_.emplace_back (full_name);
+            types_.emplace_back (current_ns_, child.Spelling (), child);
         }
     }
 }
@@ -89,19 +90,11 @@ void MetaParser::Private::GenCode ()
 
 }
 
-void MetaParser::Private::RecordTypes ()
+void MetaParser::Private::RecordTypes () const
 {
     for (auto const &type : types_)
-        auto_register_types_.emplace_back (type);
-}
-
-std::string MetaParser::Private::BuildNS () const
-{
-    std::string result;
-    for (auto const &ns : current_ns_)
     {
-        result.append ("::");
-        result.append (ns);
+        std::cout << std::format("added type \"{}\" from {}\n", type.FullName (), type.GetSourceFile ());
+        auto_register_types_.emplace_back (type.FullName ());
     }
-    return result;
 }

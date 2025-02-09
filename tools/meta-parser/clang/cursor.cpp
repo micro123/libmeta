@@ -1,4 +1,5 @@
 #include "cursor.hpp"
+#include <format>
 #include "utilities/clang_utils.hpp"
 
 Cursor::Cursor (const CXCursor &cursor) : cursor_ (cursor) {}
@@ -37,6 +38,32 @@ void Cursor::visitChildren (Visitor visitor, void *data) const
 std::string Cursor::DisplayName () const
 {
     return ToString (clang_getCursorDisplayName (cursor_));
+}
+std::string Cursor::Spelling () const
+{
+    return ToString (clang_getCursorSpelling (cursor_));
+}
+
+std::string Cursor::SourceFile () const
+{
+    auto range = clang_Cursor_getSpellingNameRange (cursor_, 0, 0);
+
+    auto start = clang_getRangeStart (range);
+
+    CXFile   file;
+    unsigned line, column, offset;
+
+    clang_getFileLocation (start, &file, &line, &column, &offset);
+
+    std::string filename = std::format ("{}:{}:{}", ToString (clang_getFileName (file)), line, column);
+
+    return filename;
+}
+
+std::string Cursor::LangType () const
+{
+    auto type = clang_getCursorType (cursor_);
+    return ToString (clang_getTypeSpelling (type));
 }
 
 bool Cursor::IsUserType () const

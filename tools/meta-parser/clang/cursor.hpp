@@ -18,11 +18,16 @@ public:
     void visitChildren(Visitor visitor, void* data = nullptr) const;
     operator CXCursor() const { return cursor_; }
     [[nodiscard]] std::string DisplayName() const;
+    [[nodiscard]] std::string Spelling() const;
+    [[nodiscard]] std::string SourceFile() const;
+    [[nodiscard]] std::string LangType() const;
 
     [[nodiscard]] bool IsUserType() const;
     [[nodiscard]] bool IsDataType() const;
     [[nodiscard]] bool IsEnumType() const;
     [[nodiscard]] bool IsNamespace() const;
+
+    [[nodiscard]] CXCursorKind Kind() const { return cursor_.kind; }
 
 private:
     CXCursor cursor_;
