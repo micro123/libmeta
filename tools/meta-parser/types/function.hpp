@@ -8,7 +8,6 @@
 
 struct Parameter {
     std::string name;
-    std::string type;
 };
 
 class Function final : public TypeInfo

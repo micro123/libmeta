@@ -10,8 +10,8 @@
 namespace Meta {
     struct ParameterInfo {
         sview   name;
-        TypePtr type;
-        Any def;
+        TypeId  type_id;
+        Any     def;
     };
 
     using Params = std::vector<ParameterInfo>;
@@ -44,7 +44,7 @@ namespace Meta {
         }
 
     private:
-        void AddParam(sview name, TypePtr type, Any def);
+        void AddParam(sview name, TypeId type_id, Any def);
 
     private:
         sview    name_;

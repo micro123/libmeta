@@ -8,7 +8,7 @@ Function::Function (const Cursor &cursor, const Namespace &ns, TypeInfo *parent)
     {
         if (child.Kind () == CXCursor_ParmDecl)
         {
-            parameters_.emplace_back (child.Spelling (), child.LangType ());
+            parameters_.emplace_back (child.Spelling ());
         }
     }
 }

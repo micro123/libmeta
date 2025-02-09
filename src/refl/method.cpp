@@ -16,7 +16,7 @@ u32 Meta::Method::ParameterCount () const
 Meta::TypePtr Meta::Method::ParameterType (u32 index) const
 {
     assert (index < params_.size ());
-    return params_.at (index).type;
+    return TypeOf(params_.at (index).type_id);
 }
 
 Meta::sview Meta::Method::ParameterName (u32 index) const
@@ -31,6 +31,6 @@ Meta::Any Meta::Method::ParameterDefault (u32 index) const
     return params_.at (index).def;
 }
 
-void Meta::Method::AddParam (sview name, TypePtr type, Any def) {
-    params_.emplace_back(name, std::move(type), std::move(def));
+void Meta::Method::AddParam (sview name, TypeId type_id, Any def) {
+    params_.emplace_back(name, type_id, std::move(def));
 }

@@ -47,7 +47,7 @@ void Meta::CodeGenFor<{{type.fullname}}>::Register() {
     .AddMethod(
         MethodBuilder::NewMethodBuilder ("{{method.name}}", &{{method.fullname}})
 ## for arg in method.args
-        .AddParam ("{{arg.name}}", "{{arg.type}}")
+        .AddParam ("{{arg}}", NParamId ({{method.fullname}}, {{loop.index}}))
 ## endfor
         .Build()
     )
@@ -55,6 +55,7 @@ void Meta::CodeGenFor<{{type.fullname}}>::Register() {
     .Register();
     (void)r;
 };
+
 ## endfor
 )";
 
@@ -85,10 +86,7 @@ static nlohmann::json BuildMethod(const Function *m)
     json args = json::array();
     for (auto &x: m->Arguments())
     {
-        json arg = json::object();
-        arg["name"] = x.name;
-        arg["type"] = x.type;
-        args.emplace_back(arg);
+        args.emplace_back(x.name);
     }
     j["args"] = args;
     return j;

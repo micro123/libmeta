@@ -9,6 +9,48 @@
 #include "refl/method.hpp"
 
 namespace Meta {
+    namespace details
+    {
+        template <typename F>
+        struct MethodTraits;
+
+        template <typename R, typename ... P>
+        struct MethodTraits<R(*)(P...)>
+        {
+            using ParamTuple = std::tuple<P...>;
+        };
+
+        template <typename R, typename C, typename ... P>
+        struct MethodTraits<R(C::*)(P...)>
+        {
+            using ParamTuple = std::tuple<P...>;
+        };
+
+        template <typename R, typename C, typename ... P>
+        struct MethodTraits<R(C::*)(P...) const>
+        {
+            using ParamTuple = std::tuple<P...>;
+        };
+
+        template <typename R, typename C, typename ... P>
+        struct MethodTraits<R(C::*)(P...) volatile>
+        {
+            using ParamTuple = std::tuple<P...>;
+        };
+
+        template <typename F, size_t N>
+        struct MethodParamType
+        {
+            using ParamTuple = typename MethodTraits<F>::ParamTuple;
+            using Type = std::tuple_element_t<N, ParamTuple>;
+        };
+    }
+
+    template <typename F, size_t N>
+    using n_param_t = typename details::MethodParamType<F, N>::Type;
+
+#define NParamId(F,N) GetTypeId<n_param_t<decltype(&F), N>>()
+
     class LIBMETA_API MethodBuilder final
     {
         class PrivateData;
@@ -20,7 +62,7 @@ namespace Meta {
             return MakeMethod(name, f);
         }
 
-        MethodBuilder& AddParam(sview name, sview type_name, Any def = {});
+        MethodBuilder& AddParam(sview name, TypeId type_id, Any def = {});
 
         [[nodiscard]] MethodPtr Build() const;
         ~MethodBuilder();

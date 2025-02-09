@@ -28,7 +28,7 @@ int  MyClass::Test (double f) const
 }
 void Foo::Bar::Baz::foo (MyClass *obj) const
 {
-    
+
 }
 
 TYPES_AUTO_REG;
