@@ -14,6 +14,11 @@ struct Foo
     {
         printf("Foo: x=%d, y=%d, z=%d\n", x, y, z);
     }
+
+    void test(int x = 42) const
+    {
+
+    }
 };
 
 int Foo::z = 42;
@@ -30,13 +35,18 @@ TEST_CASE ("TYPE BUILDER")
     using namespace Meta;
 
     auto type = TypeBuilder::NewTypeBuilder<Foo> ()
-        .AddField (MakeField("x", &Foo::x))
-        .AddField (MakeField("y", &Foo::y))
-        .AddField (MakeField("z", &Foo::z))
-        .AddMethod (
-            MethodBuilder::NewMethodBuilder ("print", &Foo::print)
-            .Build ()
-        )
+    .AddField (MakeField("x", &Foo::x))
+    .AddField (MakeField("y", &Foo::y))
+    .AddField (MakeField("z", &Foo::z))
+    .AddMethod (
+        MethodBuilder::NewMethodBuilder ("print", &Foo::print)
+        .Build ()
+    )
+    .AddMethod (
+        MethodBuilder::NewMethodBuilder ("test", &Foo::test)
+        .AddParam ("x", "int", 42)
+        .Build()
+    )
     .Register ();
     REQUIRE (type->Name () == "Foo");
 }

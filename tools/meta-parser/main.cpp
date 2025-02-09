@@ -8,45 +8,10 @@
 
 #include <iostream>
 #include <string>
-
-// static void CreateFile(const char *path)
-// {
-//     FILE *f = fopen(path, "w");
-//     fclose(f);
-// }
+#include <list>
 
 static bool ParseAndGen(const std::string &in, const std::string &out, const std::vector<const char*> &args)
 {
-    // printf("Begin file: %s\n", in.c_str());
-    // int code = 0;
-    // CXIndex index = clang_createIndex(0, 0);
-    // CXTranslationUnit unit{};
-    // int parseFlags = 0;
-    // CXErrorCode ec = clang_parseTranslationUnit2(
-    //     index, in.c_str(), &args[0], (int)args.size(),
-    //     nullptr, 0, parseFlags, &unit);
-    
-    // if (ec == CXError_Success) {
-    //     Cursor cursor = clang_getTranslationUnitCursor(unit);
-
-    //     auto children = cursor.Children(true);
-    //     for (auto const &x: children) {
-    //         if (x.IsUserType()) {
-    //             Print(x);
-    //             auto inner = x.Children(true);
-    //             for (auto const &y: inner) {
-    //                 Print(y);
-    //             }
-    //         }
-    //     }
-    //     clang_disposeTranslationUnit(unit);
-    // } else {
-    //     code = 2;
-    //     fprintf(stderr, "Failed to parse file \"%s\", code %d\n", in.c_str(), ec);
-    // }
-    // clang_disposeIndex(index);
-    // printf("End file: %s\n", in.c_str());
-    // return code;
     MetaParser parser(in, out);
     return parser.Generate();
 }
@@ -65,12 +30,13 @@ int main(int argc, char const *argv[])
         return 1;
     
     // dump cmdl
-    printf(R"(%s "%s" "%s" "%s" "%s" "%s")", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-    printf("\n");
+    // printf(R"(%s "%s" "%s" "%s" "%s" "%s")", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+    // printf("\n");
     
     auto const args = ParseCompileOptions(argv + 3);
     auto const files = ParseHeaderPairFile(argv[1]);
     const std::string auto_register_file = argv[2];
+    std::list<std::string> all_headers;
     
     MetaParser::Prepare(std::move(args));
 
@@ -79,11 +45,10 @@ int main(int argc, char const *argv[])
         {
             return 1;
         }
+        all_headers.emplace_back(x.first);
     }
-    // CreateFile(auto_register_file.c_str());
     if (!MetaParser::GenerateRegisterFile(auto_register_file))
         return 1;
-
 
     return 0;
 }

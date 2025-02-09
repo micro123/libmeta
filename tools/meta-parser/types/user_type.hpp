@@ -20,6 +20,10 @@ public:
     [[nodiscard]] std::string FullName() const;
     [[nodiscard]] std::string Name() const;
 
+    const std::list<Field *> &Fields() const;
+    const std::list<Function *> &Functions() const;
+    const std::list<Constant *> &Constants() const;
+
     bool ShouldCompile() const override;
 private:
     // 常规解析，用于结构体/联合体

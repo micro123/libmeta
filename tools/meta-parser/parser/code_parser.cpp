@@ -5,15 +5,17 @@
 #include <ostream>
 #include "clang/cursor.hpp"
 #include "clang/translate_unit.hpp"
+#include "codegen/code_generator.hpp"
 #include "types/user_type.hpp"
 #include "utilities/clang_utils.hpp"
+#include "utilities/file_utils.hpp"
 
 class MetaParser::Private {
 public:
 
     void VisitAst (const Cursor &c);
 
-    void GenCode();
+    bool GenCode() const;
 
     void RecordTypes() const;
 
@@ -22,10 +24,12 @@ public:
     std::list<LanguageType> types_;
 
     static std::vector<const char*> clang_args_;
+    static std::list<std::string>   user_headers_;
     static std::list<std::string>   auto_register_types_;
 };
 
 std::vector<const char*> MetaParser::Private::clang_args_;
+std::list<std::string>   MetaParser::Private::user_headers_;
 std::list<std::string>   MetaParser::Private::auto_register_types_;
 
 MetaParser::MetaParser (std::string input, std::string output): d{new Private} {
@@ -51,7 +55,8 @@ bool MetaParser::Generate () const
     const Cursor root = unit.GetCursor ();
     d->VisitAst(root);
     // 3. generate code
-    d->GenCode();
+    if (!d->GenCode())
+        return false;
     // 4. record type we need auto-register
     d->RecordTypes();
     return true;
@@ -64,7 +69,8 @@ void MetaParser::Prepare (std::vector<const char *> clang_args) {
 bool MetaParser::GenerateRegisterFile (const std::string &path)
 {
     // generate function body
-    return false;
+    AutoRegCodeGen gen(Private::user_headers_, Private::auto_register_types_, path);
+    return gen.GenerateCode ();
 }
 
 void MetaParser::Private::VisitAst (const Cursor &c)
@@ -78,23 +84,26 @@ void MetaParser::Private::VisitAst (const Cursor &c)
             VisitAst (child);
             current_ns_.Pop ();
         }
-        else if (child.IsUserType ())
+        else if (child.IsUserType () && !child.IsAnonymous ())
         {
             types_.emplace_back (current_ns_, child.Spelling (), child);
         }
     }
 }
 
-void MetaParser::Private::GenCode ()
+bool MetaParser::Private::GenCode () const
 {
-
+    // just create file
+    TypeCodeGen gen(in_, types_, out_);
+    return gen.GenerateCode ();
 }
 
 void MetaParser::Private::RecordTypes () const
 {
+    user_headers_.emplace_back(in_);
     for (auto const &type : types_)
     {
-        std::cout << std::format("added type \"{}\" from {}\n", type.FullName (), type.GetSourceFile ());
+        // std::cout << std::format("added type \"{}\" from {}\n", type.FullName (), type.GetSourceFile ());
         auto_register_types_.emplace_back (type.FullName ());
     }
 }

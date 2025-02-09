@@ -65,3 +65,15 @@ bool LanguageType::ShouldCompile () const
 {
     return enabled_;
 }
+const std::list<Field *>    &LanguageType::Fields () const
+{
+    return fields_;
+}
+const std::list<Function *> &LanguageType::Functions () const
+{
+    return functions_;
+}
+const std::list<Constant *> &LanguageType::Constants () const
+{
+    return constants_;
+}

@@ -12,15 +12,21 @@ namespace Meta {
     class LIBMETA_API Constant
     {
     public:
-        Constant(sview name, Any value);
-        ~Constant();
+        Constant (sview name, Any value);
+        ~Constant ();
 
-        sview Name() const;
-        Any Value() const;
+        sview Name () const;
+        Any   Value () const;
+
     private:
         sview const name_;
-        Any   const value_;
+        Any const   value_;
     };
+
+    inline ConstantPtr MakeConstant(sview name, const Any& value)
+    {
+        return MakeRef<Constant>(name, value);
+    }
 }
 
 #endif //LIBMETA_CONSTANT_HPP

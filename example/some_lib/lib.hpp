@@ -2,7 +2,7 @@
 #define LIB_HPP
 
 #include "export.h"
-#include "meta-parse.h"
+#include "meta-parser.h"
 
 #include <string>
 

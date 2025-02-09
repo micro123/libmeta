@@ -75,6 +75,10 @@ bool Cursor::IsNamespace () const
 {
     return cursor_.kind == CXCursor_Namespace;
 }
+bool Cursor::IsAnonymous () const
+{
+    return clang_Cursor_isAnonymous (cursor_);
+}
 
 bool Cursor::IsDataType () const
 {

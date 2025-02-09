@@ -20,7 +20,7 @@ namespace Meta {
             return MakeMethod(name, f);
         }
 
-        MethodBuilder& AddParam(sview name, TypePtr type, Any def);
+        MethodBuilder& AddParam(sview name, sview type_name, Any def = {});
 
         [[nodiscard]] MethodPtr Build() const;
         ~MethodBuilder();

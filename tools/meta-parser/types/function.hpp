@@ -22,6 +22,8 @@ public:
         return name_;
     }
 
+    const std::vector<Parameter>& Arguments () const { return parameters_; }
+
     bool ShouldCompile () const override;
 
 private:

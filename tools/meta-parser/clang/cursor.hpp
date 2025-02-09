@@ -26,6 +26,7 @@ public:
     [[nodiscard]] bool IsDataType() const;
     [[nodiscard]] bool IsEnumType() const;
     [[nodiscard]] bool IsNamespace() const;
+    [[nodiscard]] bool IsAnonymous() const;
 
     [[nodiscard]] CXCursorKind Kind() const { return cursor_.kind; }
 
