@@ -20,6 +20,7 @@ namespace Meta
         void AddField(FieldPtr ptr);
         void AddMethod(MethodPtr ptr);
         void AddConstant(ConstantPtr ptr);
+        void AddBaseClass(TypePtr ptr);
 
         [[nodiscard]] std::vector<FieldPtr>    GetFields () const override;
         [[nodiscard]] FieldPtr                 GetField (sview name) override;

@@ -69,6 +69,12 @@ namespace Meta
         virtual std::vector<ConstantPtr> GetConstants () const;
         virtual ConstantPtr              GetConstant (sview name) const;
 
+        // 基类信息
+        virtual std::vector<TypePtr>     GetBaseClasses () const;
+
+        // 一般工具
+        virtual std::string              ToString (const Any &obj) const;
+
     private:
         sview const  name_;
         size_t const size_;

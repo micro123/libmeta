@@ -1,4 +1,6 @@
 #include "refl/type.hpp"
+#include <format>
+#include <refl/any.hpp>
 #include "refl/registry.hpp"
 
 Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
@@ -56,4 +58,14 @@ namespace Meta
 Meta::TypePtr Meta::TypeOf (Meta::TypeId tid)
 {
     return Meta::Registry::Instance ().Get (tid);
+}
+
+std::vector<Meta::TypePtr> Meta::Type::GetBaseClasses () const
+{
+    return {};
+}
+
+std::string                Meta::Type::ToString (const Any &obj) const
+{
+    return std::format("{}(@{})", name_, obj.ValuePtr<void> ());
 }

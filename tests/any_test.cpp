@@ -39,4 +39,15 @@ TEST_CASE ("Any Ref")
         b = {};
         puts("after");
     }
+
+    Meta::Any b = Meta::Any::New<Foo> (55);
+    {
+        auto c = b;
+        c.ValueRef<Foo>().print();
+        c = Meta::MakeRef<Foo>(66);
+        c.ValueRef<Foo>().print();
+        puts("before");
+        c = {};
+        puts("after");
+    }
 }

@@ -10,7 +10,7 @@ Meta::Any::Any ()
 {
     ops_ = details::AnyOps::Empty ();
 }
-Meta::Any::Any (const Any &var)
+Meta::Any::Any (const Any &var): Any()
 {
     Assign (var);
 }
@@ -38,7 +38,10 @@ Meta::TypePtr Meta::Any::Type () const
 {
     return TypeOf (type_id_);
 }
-Meta::Any::Any (TypeId tid) : type_id_ (tid) {}
+Meta::Any::Any (TypeId tid)
+{
+    type_id_ = tid;
+}
 void Meta::Any::Destroy () const
 {
     if (data_)
