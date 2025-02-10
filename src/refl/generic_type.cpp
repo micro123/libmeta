@@ -1,5 +1,6 @@
 #include "refl/generic_type.hpp"
 #include <algorithm>
+#include <iterator>
 #include <refl/constant.hpp>
 #include <refl/field.hpp>
 #include <refl/method.hpp>

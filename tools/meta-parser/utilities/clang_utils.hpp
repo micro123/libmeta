@@ -3,6 +3,7 @@
 
 #include <clang-c/Index.h>
 #include <string>
+#include <iostream>
 
 std::string ToString(CXString s);
 

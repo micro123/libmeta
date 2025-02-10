@@ -67,7 +67,7 @@ namespace Meta
 
         public:
             template <typename C>
-            MemberMethodNormal (sview name, R (C::*ptr) (Param...)) : Method (name, TypeOf<R> ()), ptr_ ((Ptr) ptr)
+            MemberMethodNormal (sview name, R (C::*ptr) (Param...)) : Method (name, TypeOf<R> ()), ptr_ (*(Ptr*) &ptr)
             {
                 assert (ptr_ != nullptr);
             }
@@ -120,7 +120,7 @@ namespace Meta
 
         public:
             template <typename C>
-            MemberMethodConst (sview name, R (C::*ptr) (Param...) const) : Method (name, TypeOf<R> ()), ptr_ ((Ptr) ptr)
+            MemberMethodConst (sview name, R (C::*ptr) (Param...) const) : Method (name, TypeOf<R> ()), ptr_ (*(Ptr*) &ptr)
             {
                 assert (ptr_ != nullptr);
             }
@@ -173,7 +173,7 @@ namespace Meta
 
         public:
             template <typename C>
-            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile) : Method (name, TypeOf<R> ()), ptr_ ((Ptr) ptr)
+            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile) : Method (name, TypeOf<R> ()), ptr_ (*(Ptr*) &ptr)
             {
                 assert (ptr_ != nullptr);
             }

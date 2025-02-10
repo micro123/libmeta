@@ -1,6 +1,7 @@
 #ifndef LIBMETA_VARIANT_HPP
 #define LIBMETA_VARIANT_HPP
 
+#include <typeinfo>
 #include <stdexcept>
 #include <utility>
 #include "exports.h"

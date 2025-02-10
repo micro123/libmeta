@@ -33,6 +33,7 @@ TEST_CASE ("MakeField")
 
 TEST_CASE ("ReadField")
 {
+    auto px = &Simple::x;
     auto x = Meta::MakeField ("x", &Simple::x);
     auto y = Meta::MakeField ("y", &Simple::y);
     auto z = Meta::MakeField ("z", &Simple::z);
