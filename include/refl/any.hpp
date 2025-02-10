@@ -100,7 +100,7 @@ namespace Meta
         template <typename T>
         Any (T value)
         {
-            Construct (value);
+            Construct (std::move(value));
         }
 
         // Ref<T>
@@ -239,17 +239,17 @@ namespace Meta
         void Destroy () const;
 
         template <typename T>
-        void Construct (const T &t)
+        void Construct (T t)
         {
             type_id_ = GetTypeId<T> ();
             ops_     = details::AnyOps::Of<T> ();
             if constexpr (sizeof (T) < BufferSize)
             {
-                data_ = new (&buffer_) T {t};
+                data_ = new (&buffer_) T {std::move(t)};
             }
             else
             {
-                data_ = new T {t};
+                data_ = new T {std::move(t)};
             }
         }
 

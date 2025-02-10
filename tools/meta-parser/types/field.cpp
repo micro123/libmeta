@@ -9,5 +9,14 @@ Field::~Field () = default;
 
 bool Field::ShouldCompile () const
 {
-    return true;
+    if (parent_->ShouldCompile())
+    {
+        auto &pm = parent_->GetMetaInfo();
+        auto const disabled_ = meta_info_.GetFlag(NativeProperty::Disabled);
+        if ((pm.GetFlag(NativeProperty::All) || pm.GetFlag(NativeProperty::Fields)) && !disabled_)
+            return true;
+        if (pm.GetFlag(NativeProperty::WhileListFields) && enabled_)
+            return true;
+    }
+    return false;
 }

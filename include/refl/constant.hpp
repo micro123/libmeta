@@ -12,7 +12,7 @@ namespace Meta {
     class LIBMETA_API Constant
     {
     public:
-        Constant (sview name, Any value);
+        Constant (sview name, s64 value);
         ~Constant ();
 
         sview Name () const;
@@ -23,7 +23,7 @@ namespace Meta {
         Any const   value_;
     };
 
-    inline ConstantPtr MakeConstant(sview name, const Any& value)
+    inline ConstantPtr MakeConstant(sview name, s64 value)
     {
         return MakeRef<Constant>(name, value);
     }

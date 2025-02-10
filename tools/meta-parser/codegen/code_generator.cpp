@@ -36,7 +36,7 @@ constexpr auto type_reg_template = R"(
 ## for type in types
 template<>
 void Meta::CodeGenFor<{{type.fullname}}>::Register() {
-    auto r = TypeBuilder::NewTypeBuilder<{{type.fullname}}> ()
+    auto const r = TypeBuilder::NewTypeBuilder<{{type.fullname}}> ()
 ## for field in type.fields
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
 ## endfor

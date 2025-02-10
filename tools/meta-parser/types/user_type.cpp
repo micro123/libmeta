@@ -12,6 +12,8 @@ LanguageType::LanguageType (const Namespace &ns, std::string name, const Cursor 
         name_ = "";
     else
         name_ = std::move(name);
+    if (!ShouldCompile())
+        return;
     assert (cursor.IsUserType());
     if (cursor.IsEnumType ())
         ParseEnumType (cursor);
@@ -32,10 +34,21 @@ void LanguageType::ParseDataType (const Cursor &cursor)
     auto children = cursor.Children ();
     for (auto &x: children)
     {
-        if (x.Kind () == CXCursor_FieldDecl)
-            fields_.emplace_back (new Field(x, ns, this));
+        if (x.Kind () == CXCursor_FieldDecl) {
+            auto f = new Field(x, ns, this);
+            if (f->ShouldCompile())
+                fields_.emplace_back (f);
+            else
+                delete f;
+        }
         else if (x.Kind () == CXCursor_CXXMethod)
-            functions_.emplace_back (new Function (x, ns, this));
+        {
+            auto f = new Function(x, ns, this);
+            if (f->ShouldCompile())
+                functions_.emplace_back (f);
+            else
+                delete f;
+        }
     }
 }
 void LanguageType::ParseEnumType (const Cursor &cursor)
@@ -48,7 +61,11 @@ void LanguageType::ParseEnumType (const Cursor &cursor)
     {
         if (x.Kind () == CXCursor_EnumConstantDecl)
         {
-            constants_.emplace_back (new Constant(x, ns, this));
+            auto c = new Constant(x, ns, this);
+            if (c->ShouldCompile())
+                constants_.emplace_back (new Constant(x, ns, this));
+            else
+                delete c;
         }
     }
 }

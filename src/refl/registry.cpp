@@ -21,7 +21,7 @@ public:
 
 Meta::Registry::Registry () : d (new Private)
 {
-    details::RegisterFundamentalTypes (this);
+    
 }
 
 Meta::Registry::~Registry ()
@@ -31,8 +31,13 @@ Meta::Registry::~Registry ()
 
 Meta::Registry &Meta::Registry::Instance ()
 {
-    static Registry instance;
-    return instance;
+    static Registry *instance = nullptr;
+    if (!instance) {
+        static Registry real;
+        instance = &real;
+        details::RegisterFundamentalTypes (instance);
+    }
+    return *instance;
 }
 
 bool Meta::Registry::RegisterType (TypePtr type, TypeId tid)

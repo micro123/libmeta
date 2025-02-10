@@ -87,23 +87,28 @@ void MetaParser::Private::VisitAst (const Cursor &c)
         else if (child.IsUserType () && !child.IsAnonymous ())
         {
             types_.emplace_back (current_ns_, child.Spelling (), child);
+            if (!types_.back().ShouldCompile())
+                types_.pop_back();
         }
     }
 }
 
 bool MetaParser::Private::GenCode () const
 {
-    // just create file
     TypeCodeGen gen(in_, types_, out_);
     return gen.GenerateCode ();
 }
 
 void MetaParser::Private::RecordTypes () const
 {
-    user_headers_.emplace_back(in_);
+    bool empty = true;
     for (auto const &type : types_)
     {
-        // std::cout << std::format("added type \"{}\" from {}\n", type.FullName (), type.GetSourceFile ());
-        auto_register_types_.emplace_back (type.FullName ());
+        if (type.ShouldCompile()) {
+            auto_register_types_.emplace_back (type.FullName ());
+            empty = false;
+        }
     }
+    if (!empty)
+        user_headers_.emplace_back(in_);
 }

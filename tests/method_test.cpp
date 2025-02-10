@@ -1,6 +1,8 @@
 #include <catch_amalgamated.hpp>
 #include <refl/method.hpp>
 
+#include <iostream>
+
 double foo (int x, int y, int z)
 {
     printf ("in %s, x = %d, y = %d, z = %d\n", __FUNCTION__, x, y, z);
@@ -67,4 +69,12 @@ TEST_CASE ("Method Call")
 
     auto d = Meta::MakeMethod ("d", &A::d);
     d->Invoke ();
+}
+
+TEST_CASE ("String Types")
+{
+    Meta::Any cStr = "Hello World";
+    auto t = cStr.Type();
+    auto l = t->GetMethod("Length");
+    std::cout << l->Invoke(cStr).Value<int>() << std::endl;
 }

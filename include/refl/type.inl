@@ -12,6 +12,8 @@
     X (u16);                 \
     X (u32);                 \
     X (u64);                 \
+    X (f32);                 \
+    X (f64);                 \
     X (bool);                \
     X (char)
 
@@ -25,10 +27,11 @@ namespace Meta
 
     // void type
     LINKAGE_TYPEID(void);
-    // const char *
-    LINKAGE_TYPEID(cstr);
     // std::string
     LINKAGE_TYPEID(str);
+    // const char *
+    template <>
+    TypeId LIBMETA_API GetTypeId<cstr> ();
 }
 
 #undef LINKAGE_TYPEID

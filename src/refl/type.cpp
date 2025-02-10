@@ -50,8 +50,14 @@ namespace Meta
     FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
 
     LINKAGE_TYPEID (void);
-    LINKAGE_TYPEID (cstr);
     LINKAGE_TYPEID (str);
+
+    template <>
+    TypeId GetTypeId<cstr> ()
+    {
+        static u8 internal {1};
+        return reinterpret_cast<TypeId> (&internal);
+    }
 
 }  // namespace Meta
 
@@ -67,5 +73,13 @@ std::vector<Meta::TypePtr> Meta::Type::GetBaseClasses () const
 
 std::string                Meta::Type::ToString (const Any &obj) const
 {
-    return std::format("{}(@{})", name_, obj.ValuePtr<void> ());
+    auto const tid = GetTypeId<std::string>();
+    auto const it = cast_ops_.find(tid);
+    if (it == end(cast_ops_))
+        return std::format("{}(@{})", name_, obj.ValuePtr<void>());
+    return it->second(obj).Value<std::string>();
+}
+
+void Meta::Type::AddConversion (CastPorc proc, TypeId type_id) {
+    cast_ops_[type_id] = proc;
 }

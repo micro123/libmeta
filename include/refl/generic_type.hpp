@@ -8,7 +8,7 @@
 
 namespace Meta
 {
-    class LIBMETA_API GenericType final : public Type
+    class LIBMETA_API GenericType : public Type
     {
         using FieldContainer     = std::unordered_map<str, FieldPtr>;
         using MethodContainer    = std::unordered_map<str, MethodPtr>;

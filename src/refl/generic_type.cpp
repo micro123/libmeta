@@ -20,6 +20,10 @@ void Meta::GenericType::AddConstant (ConstantPtr ptr)
     constants_[name] = std::move (ptr);
 }
 
+void Meta::GenericType::AddBaseClass (TypePtr ptr) {
+    
+}
+
 std::vector<Meta::FieldPtr> Meta::GenericType::GetFields () const
 {
     std::vector<FieldPtr> ret;

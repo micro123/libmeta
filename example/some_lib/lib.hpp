@@ -9,7 +9,7 @@
 LIB_API
 void sayHello();
 
-CLASS(MyClass, mode=all, desc=some class)
+CLASS(MyClass, Enabled, All)
 {
     REFL_BODY(MyClass)
 public:
@@ -17,17 +17,20 @@ public:
     MyClass(std::string name);
     ~MyClass();
     
-    META(keep, desc=I will say hello to you!)
+    META(Enabled)
     void SayHello();
 
     int Test(double f) const;
 
+    static void xxx();
+
 private:
+    int a, b, c;
     std::string name_;
 };
 
 namespace Foo::Bar {
-    CLASS(Baz, mode=public) {
+    CLASS(Baz, Enabled) {
         REFL_BODY(Baz)
     public:
         void foo(MyClass *obj) const;
@@ -36,14 +39,14 @@ namespace Foo::Bar {
         int z = 100;
     };
 
-    STRUCT(Bal, mode=fields) {
+    STRUCT(Bal, Enabled, Fields) {
         REFL_BODY(Bal)
     public:
         float x,y,z;
     };
 }
 
-enum class Fxxk
+enum CLASS(Van, Enabled, All)
 {
     Deep,
     Dark,

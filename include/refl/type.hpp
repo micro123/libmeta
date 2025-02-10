@@ -3,6 +3,7 @@
 
 #include <string_view>
 #include <vector>
+#include <unordered_map>
 #include "fwd.hpp"
 
 namespace Meta
@@ -16,9 +17,13 @@ namespace Meta
         eTypeIsVirtual = 0x10,
     };
 
+    template <typename T>
+    TypeId GetTypeId ();
+
     class LIBMETA_API Type
     {
     public:
+        using CastPorc = Any(*)(const Any &); // 内容转换函数
         Type (sview name, size_t size, u32 flags);
         virtual ~Type ();
 
@@ -75,10 +80,16 @@ namespace Meta
         // 一般工具
         virtual std::string              ToString (const Any &obj) const;
 
+        void AddConversion(CastPorc proc, TypeId type_id);
+
+        template <typename T>
+        inline void AddConversion(CastPorc proc) { return AddConversion(proc, GetTypeId<T>()); }
     private:
         sview const  name_;
         size_t const size_;
         u32 const    flags_;
+    protected:
+        std::unordered_map<TypeId, CastPorc> cast_ops_;
     };
 
     namespace details {

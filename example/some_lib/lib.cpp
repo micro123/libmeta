@@ -5,6 +5,8 @@ void sayHello () {
     puts("你好");
 }
 
+void MyClass::xxx () {}
+
 MyClass::MyClass()
 {
 

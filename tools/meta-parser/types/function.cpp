@@ -15,5 +15,14 @@ Function::Function (const Cursor &cursor, const Namespace &ns, TypeInfo *parent)
 Function::~Function () = default;
 bool Function::ShouldCompile () const
 {
-    return TypeInfo::ShouldCompile ();
+    if (parent_->ShouldCompile())
+    {
+        auto &pm = parent_->GetMetaInfo();
+        auto const disabled_ = meta_info_.GetFlag(NativeProperty::Disabled);
+        if ((pm.GetFlag(NativeProperty::All) || pm.GetFlag(NativeProperty::Methods)) && !disabled_)
+            return true;
+        if (pm.GetFlag(NativeProperty::WhileListMethods) && enabled_)
+            return true;
+    }
+    return false;
 }

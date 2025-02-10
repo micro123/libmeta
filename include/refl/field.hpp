@@ -13,12 +13,13 @@ namespace Meta {
         virtual ~Field();
 
         inline sview Name() const { return name_; }
+        virtual TypePtr Type() const = 0;
 
         virtual bool IsMember() const = 0;
         virtual bool IsConst() const = 0;
 
-        virtual Any Get(Any *object) const = 0;
-        virtual Any Set(Any *object, Any value) const = 0;
+        virtual Any Get(const Any *object) const = 0;
+        virtual Any Set(const Any *object, Any value) const = 0;
     private:
         sview const name_;
     };
