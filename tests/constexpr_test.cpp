@@ -10,6 +10,7 @@ class bar
 
 TEST_CASE ("Constexpr GetTypeName")
 {
+    REQUIRE (Meta::GetTypeName<void> () == "void");
     REQUIRE (Meta::GetTypeName<int> () == "int");
     REQUIRE (Meta::GetTypeName<foo> () == "foo");
     REQUIRE (Meta::GetTypeName<bar> () == "bar");

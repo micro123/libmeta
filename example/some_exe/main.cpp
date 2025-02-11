@@ -34,10 +34,15 @@ static void PrintType(const Meta::TypePtr &ptr)
     auto methods = ptr->GetMethods();
     if (!methods.empty())
     {
-        std::cout << "  Fields:\n";
+        std::cout << "  Methods:\n";
         for (auto &x: methods)
         {
             std::cout << std::format("    {}\n", x->Name());
+            auto const cnt = x->ParameterCount();
+            for (auto i=0u; i<cnt; ++i)
+            {
+                std::cout << std::format("      Parameter #{}: {} with type {}\n", i+1, x->ParameterName(i), x->ParameterType(i)->Name());
+            }
         }
     }
 }

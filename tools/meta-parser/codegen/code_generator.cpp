@@ -173,11 +173,11 @@ constexpr auto auto_reg_template = R"(
 
 // 3. extern define
 ## for type in types
-template struct Meta::CodeGenFor<{{type}}>;
+extern template struct Meta::CodeGenFor<{{type}}>;
 ## endfor
 
 // 4. function start
-void __RegisterTypes() {
+void RegisterTypes() {
 
     // 5. call register functions
 ## for type in types
@@ -186,7 +186,7 @@ void __RegisterTypes() {
 }
 
 // 6. auto call
-static struct AutoRegister_ { AutoRegister_(){ __RegisterTypes(); } } __auto_register;
+static struct AutoRegister_ { AutoRegister_(){ RegisterTypes(); } } auto_register;
 
 // 7. end
 )";

@@ -16,7 +16,27 @@ struct std::hash<cvt_key_t>
 static std::unordered_map<cvt_key_t, Meta::Type::CastPorc> g_fundamental_cast_ops;
 
 static void __register_fundamental_type_cast_ops() {
+    auto& m = g_fundamental_cast_ops;
+    using namespace Meta;
+#define F(x,y) \
+    m[std::make_pair(GetTypeId<x>(), GetTypeId<y>())] = &Converter<x,y>::Convert
+#define REG_CAST_OP_1(dst) \
+    F(s8, dst); \
+    F(u8, dst); \
+    F(s16, dst); \
+    F(u16, dst); \
+    F(s32, dst); \
+    F(u32, dst); \
+    F(s64, dst); \
+    F(u64, dst); \
+    F(f32, dst); \
+    F(f64, dst); \
+    F(bool, dst); \
+    F(char, dst); \
+    F(cstr, dst); \
+    F(str, dst)
 
+    FUNDAMENTAL_TYPES(REG_CAST_OP_1);
 }
 
 const Meta::Any Meta::Any::Void {Meta::GetTypeId<void> ()};
@@ -106,8 +126,8 @@ bool Meta::AnyCast(const Any &in, TypeId src, Any& out, TypeId dst)
     auto key = std::make_pair(src, dst);
     if (g_fundamental_cast_ops.find(key) != end(g_fundamental_cast_ops))
     {
-        auto result = g_fundamental_cast_ops.at(key)(in);
-        return result.Valid();
+        out = g_fundamental_cast_ops.at(key)(in);
+        return out.Valid();
     }
 
     // 2. use converter from type

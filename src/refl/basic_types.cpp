@@ -6,7 +6,6 @@
 #include "refl/method.hpp"
 #include "refl/field.hpp"
 
-
 Meta::details::VoidType::VoidType () : Type (GetTypeName<void> (), 0, 0) {
     AddConversion<std::string>(
         +[](const Any &) -> Any {

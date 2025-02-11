@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 project(libmeta CXX)
 
+set(USE_FOLDERS ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -16,6 +17,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-fvisibility=hidden)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "using MSVC compiler")
+    add_compile_options(/utf-8)
 endif()
 
 add_library(libmeta_headers INTERFACE)

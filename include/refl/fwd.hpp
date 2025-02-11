@@ -38,7 +38,7 @@ namespace Meta
 #endif
 
 #ifdef EXPLICIT_CLASS_NAME
-#define M_T T
+#define M_T C
 #else
 #define M_T CLASS_TAG
 #endif
