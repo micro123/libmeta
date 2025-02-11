@@ -76,5 +76,6 @@ TEST_CASE ("String Types")
     Meta::Any cStr = "Hello World";
     auto t = cStr.Type();
     auto l = t->GetMethod("Length");
-    std::cout << l->Invoke(cStr).Value<int>() << std::endl;
+    auto len = l->Invoke(cStr);
+    REQUIRE(len.Value<u32>() == 11);
 }

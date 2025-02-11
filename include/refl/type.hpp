@@ -85,6 +85,18 @@ namespace Meta
 
         template <typename T>
         inline void AddConversion(CastPorc proc) { return AddConversion(proc, GetTypeId<T>()); }
+
+        // cast check
+        bool CanCast(TypeId dst) const;
+
+        template <typename T>
+        bool CanCast() const { return CanCast(GetTypeId<T>()); }
+
+        bool Cast(const Any &obj, Any &out, TypeId dst) const;
+
+        template <typename T>
+        bool Cast(const Any &obj, Any &out) const { return Cast(obj, out, GetTypeId<T>()); }
+
     private:
         sview const  name_;
         size_t const size_;

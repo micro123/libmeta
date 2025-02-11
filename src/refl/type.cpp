@@ -3,7 +3,7 @@
 #include <refl/any.hpp>
 #include "refl/registry.hpp"
 
-const Meta::StringName Meta::NULL_TYPE_ID{"<NIL>"};
+const Meta::StringName Meta::NULL_TYPE_ID{"nil"};
 
 Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
 
@@ -85,4 +85,15 @@ std::string Meta::Type::ToString (const Any &obj) const
 void Meta::Type::AddConversion (CastPorc proc, TypeId type_id)
 {
     cast_ops_[type_id] = proc;
+}
+
+bool Meta::Type::CanCast (TypeId dst) const
+{
+    return cast_ops_.find(dst) != end(cast_ops_);
+}
+
+bool Meta::Type::Cast (const Any &obj, Any &out, TypeId dst) const
+{
+    out = cast_ops_.at(dst)(obj);
+    return out.Valid();
 }

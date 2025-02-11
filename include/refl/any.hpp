@@ -88,6 +88,8 @@ namespace Meta
         };
     }  // namespace details
 
+    bool LIBMETA_API AnyCast(const Any &in, TypeId src, Any& out, TypeId dst);
+
     class LIBMETA_API Any
     {
         static constexpr size_t BufferSize = sizeof (details::BufferView);
@@ -179,7 +181,10 @@ namespace Meta
                 }
                 else
                 {
-                    return {};
+                    Any result;
+                    if (!AnyCast(*this, type_id_, result, GetTypeId<T>()))
+                        throw std::bad_cast();
+                    return result.Value<T>();
                 }
             }
             return *ValuePtr<T> ();

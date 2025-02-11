@@ -1,7 +1,7 @@
 #ifndef LIBMETA_GENERIC_TYPE_HPP
 #define LIBMETA_GENERIC_TYPE_HPP
 
-#include <unordered_map>
+#include <list>
 #include "exports.h"
 #include "refl/fwd.hpp"
 #include "refl/type.hpp"
@@ -10,9 +10,9 @@ namespace Meta
 {
     class LIBMETA_API GenericType : public Type
     {
-        using FieldContainer     = std::unordered_map<str, FieldPtr>;
-        using MethodContainer    = std::unordered_map<str, MethodPtr>;
-        using ConstantsContainer = std::unordered_map<str, ConstantPtr>;
+        using FieldContainer     = std::list<std::pair<str, FieldPtr>>;
+        using MethodContainer    = std::list<std::pair<str, MethodPtr>>;
+        using ConstantsContainer = std::list<std::pair<str, ConstantPtr>>;
     public:
         using Ptr = Ref<GenericType>;
         using Type::Type;

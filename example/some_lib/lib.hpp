@@ -51,6 +51,7 @@ enum CLASS(Van, Enabled, All)
     Deep,
     Dark,
     Fantasy,
+    Other = 10086,
 };
 
 enum
