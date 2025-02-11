@@ -6,6 +6,9 @@
 #include <refl/method.hpp>
 #include <refl/constant.hpp>
 
+#include <serialization/jsonify.hpp>
+#include "lib.hpp"
+
 static void PrintType(const Meta::TypePtr &ptr)
 {
     auto fields = ptr->GetFields();
@@ -46,5 +49,8 @@ int main(int argc, char const *argv[])
         PrintType(type);
         return true;
     });
+
+    Meta::Any test = MyClass();
+    std::cout << Meta::JsonSerialize(test) << std::endl;
     return 0;
 }

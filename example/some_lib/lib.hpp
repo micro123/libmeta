@@ -9,7 +9,7 @@
 LIB_API
 void sayHello();
 
-CLASS(MyClass, Enabled, All)
+CLASS(LIB_API MyClass, Enabled, All)
 {
     REFL_BODY(MyClass)
 public:

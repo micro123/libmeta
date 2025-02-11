@@ -129,15 +129,17 @@ bool TypeCodeGen::GenerateCode () const
 
     std::ofstream out(d->out_path_, std::ios::out | std::ios::trunc);
 
-    json data = json::object();
-    data["header"] = d->header_;
-    json types = json::array();
-    for (const auto &type : *d->types_)
-    {
-        types.emplace_back(BuildType (type));
+    if (!d->types_->empty()) {
+        json data = json::object();
+        data["header"] = d->header_;
+        json types = json::array();
+        for (const auto &type : *d->types_)
+        {
+            types.emplace_back(BuildType (type));
+        }
+        data["types"] = types;
+        render_to (out, type_reg_template, data);
     }
-    data["types"] = types;
-    render_to (out, type_reg_template, data);
 
     out.close();
     return true;
@@ -181,9 +183,12 @@ void __RegisterTypes() {
 ## for type in types
     Meta::CodeGenFor<{{type}}>::Register();
 ## endfor
-
-// 6. end
 }
+
+// 6. auto call
+static struct AutoRegister_ { AutoRegister_(){ __RegisterTypes(); } } __auto_register;
+
+// 7. end
 )";
 
 bool AutoRegCodeGen::GenerateCode () const

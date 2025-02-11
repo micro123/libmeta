@@ -3,7 +3,7 @@
 #include <refl/any.hpp>
 #include "refl/registry.hpp"
 
-const Meta::StringName Meta::NULL_TYPE_ID;
+const Meta::StringName Meta::NULL_TYPE_ID{"<NIL>"};
 
 Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
 
@@ -39,12 +39,12 @@ Meta::ConstantPtr Meta::Type::GetConstant (sview name) const
     return {};
 }
 
-#define LINKAGE_TYPEID(type)                                                       \
-    template <>                                                                    \
-    TypeId details::GetTypeId<type> ()                                             \
-    {                                                                              \
-        static StringName internal (GetTypeName<type> ()); \
-        return internal;                                                           \
+#define LINKAGE_TYPEID(type)                \
+    template <>                             \
+    TypeId details::GetTypeId<type> ()      \
+    {                                       \
+        static StringName internal (#type); \
+        return internal;                    \
     }
 
 namespace Meta
@@ -57,7 +57,7 @@ namespace Meta
     template <>
     TypeId GetTypeId<cstr> ()
     {
-        static StringName internal (GetTypeName<cstr> ());
+        static StringName internal ("cstr");
         return internal;
     }
 
