@@ -7,8 +7,6 @@ namespace Meta
 {
     namespace details
     {
-        class UnExistsClass;
-        using CLASS_TAG = UnExistsClass;
         // free method / static member
         template <typename R, typename... Param>
         class NormalMethod : public Method
@@ -60,14 +58,20 @@ namespace Meta
             R (*ptr_) (Param...);
         };
 
+#ifdef EXPLICIT_CLASS_NAME
+        template <typename R, typename T, typename... Param>
+#else
         template <typename R, typename... Param>
+#endif
         class MemberMethodNormal : public Method
         {
-            using Ptr = R (CLASS_TAG::*) (Param...);
+            using Ptr = R (M_T::*) (Param...);
 
         public:
-            template <typename C>
-            MemberMethodNormal (sview name, R (C::*ptr) (Param...)) : Method (name, TypeOf<R> ()), ptr_ (*(Ptr*) &ptr)
+#ifndef EXPLICIT_CLASS_NAME
+            template <typename T>
+#endif
+            MemberMethodNormal (sview name, R (T::*ptr) (Param...)) : Method (name, TypeOf<R> ()), ptr_ ((Ptr) ptr)
             {
                 assert (ptr_ != nullptr);
             }
@@ -91,36 +95,43 @@ namespace Meta
                 if (cnt < sizeof...(Param) + 1)
                     return {};
                 // args[0] is class instance
-                void *obj = args[0].ValuePtr<void>();
-                return Apply(obj, args+1, std::make_index_sequence<sizeof...(Param)>{});
+                void *obj = args[0].ValuePtr<void> ();
+                return Apply (obj, args + 1, std::make_index_sequence<sizeof...(Param)> {});
             }
+
         private:
-            template <size_t ... Idx>
-            Any Apply(void *obj, Any *args, std::index_sequence<Idx...>) const
+            template <size_t... Idx>
+            Any Apply (void *obj, Any *args, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
-                CLASS_TAG *t_obj = (CLASS_TAG*)obj;
+                M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
+                    (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
+                    return (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
         };
 
+#ifdef EXPLICIT_CLASS_NAME
+        template <typename R, typename T, typename... Param>
+#else
         template <typename R, typename... Param>
+#endif
         class MemberMethodConst : public Method
         {
-            using Ptr = R (CLASS_TAG::*) (Param...) const;
+            using Ptr = R (M_T::*) (Param...) const;
 
         public:
-            template <typename C>
-            MemberMethodConst (sview name, R (C::*ptr) (Param...) const) : Method (name, TypeOf<R> ()), ptr_ (*(Ptr*) &ptr)
+#ifndef EXPLICIT_CLASS_NAME
+            template <typename T>
+#endif
+            MemberMethodConst (sview name, R (T::*ptr) (Param...) const) : Method (name, TypeOf<R> ()), ptr_ ((Ptr ) ptr)
             {
                 assert (ptr_ != nullptr);
             }
@@ -144,36 +155,43 @@ namespace Meta
                 if (cnt < sizeof...(Param) + 1)
                     return {};
                 // args[0] is class instance
-                void *obj = args[0].ValuePtr<void>();
-                return Apply(obj, args+1, std::make_index_sequence<sizeof...(Param)>{});
+                void *obj = args[0].ValuePtr<void> ();
+                return Apply (obj, args + 1, std::make_index_sequence<sizeof...(Param)> {});
             }
+
         private:
-            template <size_t ... Idx>
-            Any Apply(void *obj, Any *args, std::index_sequence<Idx...>) const
+            template <size_t... Idx>
+            Any Apply (void *obj, Any *args, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
-                CLASS_TAG *t_obj = (CLASS_TAG*)obj;
+                M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
+                    (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
+                    return (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
         };
 
+#ifdef EXPLICIT_CLASS_NAME
+        template <typename R, typename T, typename... Param>
+#else
         template <typename R, typename... Param>
+#endif
         class MemberMethodVolatile : public Method
         {
-            using Ptr = R (CLASS_TAG::*) (Param...) volatile;
+            using Ptr = R (M_T::*) (Param...) volatile;
 
         public:
-            template <typename C>
-            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile) : Method (name, TypeOf<R> ()), ptr_ (*(Ptr*) &ptr)
+#ifndef EXPLICIT_CLASS_NAME
+            template <typename T>
+#endif
+            MemberMethodVolatile (sview name, R (T::*ptr) (Param...) volatile) : Method (name, TypeOf<R> ()), ptr_ ((Ptr ) ptr)
             {
                 assert (ptr_ != nullptr);
             }
@@ -197,23 +215,24 @@ namespace Meta
                 if (cnt < sizeof...(Param) + 1)
                     return {};
                 // args[0] is class instance
-                void *obj = args[0].ValuePtr<void>();
-                return Apply(obj, args+1, std::make_index_sequence<sizeof...(Param)>{});
+                void *obj = args[0].ValuePtr<void> ();
+                return Apply (obj, args + 1, std::make_index_sequence<sizeof...(Param)> {});
             }
+
         private:
-            template <size_t ... Idx>
-            Any Apply(void *obj, Any *args, std::index_sequence<Idx...>) const
+            template <size_t... Idx>
+            Any Apply (void *obj, Any *args, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
-                CLASS_TAG *t_obj = (CLASS_TAG*)obj;
+                M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
+                    (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_)(args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>>()...);
+                    return (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
@@ -222,25 +241,37 @@ namespace Meta
         template <typename R, typename... Param>
         MethodPtr MakeMethod (sview name, R (*ptr) (Param...))
         {
-            return MethodPtr {new NormalMethod {name, ptr}};
+            return new NormalMethod<R, Param...> {name, ptr};
         };
 
         template <typename R, typename C, typename... Param>
         MethodPtr MakeMethod (sview name, R (C::*ptr) (Param...))
         {
-            return MethodPtr {new MemberMethodNormal {name, ptr}};
+#ifdef EXPLICIT_CLASS_NAME
+            return new MemberMethodNormal<R, C, Param...> {name, ptr};
+#else
+            return new MemberMethodNormal<R, Param...> {name, ptr};
+#endif
         };
 
         template <typename R, typename C, typename... Param>
         MethodPtr MakeMethod (sview name, R (C::*ptr) (Param...) const)
         {
-            return MethodPtr {new MemberMethodConst {name, ptr}};
+#ifdef EXPLICIT_CLASS_NAME
+            return new MemberMethodConst<R, C, Param...> {name, ptr};
+#else
+            return new MemberMethodConst<R, Param...> {name, ptr};
+#endif
         };
 
         template <typename R, typename C, typename... Param>
         MethodPtr MakeMethod (sview name, R (C::*ptr) (Param...) volatile)
         {
-            return MethodPtr {new MemberMethodVolatile {name, ptr}};
+#ifdef EXPLICIT_CLASS_NAME
+            return new MemberMethodVolatile<R, C, Param...> {name, ptr};
+#else
+            return new MemberMethodVolatile<R, Param...> {name, ptr};
+#endif
         };
 
     }  // namespace details

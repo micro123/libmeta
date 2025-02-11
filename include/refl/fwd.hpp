@@ -28,6 +28,19 @@ namespace Meta
 
     static_assert(sizeof(TypeId) == sizeof(void*));
     constexpr TypeId NULL_TYPE_ID = (TypeId)0;
+
+#ifndef EXPLICIT_CLASS_NAME
+    namespace details {
+        class UnExistsClass;
+        using CLASS_TAG = UnExistsClass;
+    }
+#endif
+
+#ifdef EXPLICIT_CLASS_NAME
+#define M_T T
+#else
+#define M_T CLASS_TAG
+#endif
 }  // namespace Meta
 
 #undef FWDC

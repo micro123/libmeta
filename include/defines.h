@@ -26,4 +26,8 @@ typedef double f64;
 #define PASTE(X) PASTE_ (X)
 #define PASTE_(X) X
 
+#if defined(_MSC_VER)
+#define EXPLICIT_CLASS_NAME
+#endif
+
 #endif /* DEFINES_H */
