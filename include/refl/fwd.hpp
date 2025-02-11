@@ -3,6 +3,7 @@
 
 #include "exports.h"
 #include "refl/ref.hpp"
+#include "utility/string_name.hpp"
 
 #include <string_view>
 #include <string>
@@ -21,13 +22,13 @@ namespace Meta
     class Registry;
     class TypeBuilder;
 
-    using TypeId = uintptr_t;
+    using TypeId = StringName;
     using sview  = std::string_view;
     using cstr   = const char*;
     using str    = std::string;
 
     static_assert(sizeof(TypeId) == sizeof(void*));
-    constexpr TypeId NULL_TYPE_ID = (TypeId)0;
+    extern const LIBMETA_API TypeId NULL_TYPE_ID;
 
 #ifndef EXPLICIT_CLASS_NAME
     namespace details {

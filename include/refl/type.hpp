@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include "fwd.hpp"
+#include "utility/constexpr.hpp"
 
 namespace Meta
 {
@@ -109,8 +110,8 @@ namespace Meta
         template <typename T>
         TypeId GetTypeId ()
         {
-            static u8 store;
-            return reinterpret_cast<TypeId> (&store);
+            static StringName store(GetTypeName<T>());
+            return store;
         }
     }
 

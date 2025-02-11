@@ -5,9 +5,9 @@
 TEST_CASE ("TypeId BasicType")
 {
     auto x = Meta::GetTypeId<s8> ();
-    REQUIRE (x != Meta::NULL_TYPE_ID);
+    REQUIRE ((x != Meta::NULL_TYPE_ID));
     auto t = Meta::TypeOf<u8> ();
-    REQUIRE (t != Meta::NULL_TYPE_ID);
+    REQUIRE ((t != nullptr));
     REQUIRE (t->Name () == "u8");
 }
 

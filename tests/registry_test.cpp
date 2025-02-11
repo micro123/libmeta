@@ -14,7 +14,7 @@ TEST_CASE ("Registry Basic Types")
     FUNDAMENTAL_TYPES (NOT_NULL);
 
     inst.VisitTypes([](TypeId tid, TypePtr ptr) -> bool {
-        std::cout << std::format("name = {}, id = {:x}\n", ptr->Name(), tid);
+        std::cout << std::format("name = {}, id = {}\n", ptr->Name(), tid.operator std::string());
         return true;
     });
 }

@@ -3,6 +3,8 @@
 #include <refl/any.hpp>
 #include "refl/registry.hpp"
 
+const Meta::StringName Meta::NULL_TYPE_ID;
+
 Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
 
 Meta::Type::~Type () = default;
@@ -32,17 +34,17 @@ std::vector<Meta::ConstantPtr> Meta::Type::GetConstants () const
     return {};
 }
 
-Meta::ConstantPtr              Meta::Type::GetConstant (sview name) const
+Meta::ConstantPtr Meta::Type::GetConstant (sview name) const
 {
     return {};
 }
 
-#define LINKAGE_TYPEID(type)                         \
-    template <>                                      \
-    TypeId details::GetTypeId<type> ()                        \
-    {                                                \
-        static u8 internal {1};                      \
-        return reinterpret_cast<TypeId> (&internal); \
+#define LINKAGE_TYPEID(type)                                                       \
+    template <>                                                                    \
+    TypeId details::GetTypeId<type> ()                                             \
+    {                                                                              \
+        static StringName internal (GetTypeName<type> ()); \
+        return internal;                                                           \
     }
 
 namespace Meta
@@ -55,8 +57,8 @@ namespace Meta
     template <>
     TypeId GetTypeId<cstr> ()
     {
-        static u8 internal {1};
-        return reinterpret_cast<TypeId> (&internal);
+        static StringName internal (GetTypeName<cstr> ());
+        return internal;
     }
 
 }  // namespace Meta
@@ -71,15 +73,16 @@ std::vector<Meta::TypePtr> Meta::Type::GetBaseClasses () const
     return {};
 }
 
-std::string                Meta::Type::ToString (const Any &obj) const
+std::string Meta::Type::ToString (const Any &obj) const
 {
-    auto const tid = GetTypeId<std::string>();
-    auto const it = cast_ops_.find(tid);
-    if (it == end(cast_ops_))
-        return std::format("{}(@{})", name_, obj.ValuePtr<void>());
-    return it->second(obj).Value<std::string>();
+    auto const tid = GetTypeId<std::string> ();
+    auto const it  = cast_ops_.find (tid);
+    if (it == end (cast_ops_))
+        return std::format ("{}(@{})", name_, obj.ValuePtr<void> ());
+    return it->second (obj).Value<std::string> ();
 }
 
-void Meta::Type::AddConversion (CastPorc proc, TypeId type_id) {
+void Meta::Type::AddConversion (CastPorc proc, TypeId type_id)
+{
     cast_ops_[type_id] = proc;
 }
