@@ -39,6 +39,15 @@ TEST_CASE ("ReadField")
     auto z = Meta::MakeField ("z", &Simple::z);
     auto w = Meta::MakeField ("w", &Simple::w);
 
+    int ii = 5;
+    char buffer[sizeof(&ii)];
+    auto pii = new(buffer) int* {&ii};
+
+    Meta::Any anyi = &ii;
+    auto pi = anyi.ValuePtr<int>();
+    REQUIRE((anyi == ii));
+
+
     Meta::Any i;
     Meta::Any obj = Simple{1,2};
     i = x->Get(&obj);

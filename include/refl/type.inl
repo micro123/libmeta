@@ -19,7 +19,7 @@
 
 #define LINKAGE_TYPEID(type) \
     template <>              \
-    TypeId LIBMETA_API details::GetTypeId<type> ()
+    TypeId LIBMETA_API details::GetTypeIdImpl<type> ()
 
 namespace Meta
 {
@@ -27,7 +27,7 @@ namespace Meta
 
     // void type
     LINKAGE_TYPEID(void);
-    // std::string
+    // str
     LINKAGE_TYPEID(str);
     // const char *
     template <>

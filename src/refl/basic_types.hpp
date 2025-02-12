@@ -16,6 +16,27 @@ namespace Meta::details {
                 }
             );
         }
+
+        bool FromString(const Any &obj, const str &content) const override {
+            assert (obj.Type() == this);
+            try {
+                if constexpr (std::is_signed_v<T>)
+                {
+                    obj.ValueRef<T>() = static_cast<T>(std::stoll(content, nullptr, 0));
+                }
+                else if constexpr (std::is_signed_v<T>)
+                {
+                    obj.ValueRef<T>() = static_cast<T>(std::stoull(content, nullptr, 0));
+                }
+                else if constexpr (std::is_signed_v<T>)
+                {
+                    obj.ValueRef<T>() = static_cast<T>(std::stod(content, nullptr));
+                }
+            } catch (std::exception &) {
+                return false;
+            }
+            return true;
+        }
     };
 
     class VoidType final: public Type {
@@ -31,6 +52,12 @@ namespace Meta::details {
     class StringType final :public GenericType {
     public:
         StringType();
+
+        bool FromString(const Any &obj, const str &content) const override {
+            assert (obj.Type() == (const Type*)this);
+            obj.ValueRef<str>().assign(content);
+            return true;
+        }
     };
 
     class NullType final : public Type {

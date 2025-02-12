@@ -1,7 +1,7 @@
 #ifndef LIBMETA_JSONIFY_HPP
 #define LIBMETA_JSONIFY_HPP
 
-#include <exports.h>
+#include "refl/fwd.hpp"
 #include <string>
 
 
@@ -10,10 +10,10 @@ namespace Meta
     class Any;
 
     LIBMETA_API
-    std::string JsonSerialize(const Any& value);
+    str JsonSerialize(const Any& value, bool formatted = false);
 
     LIBMETA_API
-    Any JsonDeserialize(const std::string& value);
+    bool JsonDeserialize(const Any &obj, const str& value);
 }
 
 

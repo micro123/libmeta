@@ -2,34 +2,53 @@
 #include <refl/any.hpp>
 #include <refl/field.hpp>
 
+#include <nlohmann/json.hpp>
 #include <format>
 
-std::string Meta::JsonSerialize (const Meta::Any &value)
+using namespace nlohmann;
+
+static json ToJson(const Meta::Any &value)
 {
     auto type = value.Type();
     if (!type)
-        return "null";
+        return json{nullptr};
     auto fields = type->GetFields();
     if (fields.empty())
-        return std::format("\"{}\"", value.Value<std::string>());
+        return value.Value<Meta::str>();
     else {
-        std::string result = "{";
-        bool first = true;
+        nlohmann::json result = nlohmann::json::object();
         for (auto &x: fields) {
             if (x->IsMember()) {
-                if (first)
-                    first = false;
-                else
-                    result.append(",");
-                result.append(std::format("\"{}\":{}", x->Name(), JsonSerialize(x->Get(&value))));
+                result[x->Name()] = ToJson(x->Get(&value));
             }
         }
-        result.append("}");
         return result;
     }
 }
 
-Meta::Any         Meta::JsonDeserialize (const std::string &value)
+Meta::str Meta::JsonSerialize (const Meta::Any &value, bool formated)
 {
-    return Meta::Any ();
+    return ToJson(value).dump(formated ? 2 : -1);
+}
+
+static bool FromJson(const Meta::Any& obj, const json &content)
+{
+    auto type = obj.Type();
+    if (!type)
+        return true;
+    auto fields = type->GetFields();
+    if (fields.empty()) {
+        return type->FromString(obj, content.get<Meta::str>());
+    }
+    for (auto &x: fields) {
+        if (x->IsMember()) {
+            FromJson(x->Get(&obj), content[x->Name()]);
+        }
+    }
+    return false;
+}
+
+bool Meta::JsonDeserialize(const Any& obj, const Meta::str& value)
+{
+    return FromJson(obj, json::parse(value));
 }

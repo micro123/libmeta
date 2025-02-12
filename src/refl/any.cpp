@@ -91,7 +91,7 @@ Meta::Any::Any (TypeId tid)
 }
 void Meta::Any::Destroy () const
 {
-    if (data_)
+    if (data_ && ops_.Destroy)
     {
         ops_.Destroy (data_);
     }
@@ -145,3 +145,5 @@ bool Meta::AnyCast(const Any &in, TypeId src, Any& out, TypeId dst)
     
     return type->CanCast(dst) && type->Cast(in, out, dst);
 }
+
+constexpr size_t any_size = sizeof(Meta::Any);

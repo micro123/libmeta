@@ -35,7 +35,7 @@ namespace Meta
             Any Get (const Any *) const override
             {
                 // assert(Type() == object->Type());
-                return *ptr_;
+                return ptr_;
             }
             Any Set (const Any *, Any value) const override
             {
@@ -89,7 +89,7 @@ namespace Meta
             {
                 // assert(Type() == object->Type());
                 auto t_obj = (M_T*) object->ValuePtr<void> ();
-                return t_obj->*ptr_;
+                return &(t_obj->*ptr_);
             }
             Any Set (const Any *object, Any value) const override
             {

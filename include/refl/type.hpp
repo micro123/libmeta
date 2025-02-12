@@ -79,7 +79,8 @@ namespace Meta
         virtual std::vector<TypePtr>     GetBaseClasses () const;
 
         // 一般工具
-        virtual std::string              ToString (const Any &obj) const;
+        virtual str                      ToString (const Any &obj) const;
+        virtual bool                     FromString (const Any &obj, const str& data) const;
 
         void AddConversion(CastPorc proc, TypeId type_id);
 
@@ -120,7 +121,7 @@ namespace Meta
         // }
 
         template <typename T>
-        TypeId GetTypeId ()
+        TypeId GetTypeIdImpl ()
         {
             static StringName store(GetTypeName<T>());
             return store;
@@ -132,7 +133,7 @@ namespace Meta
     {
         using no_pointer_t = std::remove_pointer_t<T>;
         using no_cvref_t = std::remove_cvref_t<no_pointer_t>;
-        return details::GetTypeId<no_cvref_t>();
+        return details::GetTypeIdImpl<no_cvref_t>();
     }
 
     LIBMETA_API

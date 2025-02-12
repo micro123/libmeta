@@ -228,6 +228,18 @@ namespace Meta
             return operator bool ();
         }
 
+        template <typename U> requires details::PtrCastable<T, U>
+        bool operator==(const U *u)
+        {
+            return ptr_->Ptr() == u;
+        }
+
+        template <typename U> requires details::PtrCastable<T, U>
+        bool operator!=(const U *u)
+        {
+            return ptr_->Ptr() != u;
+        }
+
     private:
         void Assign (const Ref &other)
         {

@@ -32,20 +32,21 @@ namespace Meta
         // 小对象查看器， 后续可以添加其他类型
         union alignas (max_align_t) BufferView
         {
-            s8    _s8;
-            s16   _s16;
-            s32   _s32;
-            s64   _s64;
-            u8    _u8;
-            u16   _u16;
-            u32   _u32;
-            u64   _u64;
-            f32   _f32;
-            f64   _f64;
-            cstr  _cstr;
-            void *_ptr;
+            s8     _s8;
+            s16    _s16;
+            s32    _s32;
+            s64    _s64;
+            u8     _u8;
+            u16    _u16;
+            u32    _u32;
+            u64    _u64;
+            f32    _f32;
+            f64    _f64;
+            cstr   _cstr;
+            void  *_ptr;
+            void **_pptr;
 
-            char _pad[sizeof (Ref<void>) * 4];
+            char _pad[sizeof (void *) * 8];
         };
 
         // check operator==
@@ -69,6 +70,32 @@ namespace Meta
         constexpr bool has_less_v = has_less_op<T>::value;
 
         struct LIBMETA_API AnyOps {
+        private:
+            template <typename T>
+            static bool IsEqual(void *a, void *b)
+            {
+                T *ta = static_cast<T *> (a);
+                T *tb = static_cast<T *> (b);
+                if constexpr (has_equal_v<T>)
+                {
+                    return *ta == *tb;
+                }
+                return ta == tb;
+            }
+            template <typename T>
+            static bool IsLess(void *a, void *b)
+            {
+                T *ta = static_cast<T *> (a);
+                T *tb = static_cast<T *> (b);
+                if constexpr (has_less_v<T>)
+                {
+                    return *ta < *tb;
+                }
+                return ta < tb;
+            }
+
+        public:
+
             void *(*Construct) (void *, void *) = nullptr;
             void (*Destroy) (void *)            = nullptr;
             void *(*Clone) (void *, void *)     = nullptr;
@@ -80,90 +107,51 @@ namespace Meta
             template <typename T>
             static AnyOps Of (std::enable_if_t<(sizeof (BufferView) < sizeof (T))> * = nullptr)
             {
-                return AnyOps {
+                static AnyOps ops {
                         .Destroy = +[] (void *data) { delete static_cast<T *> (data); },
-                        .Clone   = +[] (void *, void *data) -> void   *{ return new T {*static_cast<T *> (data)}; },
-                        .Equal =
-                                +[] (void *a, void *b) {
-                                    T *ta = static_cast<T *> (a);
-                                    T *tb = static_cast<T *> (b);
-                                    if constexpr (has_equal_v<T>)
-                                    {
-                                        return *ta == *tb;
-                                    }
-                                    return ta == tb;
-                                },
-                        .Less =
-                                +[] (void *a, void *b) {
-                                    T *ta = static_cast<T *> (a);
-                                    T *tb = static_cast<T *> (b);
-                                    if constexpr (has_less_v<T>)
-                                    {
-                                        return *ta < *tb;
-                                    }
-                                    return ta < tb;
-                                },
+                        .Clone   = +[] (void *, void *data) -> void* { return new T {*static_cast<T *> (data)}; },
+                        .Equal   = &AnyOps::IsEqual<T>,
+                        .Less    = &AnyOps::IsLess<T>,
                 };
+                return ops;
             }
 
             template <typename T>
             static AnyOps Of (std::enable_if_t<(sizeof (BufferView) >= sizeof (T))> * = nullptr)
             {
-                return AnyOps {
+                static AnyOps ops {
                         .Destroy = +[] (void *data) { static_cast<T *> (data)->~T (); },
-                        .Clone   = +[] (void *stack, void *data) -> void   *{ return new (stack) T {*static_cast<T *> (data)}; },
-                        .Equal =
-                                +[] (void *a, void *b) {
-                                    T *ta = static_cast<T *> (a);
-                                    T *tb = static_cast<T *> (b);
-                                    if constexpr (has_equal_v<T>)
-                                    {
-                                        return *ta == *tb;
-                                    }
-                                    return ta == tb;
-                                },
-                        .Less =
-                                +[] (void *a, void *b) {
-                                    T *ta = static_cast<T *> (a);
-                                    T *tb = static_cast<T *> (b);
-                                    if constexpr (has_less_v<T>)
-                                    {
-                                        return *ta < *tb;
-                                    }
-                                    return ta < tb;
-                                },
+                        .Clone   = +[] (void *stack, void *data) -> void* { return new (stack) T {*static_cast<T *> (data)}; },
+                        .Equal   = &AnyOps::IsEqual<T>,
+                        .Less    = &AnyOps::IsLess<T>,
                 };
+                return ops;
+            }
+
+            template <typename T>
+            static AnyOps OfPtr ()
+            {
+                static AnyOps ops {
+                        .Construct = +[] (void *stack, void *data) -> void* { return *(void**)data; },
+                        .Clone     = +[] (void *stack, void *data) -> void* { return data; },
+                        .Equal   = &AnyOps::IsEqual<T>,
+                        .Less    = &AnyOps::IsLess<T>,
+                };
+                return ops;
             }
 
             template <typename T>
             static AnyOps OfRef ()
             {
-                return {
+                static AnyOps ops {
                         .Construct = +[] (void *stack, void *data) -> void * { return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
                         .Destroy   = +[] (void *data) { static_cast<Ref<T> *> (data)->~Ref (); },
                         .Clone     = +[] (void *stack, void *data) -> void     *{ return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
                         .Get       = +[] (void *data) -> void       *{ return static_cast<Ref<T> *> (data)->Get (); },
-                        .Equal =
-                                +[] (void *a, void *b) {
-                                    T *ta = static_cast<T *> (a);
-                                    T *tb = static_cast<T *> (b);
-                                    if constexpr (has_equal_v<T>)
-                                    {
-                                        return *ta == *tb;
-                                    }
-                                    return ta == tb;
-                                },
-                        .Less =
-                                +[] (void *a, void *b) {
-                                    T *ta = static_cast<T *> (a);
-                                    T *tb = static_cast<T *> (b);
-                                    if constexpr (has_less_v<T>)
-                                    {
-                                        return *ta < *tb;
-                                    }
-                                    return ta < tb;
-                                },
+                        .Equal   = &AnyOps::IsEqual<T>,
+                        .Less    = &AnyOps::IsLess<T>,
                 };
+                return ops;
             }
 
             static AnyOps Empty ();
@@ -181,18 +169,30 @@ namespace Meta
         // Empty
         Any ();
 
-        // Ref
+        // By Value
         template <typename T>
         Any (T value)
         {
-            Construct (std::move (value));
+            ConstructValue (std::move (value));
+        }
+
+        // Pointer
+        template <typename T>
+        Any (T *ptr)
+        {
+            ConstructPointer (ptr);
+        }
+
+        Any (cstr s)
+        {
+            ConstructValue (s);
         }
 
         // Ref<T>
         template <typename T>
         Any (Ref<T> ref)
         {
-            Construct (std::move (ref));
+            ConstructRef (std::move (ref));
         }
 
         Any (const Any &var);
@@ -206,7 +206,20 @@ namespace Meta
         Any &operator= (T t)
         {  // New Ref
             Destroy ();
-            Construct (t);
+            ConstructValue (t);
+            return *this;
+        }
+        template <typename T>
+        Any &operator= (T *ptr)
+        {
+            Destroy ();
+            ConstructPointer (ptr);
+            return *this;
+        }
+        Any &operator= (cstr s)
+        {
+            Destroy ();
+            ConstructValue (s);
             return *this;
         }
         template <typename T>
@@ -257,7 +270,7 @@ namespace Meta
                 if (!type)
                     throw std::bad_cast ();
 
-                if constexpr (std::is_same_v<std::string, T>)
+                if constexpr (std::is_same_v<str, T>)
                 {
                     return type->ToString (*this);
                 }
@@ -365,7 +378,7 @@ namespace Meta
         void Destroy () const;
 
         template <typename T>
-        void Construct (T t)
+        void ConstructValue (T t)
         {
             type_id_ = GetTypeId<T> ();
             ops_     = details::AnyOps::Of<T> ();
@@ -380,7 +393,15 @@ namespace Meta
         }
 
         template <typename T>
-        void Construct (Ref<T> ref)
+        void ConstructPointer (T *ptr)
+        {
+            type_id_ = GetTypeId<T> ();
+            ops_     = details::AnyOps::OfPtr<T> ();
+            data_    = ops_.Construct (&buffer_, &ptr);
+        }
+
+        template <typename T>
+        void ConstructRef (Ref<T> ref)
         {
             type_id_ = GetTypeId<T> ();
             ops_     = details::AnyOps::OfRef<T> ();
@@ -394,7 +415,7 @@ namespace Meta
         template <typename T>
         void Assign (Ref<T> &&ref)
         {
-            Construct (ref);
+            ConstructRef (ref);
         }
 
         [[nodiscard]] inline void *Get () const

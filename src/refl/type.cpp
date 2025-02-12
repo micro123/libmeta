@@ -3,7 +3,7 @@
 #include <refl/any.hpp>
 #include "refl/registry.hpp"
 
-const Meta::StringName Meta::NULL_TYPE_ID{"nil"};
+const Meta::StringName Meta::NULL_TYPE_ID {"nil"};
 
 Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
 
@@ -41,7 +41,7 @@ Meta::ConstantPtr Meta::Type::GetConstant (sview name) const
 
 #define LINKAGE_TYPEID(type)                \
     template <>                             \
-    TypeId details::GetTypeId<type> ()      \
+    TypeId details::GetTypeIdImpl<type> ()  \
     {                                       \
         static StringName internal (#type); \
         return internal;                    \
@@ -82,6 +82,11 @@ std::string Meta::Type::ToString (const Any &obj) const
     return it->second (obj).Value<std::string> ();
 }
 
+bool Meta::Type::FromString (const Any &obj, const str &data) const
+{
+    return false;
+}
+
 void Meta::Type::AddConversion (CastPorc proc, TypeId type_id)
 {
     cast_ops_[type_id] = proc;
@@ -89,11 +94,11 @@ void Meta::Type::AddConversion (CastPorc proc, TypeId type_id)
 
 bool Meta::Type::CanCast (TypeId dst) const
 {
-    return cast_ops_.find(dst) != end(cast_ops_);
+    return cast_ops_.find (dst) != end (cast_ops_);
 }
 
 bool Meta::Type::Cast (const Any &obj, Any &out, TypeId dst) const
 {
-    out = cast_ops_.at(dst)(obj);
-    return out.Valid();
+    out = cast_ops_.at (dst) (obj);
+    return out.Valid ();
 }
