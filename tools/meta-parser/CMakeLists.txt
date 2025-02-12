@@ -5,17 +5,18 @@ file(GLOB_RECURSE SRC_FILES *.*)
 find_package(Clang REQUIRED)
 
 # Add path to LLVM modules
-set(CMAKE_MODULE_PATH
-  ${CMAKE_MODULE_PATH}
-  "${LLVM_CMAKE_DIR}"
-)
+# set(CMAKE_MODULE_PATH
+#   ${CMAKE_MODULE_PATH}
+#   "${LLVM_CMAKE_DIR}"
+# )
 
 # import LLVM CMake functions
-include(AddLLVM)
+# include(AddLLVM)
+find_library(CLANG_LIBRARY NAMES clang PATHS ${LLVM_LIBRARY_DIRS})
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE libclang)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CLANG_LIBRARY})
 target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
@@ -23,6 +24,8 @@ target_include_directories(
   ${LLVM_INCLUDE_DIRS}
   ${CLANG_INCLUDE_DIRS}
 )
+
+# message(STATUS "${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS} ${CLANG_LIBRARY}")
 
 if (NOT WIN32)
   execute_process(COMMAND clang -v ERROR_VARIABLE CLANG_V)
@@ -60,18 +63,6 @@ function(meta_codegen tgt)
     set(cmp_hdrs "${BIN_DIR}/compile_headers.txt")
     set(reg_file "${CODE_GEN_DIR}/auto_register.cpp")
 
-    # 3.1 compile_options.txt
-    # add_custom_command(
-    #   OUTPUT ${cmp_opts}
-    #   COMMAND write-file
-    #     ARGS ${cmp_opts}
-    #          "-I$<JOIN:$<TARGET_PROPERTY:${tgt},INCLUDE_DIRECTORIES>, -I>"
-    #          "-D$<JOIN:$<TARGET_PROPERTY:${tgt},COMPILE_DEFINITIONS>, -D>"
-    #          "-H$<JOIN:$<TARGET_PROPERTY:${tgt},PRECOMPILE_HEADERS>, -H>"
-    #   COMMENT " >>> Generating ${tgt} compile_options.txt"
-    #   DEPENDS ${ALL_HEADERS} write-file
-    # )
-
     # 3.2 compile_headers.txt
     set(GENERATED_FILES)
     file(WRITE ${cmp_hdrs} "")
@@ -91,18 +82,6 @@ function(meta_codegen tgt)
       # append line
       set(line "${file}|>${generated_file}\n")
       file(APPEND ${cmp_hdrs} ${line})
-
-      # add_custom_command(
-      #   OUTPUT  ${generated_file}
-      #   COMMAND meta-parser
-      #     ARGS "${file}" "${generated_file}"
-      #          "-I$<JOIN:$<TARGET_PROPERTY:${tgt},INCLUDE_DIRECTORIES>, -I>"
-      #          "-D$<JOIN:$<TARGET_PROPERTY:${tgt},COMPILE_DEFINITIONS>, -D>"
-      #          "-H$<JOIN:$<TARGET_PROPERTY:${tgt},PRECOMPILE_HEADERS>, -H>"
-      #   COMMAND ${CMAKE_COMMAND} -E touch ${generated_file}
-      #   COMMENT "meta-parser for source ${file}"
-      #   DEPENDS meta-parser ${file}
-      # )
     endforeach()
 
     if (GENERATED_FILES)
@@ -125,7 +104,7 @@ function(meta_codegen tgt)
         COMMENT " >>> Code generation for target ${tgt}"
         DEPENDS ${GENERATED_FILES}
       )
-      set_property(TARGET ${tgt} PROPERTY FOLDER "CodeGen")
+      set_property(TARGET ${tgt}_codegen PROPERTY FOLDER "Generated Code")
       add_dependencies(
         ${tgt} ${tgt}_codegen
       )
