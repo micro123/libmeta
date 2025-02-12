@@ -1,7 +1,7 @@
 #include "refl/any.hpp"
 #include "any_converter.hpp"
 #include <unordered_map>
-
+#include "refl/method.hpp"
 
 using cvt_key_t = std::pair<Meta::TypeId, Meta::TypeId>;
 
@@ -76,6 +76,14 @@ Meta::Any &Meta::Any::operator= (Any &&var) noexcept
 Meta::TypePtr Meta::Any::Type () const
 {
     return TypeOf (type_id_);
+}
+Meta::Any Meta::Any::operator() (Any *args, size_t cnt) const
+{
+    // 需要是函数才能调用
+    if (auto m = ValuePtr<Method>()) {
+        return m->InvokeWithArgs(args, cnt);
+    }
+    return {};
 }
 Meta::Any::Any (TypeId tid)
 {

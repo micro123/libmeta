@@ -1,8 +1,8 @@
 #ifndef LIBMETA_VARIANT_HPP
 #define LIBMETA_VARIANT_HPP
 
-#include <typeinfo>
 #include <stdexcept>
+#include <typeinfo>
 #include <utility>
 #include "exports.h"
 #include "refl/ref.hpp"
@@ -32,27 +32,49 @@ namespace Meta
         // 小对象查看器， 后续可以添加其他类型
         union alignas (max_align_t) BufferView
         {
-            s8                _s8;
-            s16               _s16;
-            s32               _s32;
-            s64               _s64;
-            u8                _u8;
-            u16               _u16;
-            u32               _u32;
-            u64               _u64;
-            f32               _f32;
-            f64               _f64;
-            cstr              _cstr;
-            void             *_ptr;
+            s8    _s8;
+            s16   _s16;
+            s32   _s32;
+            s64   _s64;
+            u8    _u8;
+            u16   _u16;
+            u32   _u32;
+            u64   _u64;
+            f32   _f32;
+            f64   _f64;
+            cstr  _cstr;
+            void *_ptr;
 
-            char              _pad[sizeof (Ref<void>) * 4];
+            char _pad[sizeof (Ref<void>) * 4];
         };
+
+        // check operator==
+        template <typename T, typename = void>
+        struct has_equal_op : std::false_type {
+        };
+        template <typename T>
+        struct has_equal_op<T, std::void_t<decltype (std::declval<T> () == std::declval<T> ())>> : std::true_type {
+        };
+        template <typename T>
+        constexpr bool has_equal_v = has_equal_op<T>::value;
+
+        // check operator<
+        template <typename T, typename = void>
+        struct has_less_op : std::false_type {
+        };
+        template <typename T>
+        struct has_less_op<T, std::void_t<decltype (std::declval<T> () < std::declval<T> ())>> : std::true_type {
+        };
+        template <typename T>
+        constexpr bool has_less_v = has_less_op<T>::value;
 
         struct LIBMETA_API AnyOps {
             void *(*Construct) (void *, void *) = nullptr;
             void (*Destroy) (void *)            = nullptr;
             void *(*Clone) (void *, void *)     = nullptr;
             void *(*Get) (void *)               = nullptr;
+            bool (*Equal) (void *, void *)      = nullptr;
+            bool (*Less) (void *, void *)       = nullptr;
 
             // helpers
             template <typename T>
@@ -61,6 +83,26 @@ namespace Meta
                 return AnyOps {
                         .Destroy = +[] (void *data) { delete static_cast<T *> (data); },
                         .Clone   = +[] (void *, void *data) -> void   *{ return new T {*static_cast<T *> (data)}; },
+                        .Equal =
+                                +[] (void *a, void *b) {
+                                    T *ta = static_cast<T *> (a);
+                                    T *tb = static_cast<T *> (b);
+                                    if constexpr (has_equal_v<T>)
+                                    {
+                                        return *ta == *tb;
+                                    }
+                                    return ta == tb;
+                                },
+                        .Less =
+                                +[] (void *a, void *b) {
+                                    T *ta = static_cast<T *> (a);
+                                    T *tb = static_cast<T *> (b);
+                                    if constexpr (has_less_v<T>)
+                                    {
+                                        return *ta < *tb;
+                                    }
+                                    return ta < tb;
+                                },
                 };
             }
 
@@ -70,6 +112,26 @@ namespace Meta
                 return AnyOps {
                         .Destroy = +[] (void *data) { static_cast<T *> (data)->~T (); },
                         .Clone   = +[] (void *stack, void *data) -> void   *{ return new (stack) T {*static_cast<T *> (data)}; },
+                        .Equal =
+                                +[] (void *a, void *b) {
+                                    T *ta = static_cast<T *> (a);
+                                    T *tb = static_cast<T *> (b);
+                                    if constexpr (has_equal_v<T>)
+                                    {
+                                        return *ta == *tb;
+                                    }
+                                    return ta == tb;
+                                },
+                        .Less =
+                                +[] (void *a, void *b) {
+                                    T *ta = static_cast<T *> (a);
+                                    T *tb = static_cast<T *> (b);
+                                    if constexpr (has_less_v<T>)
+                                    {
+                                        return *ta < *tb;
+                                    }
+                                    return ta < tb;
+                                },
                 };
             }
 
@@ -81,6 +143,26 @@ namespace Meta
                         .Destroy   = +[] (void *data) { static_cast<Ref<T> *> (data)->~Ref (); },
                         .Clone     = +[] (void *stack, void *data) -> void     *{ return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
                         .Get       = +[] (void *data) -> void       *{ return static_cast<Ref<T> *> (data)->Get (); },
+                        .Equal =
+                                +[] (void *a, void *b) {
+                                    T *ta = static_cast<T *> (a);
+                                    T *tb = static_cast<T *> (b);
+                                    if constexpr (has_equal_v<T>)
+                                    {
+                                        return *ta == *tb;
+                                    }
+                                    return ta == tb;
+                                },
+                        .Less =
+                                +[] (void *a, void *b) {
+                                    T *ta = static_cast<T *> (a);
+                                    T *tb = static_cast<T *> (b);
+                                    if constexpr (has_less_v<T>)
+                                    {
+                                        return *ta < *tb;
+                                    }
+                                    return ta < tb;
+                                },
                 };
             }
 
@@ -88,7 +170,7 @@ namespace Meta
         };
     }  // namespace details
 
-    bool LIBMETA_API AnyCast(const Any &in, TypeId src, Any& out, TypeId dst);
+    bool LIBMETA_API AnyCast (const Any &in, TypeId src, Any &out, TypeId dst);
 
     class LIBMETA_API Any
     {
@@ -103,7 +185,7 @@ namespace Meta
         template <typename T>
         Any (T value)
         {
-            Construct (std::move(value));
+            Construct (std::move (value));
         }
 
         // Ref<T>
@@ -182,9 +264,9 @@ namespace Meta
                 else
                 {
                     Any result;
-                    if (!AnyCast(*this, type_id_, result, GetTypeId<T>()))
-                        throw std::bad_cast();
-                    return result.Value<T>();
+                    if (!AnyCast (*this, type_id_, result, GetTypeId<T> ()))
+                        throw std::bad_cast ();
+                    return result.Value<T> ();
                 }
             }
             return *ValuePtr<T> ();
@@ -232,6 +314,44 @@ namespace Meta
             return Any (MakeRef<T> (std::forward<Args> (args)...));
         }
 
+        Any operator() (Any *args, size_t cnt) const;
+
+        template <typename... Args>
+        Any operator() (Args &&...args) const
+        {
+            Any arg_arr[] = {std::forward<Args> (args)..., {}};
+            return (*this) (&arg_arr[0], sizeof...(Args));
+        }
+
+        template <typename T>
+        bool operator== (const T &t) const
+        {
+            return t == Value<T> ();
+        }
+
+        template <typename T>
+        bool operator!= (const T &t) const
+        {
+            return (*this == t);
+        }
+
+        bool operator== (const Any &other) const
+        {
+            if (type_id_ == other.type_id_)
+            {
+                if (Valid ())
+                {
+                    return ops_.Equal (Get (), other.Get ());
+                }
+            }
+            return false;
+        }
+
+        bool operator!= (const Any &other) const
+        {
+            return !(*this == other);
+        }
+
     private:
         // special ctor
         explicit Any (TypeId tid);
@@ -251,11 +371,11 @@ namespace Meta
             ops_     = details::AnyOps::Of<T> ();
             if constexpr (sizeof (T) < BufferSize)
             {
-                data_ = new (&buffer_) T {std::move(t)};
+                data_ = new (&buffer_) T {std::move (t)};
             }
             else
             {
-                data_ = new T {std::move(t)};
+                data_ = new T {std::move (t)};
             }
         }
 

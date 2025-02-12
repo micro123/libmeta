@@ -1,5 +1,6 @@
 #include <catch_amalgamated.hpp>
 #include <refl/any.hpp>
+#include <refl/method.hpp>
 
 TEST_CASE ("Any Basic")
 {
@@ -50,4 +51,12 @@ TEST_CASE ("Any Ref")
         c = {};
         puts("after");
     }
+}
+
+int print(int x) { puts("printed!"); return 42 + x; }
+
+TEST_CASE("Any Callable") {
+    Meta::Any p = Meta::MakeMethod("print", &print);
+    auto r = p(42);
+    REQUIRE(r == 42 + 42);
 }

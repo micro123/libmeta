@@ -31,7 +31,7 @@ namespace Meta
                 return false;
             }
 
-            Any Invoke (Any *args, u32 cnt) const override
+            Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 if (cnt < sizeof...(Param))
                     return {};
@@ -90,7 +90,7 @@ namespace Meta
                 return false;
             }
 
-            Any Invoke (Any *args, u32 cnt) const override
+            Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 if (cnt < sizeof...(Param) + 1)
                     return {};
@@ -150,7 +150,7 @@ namespace Meta
                 return false;
             }
 
-            Any Invoke (Any *args, u32 cnt) const override
+            Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 if (cnt < sizeof...(Param) + 1)
                     return {};
@@ -210,7 +210,7 @@ namespace Meta
                 return true;
             }
 
-            Any Invoke (Any *args, u32 cnt) const override
+            Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 if (cnt < sizeof...(Param) + 1)
                     return {};

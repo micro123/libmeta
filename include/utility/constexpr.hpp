@@ -52,17 +52,16 @@ namespace Meta
         {
             constexpr auto fname  = WrappedFunctionName<T> ();
             constexpr auto pos    = PrefixLength ();
+#ifdef _MSC_VER
             constexpr auto space = fname.find(' ', pos);
             if constexpr (space - pos <= 6) // enum  class struct union
             {
                 constexpr auto length = fname.length() - space - 1 - SuffixLength();
                 return fname.substr(space + 1, length);
             }
-            else
-            {
-                constexpr auto length = fname.length () - pos - SuffixLength ();
-                return fname.substr (pos, length);
-            }
+#endif
+            constexpr auto length = fname.length () - pos - SuffixLength ();
+            return fname.substr (pos, length);
         }
     }  // namespace details
 
