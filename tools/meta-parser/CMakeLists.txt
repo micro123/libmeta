@@ -12,7 +12,7 @@ find_package(Clang REQUIRED)
 
 # import LLVM CMake functions
 # include(AddLLVM)
-find_library(CLANG_LIBRARY NAMES libclang PATHS ${LLVM_LIBRARY_DIRS})
+find_library(CLANG_LIBRARY NAMES libclang clang PATHS ${LLVM_LIBRARY_DIRS})
 
 # dump_cmake_variables(LLVM)
 

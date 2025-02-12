@@ -109,7 +109,7 @@ namespace Meta
             {
                 static AnyOps ops {
                         .Destroy = +[] (void *data) { delete static_cast<T *> (data); },
-                        .Clone   = +[] (void *, void *data) -> void* { return new T {*static_cast<T *> (data)}; },
+                        .Clone   = +[] (void *, void *data) -> void * { return new T {*static_cast<T *> (data)}; },
                         .Equal   = &AnyOps::IsEqual<T>,
                         .Less    = &AnyOps::IsLess<T>,
                 };
@@ -121,7 +121,7 @@ namespace Meta
             {
                 static AnyOps ops {
                         .Destroy = +[] (void *data) { static_cast<T *> (data)->~T (); },
-                        .Clone   = +[] (void *stack, void *data) -> void* { return new (stack) T {*static_cast<T *> (data)}; },
+                        .Clone   = +[] (void *stack, void *data) -> void * { return new (stack) T {*static_cast<T *> (data)}; },
                         .Equal   = &AnyOps::IsEqual<T>,
                         .Less    = &AnyOps::IsLess<T>,
                 };
@@ -132,10 +132,10 @@ namespace Meta
             static AnyOps OfPtr ()
             {
                 static AnyOps ops {
-                        .Construct = +[] (void *stack, void *data) -> void* { return *(void**)data; },
-                        .Clone     = +[] (void *stack, void *data) -> void* { return data; },
-                        .Equal   = &AnyOps::IsEqual<T>,
-                        .Less    = &AnyOps::IsLess<T>,
+                        .Construct = +[] (void *stack, void *data) -> void * { return *(void**)data; },
+                        .Clone     = +[] (void *stack, void *data) -> void * { return data; },
+                        .Equal     = &AnyOps::IsEqual<T>,
+                        .Less      = &AnyOps::IsLess<T>,
                 };
                 return ops;
             }
@@ -146,10 +146,10 @@ namespace Meta
                 static AnyOps ops {
                         .Construct = +[] (void *stack, void *data) -> void * { return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
                         .Destroy   = +[] (void *data) { static_cast<Ref<T> *> (data)->~Ref (); },
-                        .Clone     = +[] (void *stack, void *data) -> void     *{ return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
-                        .Get       = +[] (void *data) -> void       *{ return static_cast<Ref<T> *> (data)->Get (); },
-                        .Equal   = &AnyOps::IsEqual<T>,
-                        .Less    = &AnyOps::IsLess<T>,
+                        .Clone     = +[] (void *stack, void *data) -> void * { return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
+                        .Get       = +[] (void *data) -> void * { return static_cast<Ref<T> *> (data)->Get (); },
+                        .Equal     = &AnyOps::IsEqual<T>,
+                        .Less      = &AnyOps::IsLess<T>,
                 };
                 return ops;
             }

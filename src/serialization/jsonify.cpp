@@ -3,7 +3,6 @@
 #include <refl/field.hpp>
 
 #include <nlohmann/json.hpp>
-#include <format>
 
 using namespace nlohmann;
 
@@ -45,7 +44,7 @@ static bool FromJson(const Meta::Any& obj, const json &content)
             FromJson(x->Get(&obj), content[x->Name()]);
         }
     }
-    return false;
+    return true;
 }
 
 bool Meta::JsonDeserialize(const Any& obj, const Meta::str& value)

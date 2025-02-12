@@ -7,6 +7,7 @@
 #include <refl/constant.hpp>
 
 #include <serialization/jsonify.hpp>
+#include <serialization/xml.hpp>
 #include "lib.hpp"
 
 static void PrintType(const Meta::TypePtr &ptr)
@@ -55,7 +56,8 @@ int main(int argc, char const *argv[])
         return true;
     });
 
-    Meta::Any test = MyClass();
-    std::cout << Meta::JsonSerialize(test) << std::endl;
+    Meta::Any test = MyClass("你好");
+    std::cout << Meta::JsonSerialize(test,true) << std::endl;
+    std::cout << Meta::XmlSerialize(test,true) << std::endl;
     return 0;
 }

@@ -4,7 +4,6 @@
 #include "refl/fwd.hpp"
 #include <string>
 
-
 namespace Meta
 {
     class Any;
