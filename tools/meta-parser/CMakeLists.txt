@@ -12,11 +12,13 @@ find_package(Clang REQUIRED)
 
 # import LLVM CMake functions
 # include(AddLLVM)
-find_library(CLANG_LIBRARY NAMES clang PATHS ${LLVM_LIBRARY_DIRS})
+find_library(CLANG_LIBRARY NAMES libclang PATHS ${LLVM_LIBRARY_DIRS})
+
+# dump_cmake_variables(LLVM)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CLANG_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CLANG_LIBRARY} libmeta_headers)
 target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
@@ -24,6 +26,17 @@ target_include_directories(
   ${LLVM_INCLUDE_DIRS}
   ${CLANG_INCLUDE_DIRS}
 )
+
+if (WIN32)
+  add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${LLVM_TOOLS_BINARY_DIR}/libclang.dll"
+      $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copy libclang.dll to ${PROJECT_NAME}'s binary direcotry"
+  )
+endif ()
 
 # message(STATUS "${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS} ${CLANG_LIBRARY}")
 

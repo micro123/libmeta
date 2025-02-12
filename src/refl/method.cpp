@@ -32,5 +32,5 @@ Meta::Any Meta::Method::ParameterDefault (u32 index) const
 }
 
 void Meta::Method::AddParam (sview name, TypeId type_id, Any def) {
-    params_.emplace_back(name, type_id, std::move(def));
+    params_.emplace_back(name, std::move(type_id), std::move(def));
 }
