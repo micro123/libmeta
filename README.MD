@@ -1,7 +1,5 @@
 # libmeta
-
 Just for fun and learning.
-
 A c++ runtime reflection library.
 
 ## Dependencies
@@ -21,4 +19,10 @@ A c++ runtime reflection library.
 see `example` folder.
 > TODO: More documents
 
-## Happy coding~~~
+## TODO LIST
+- Add default parameter support to `meta-parser`
+- Use older c++ standard (maybe 11?)
+- Add more unit tests
+- And more
+
+## Happy coding ~~~
