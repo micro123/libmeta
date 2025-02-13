@@ -15,6 +15,7 @@ else()
   set(LIBMETA_IS_ROOT_PROJECT OFF)
 endif()
 option(BUILD_TESTS "build unit tests" ${LIBMETA_IS_ROOT_PROJECT})
+option(BUILD_EXAMPLE "build example" ${LIBMETA_IS_ROOT_PROJECT})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   message(STATUS "using clang compiler")
@@ -47,7 +48,9 @@ target_include_directories(libmeta_headers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 add_subdirectory(src)
 add_subdirectory(tools)
 
-add_subdirectory(example)
+if (BUILD_EXAMPLE)
+  add_subdirectory(example)
+endif ()
 
 if (BUILD_TESTS)
   enable_testing()
