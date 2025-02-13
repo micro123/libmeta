@@ -13,7 +13,9 @@ TEST_CASE ("Serialization")
             float x, y, z;
         };
         float data[3];
-        bool operator==(const Vec3f& o) const = default;
+        bool operator==(const Vec3f& o) const {
+            return memcmp(this, &o, sizeof(Vec3f)) == 0;
+        }
     };
 
     struct Test {

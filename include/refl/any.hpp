@@ -176,18 +176,6 @@ namespace Meta
             ConstructValue (std::move (value));
         }
 
-        // Pointer
-        // template <typename T>
-        // Any (T *ptr)
-        // {
-        //     ConstructPointer (ptr);
-        // }
-
-        // Any (cstr s)
-        // {
-        //     ConstructValue (s);
-        // }
-
         // Ref<T>
         template <typename T>
         Any (Ref<T> ref)
@@ -209,19 +197,6 @@ namespace Meta
             ConstructValue (t);
             return *this;
         }
-        // template <typename T>
-        // Any &operator= (T *ptr)
-        // {
-        //     Destroy ();
-        //     ConstructPointer (ptr);
-        //     return *this;
-        // }
-        // Any &operator= (cstr s)
-        // {
-        //     Destroy ();
-        //     ConstructValue (s);
-        //     return *this;
-        // }
         template <typename T>
         Any &operator= (Ref<T> ref)
         {  // Const Ref
