@@ -27,26 +27,31 @@ namespace Meta
             {
                 return std::is_const_v<T>;
             }
+            bool IsArray() const override
+            {
+                return false;
+            }
             TypePtr Type () const override
             {
                 return TypeOf<T> ();
             }
 
-            Any Get (const Any *) const override
+            Any Get (const Any *, u32 index) const override
             {
                 // assert(Type() == object->Type());
                 return ptr_;
             }
-            Any Set (const Any *, Any value) const override
+            Any Set (const Any *, Any value, u32 index) const override
             {
                 // assert(Type() == object->Type());
                 if constexpr (std::is_const_v<T>)
                 {
-                    return Get (nullptr);
+                    return Get (nullptr, index);
                 }
                 else
                 {
-                    return *ptr_ = value.ValueRef<T> ();
+                    *ptr_ = value.ValueRef<T> ();
+                    return Get (nullptr, index);
                 }
             }
 
@@ -80,28 +85,33 @@ namespace Meta
             {
                 return std::is_const_v<T>;
             }
+            bool IsArray() const override
+            {
+                return false;
+            }
             TypePtr Type () const override
             {
                 return TypeOf<T> ();
             }
 
-            Any Get (const Any *object) const override
+            Any Get (const Any *object, u32 index) const override
             {
                 // assert(Type() == object->Type());
                 auto t_obj = (M_T*) object->ValuePtr<void> ();
                 return &(t_obj->*ptr_);
             }
-            Any Set (const Any *object, Any value) const override
+            Any Set (const Any *object, Any value, u32 index) const override
             {
                 // assert(Type() == object->Type());
                 auto t_obj = (M_T *) object->ValuePtr<void> ();
                 if constexpr (std::is_const_v<T>)
                 {
-                    return Get (object);
+                    return Get (object, index);
                 }
                 else
                 {
-                    return t_obj->*ptr_ = value.ValueRef<T> ();
+                    t_obj->*ptr_ = value.ValueRef<T> ();
+                    return Get (object, index);
                 }
             }
 

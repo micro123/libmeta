@@ -6,29 +6,36 @@ struct Simple {
     const int        y;
     static int       z;
     static const int w;
+    int a[10];
+    const int b[10];
+    static int c[10];
+    static const int d[10];
 };
 
 int       Simple::z = 21;
 const int Simple::w = 42;
+int       Simple::c[10] = {21};
+const int Simple::d[10] = {42};
 
 TEST_CASE ("MakeField")
 {
-    auto x = Meta::MakeField ("x", &Simple::x);
-    REQUIRE (x != nullptr);
-    REQUIRE (x->IsMember ());
-    REQUIRE (!x->IsConst ());
-    auto y = Meta::MakeField ("y", &Simple::y);
-    REQUIRE (y != nullptr);
-    REQUIRE (y->IsMember ());
-    REQUIRE (y->IsConst ());
-    auto z = Meta::MakeField ("z", &Simple::z);
-    REQUIRE (z != nullptr);
-    REQUIRE (!z->IsMember ());
-    REQUIRE (!z->IsConst ());
-    auto w = Meta::MakeField ("w", &Simple::w);
-    REQUIRE (w != nullptr);
-    REQUIRE (!w->IsMember ());
-    REQUIRE (w->IsConst ());
+#define FIELD_TEST(name, m, c, a) \
+    do {\
+        auto name = Meta::MakeField(#name, &Simple::name); \
+        REQUIRE(name != nullptr); \
+        REQUIRE(name->IsMember() == m); \
+        REQUIRE(name->IsConst() == c); \
+        REQUIRE(name->IsArray() == a); \
+    } while (0)
+
+    FIELD_TEST(x, true, false, false);
+    FIELD_TEST(y, true, true, false);
+    FIELD_TEST(z, false, false, false);
+    FIELD_TEST(w, false, true, false);
+    FIELD_TEST(a, true, false, true);
+    FIELD_TEST(b, true, true, true);
+    FIELD_TEST(c, false, true, true);
+    FIELD_TEST(d, false, true, true);
 }
 
 TEST_CASE ("ReadField")
