@@ -14,8 +14,8 @@ struct Simple {
 
 int       Simple::z = 21;
 const int Simple::w = 42;
-int       Simple::c[10] = {21};
-const int Simple::d[10] = {42};
+int       Simple::c[10] = {1,2,3,4,5,6,7,8,9,0};
+const int Simple::d[10] = {1,2,3,4,5,6,7,8,9,0};
 
 TEST_CASE ("MakeField")
 {
@@ -34,7 +34,7 @@ TEST_CASE ("MakeField")
     FIELD_TEST(w, false, true, false);
     FIELD_TEST(a, true, false, true);
     FIELD_TEST(b, true, true, true);
-    FIELD_TEST(c, false, true, true);
+    FIELD_TEST(c, false, false, true);
     FIELD_TEST(d, false, true, true);
 }
 
@@ -50,9 +50,13 @@ TEST_CASE ("ReadField")
     char buffer[sizeof(&ii)];
     auto pii = new(buffer) int* {&ii};
 
-    Meta::Any anyi = &ii;
+    Meta::Any anyi = Meta::Any::RefWrap(&ii);
     auto pi = anyi.ValuePtr<int>();
     REQUIRE((anyi == ii));
+
+    int (*ppp)[] = &Simple::c;
+    int (Simple::*ooo)[] = &Simple::a;
+
 
 
     Meta::Any i;

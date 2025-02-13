@@ -7,9 +7,12 @@
 
 TEST_CASE ("Serialization")
 {
-    struct Vec3f
+    union Vec3f
     {
-        float x, y, z;
+        struct {
+            float x, y, z;
+        };
+        float data[3];
         bool operator==(const Vec3f& o) const = default;
     };
 
@@ -24,6 +27,7 @@ TEST_CASE ("Serialization")
     .AddField (Meta::MakeField ("x", &Vec3f::x))
     .AddField (Meta::MakeField ("y", &Vec3f::y))
     .AddField (Meta::MakeField ("z", &Vec3f::z))
+    .AddField (Meta::MakeField ("data", &Vec3f::data))
     .Register ();
 
     (void)Meta::TypeBuilder::NewTypeBuilder<Test>("Test")

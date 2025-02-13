@@ -9,6 +9,11 @@
 LIB_API
 void sayHello();
 
+STRUCT(LIB_API SomeData, Enabled, Fields)
+{
+    int a, b, c, d;
+};
+
 CLASS(LIB_API MyClass, Enabled, All)
 {
     REFL_BODY(MyClass)
@@ -26,7 +31,9 @@ public:
 
 private:
     int a, b, c;
+    double dd[5];
     std::string name_;
+    SomeData data_;
 };
 
 namespace Foo::Bar {

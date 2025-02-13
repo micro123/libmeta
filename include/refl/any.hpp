@@ -177,16 +177,16 @@ namespace Meta
         }
 
         // Pointer
-        template <typename T>
-        Any (T *ptr)
-        {
-            ConstructPointer (ptr);
-        }
+        // template <typename T>
+        // Any (T *ptr)
+        // {
+        //     ConstructPointer (ptr);
+        // }
 
-        Any (cstr s)
-        {
-            ConstructValue (s);
-        }
+        // Any (cstr s)
+        // {
+        //     ConstructValue (s);
+        // }
 
         // Ref<T>
         template <typename T>
@@ -209,19 +209,19 @@ namespace Meta
             ConstructValue (t);
             return *this;
         }
-        template <typename T>
-        Any &operator= (T *ptr)
-        {
-            Destroy ();
-            ConstructPointer (ptr);
-            return *this;
-        }
-        Any &operator= (cstr s)
-        {
-            Destroy ();
-            ConstructValue (s);
-            return *this;
-        }
+        // template <typename T>
+        // Any &operator= (T *ptr)
+        // {
+        //     Destroy ();
+        //     ConstructPointer (ptr);
+        //     return *this;
+        // }
+        // Any &operator= (cstr s)
+        // {
+        //     Destroy ();
+        //     ConstructValue (s);
+        //     return *this;
+        // }
         template <typename T>
         Any &operator= (Ref<T> ref)
         {  // Const Ref
@@ -325,6 +325,13 @@ namespace Meta
         static Any New (Args &&...args)
         {
             return Any (MakeRef<T> (std::forward<Args> (args)...));
+        }
+
+        template <typename T>
+        static Any RefWrap(T *obj, std::enable_if_t<!std::is_same_v<T, cstr>>* = nullptr) {
+            Any result;
+            result.ConstructPointer(obj);
+            return result;
         }
 
         Any operator() (Any *args, size_t cnt) const;

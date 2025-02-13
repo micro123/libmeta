@@ -18,7 +18,16 @@ static json ToJson(const Meta::Any &value)
         nlohmann::json result = nlohmann::json::object();
         for (auto &x: fields) {
             if (x->IsMember()) {
-                result[x->Name()] = ToJson(x->Get(&value));
+                const u32 cnt = x->Count();
+                if (cnt <= 1)
+                    result[x->Name()] = ToJson(x->Get(&value));
+                else
+                {
+                    auto &a = (result[x->Name()] = json::array());
+                    for (u32 i=0; i<x->Count(); ++i) {
+                        a.push_back(ToJson(x->Get(&value, i)));
+                    }
+                }
             }
         }
         return result;
@@ -41,7 +50,15 @@ static bool FromJson(const Meta::Any& obj, const json &content)
     }
     for (auto &x: fields) {
         if (x->IsMember()) {
-            FromJson(x->Get(&obj), content[x->Name()]);
+            const u32 cnt = x->Count();
+            if (cnt <= 1) {
+                FromJson(x->Get(&obj), content[x->Name()]);
+            } else {
+                json arr = content[x->Name()];
+                for (u32 i=0; i<cnt; ++i) {
+                    FromJson(x->Get(&obj, i), arr[i]);
+                }
+            }
         }
     }
     return true;
