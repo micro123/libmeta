@@ -21,6 +21,16 @@
 
 #elif __GNUC__ || __clang__
 
+#define STORE_SECTION_(name) __attribute__((section(name),used))
+#define DEFINE_SECTION(name)
+#define STORE_SECTION(name) STORE_SECTION_(#name)
+#define ALIGNED(N) __attribute__((aligned(N)))
+#define SECTION_VARIABLES(name, type) \
+extern const type __start_##name; \
+extern const type __stop_##name
+#define EMPTY_SECTION(name, type) \
+static const type STORE_SECTION(name) VARNAME(empty) {}
+
 #else
 #error "Unsupported compiler"
 #endif
@@ -32,9 +42,14 @@ struct ALIGNED(sizeof(void*)) FuncReg {
     FuncReg(void(*f)(void*) = nullptr, int p = 999) : func(f), priority(p) {}
 };
 
+#if __cplusplus
+extern "C" {
+#endif
+
 DEFINE_SECTION (reg)
 SECTION_VARIABLES(reg, FuncReg);
 void call_all(const FuncReg* begin, const FuncReg* end);
 
+}
 
 #endif /* CUSTOM_SECTIONS_HPP */

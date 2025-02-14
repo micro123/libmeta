@@ -41,7 +41,7 @@ std::vector<const char *> ParseCompileOptions (const char **first)
             start = pos;
             pos = strstr(start+2, "-I");
         }
-        if (start < end) {
+        if (start + 2 < end) {
             args.emplace_back(start);
         }
     }
@@ -58,7 +58,7 @@ std::vector<const char *> ParseCompileOptions (const char **first)
             start = pos;
             pos = strstr(start+2, "-D");
         }
-        if (start < end) {
+        if (start + 2 < end) {
             args.emplace_back(start);
         }
     }
