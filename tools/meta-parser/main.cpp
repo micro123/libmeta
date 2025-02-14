@@ -30,8 +30,8 @@ int main(int argc, char const *argv[])
         return 1;
     
     // dump cmdl
-    printf(R"(%s "%s" "%s" "%s" "%s" "%s")", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-    printf("\n");
+    // printf(R"(%s "%s" "%s" "%s" "%s" "%s")", argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+    // printf("\n");
     
     auto const args = ParseCompileOptions(argv + 3);
     auto const files = ParseHeaderPairFile(argv[1]);

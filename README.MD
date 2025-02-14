@@ -23,6 +23,8 @@ see `example` folder.
 - Add default parameter support to `meta-parser`
 - Use older c++ standard (maybe c++11?)
 - Add construct method to type
+- Add overloaded method support
+- Add base class records & converter
 - Add custom properties to field
 - Add more unit tests
 - And more
