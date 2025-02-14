@@ -22,7 +22,6 @@ macro(single_file_test name)
   AddTest(NAME ${name} SRC ${name}_test.cpp LINK libmeta libmeta_headers)
 endmacro()
 
-single_file_test(foo)
 single_file_test(constexpr)
 single_file_test(typeid)
 single_file_test(registry)

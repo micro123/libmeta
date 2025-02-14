@@ -210,7 +210,7 @@ namespace Meta
         template <typename T>
         T *ValuePtr () const
         {
-            assert (Valid ());
+            assert (IsValid ());
             if constexpr (std::is_same_v<void, T>)
             {
                 return Get ();
@@ -228,7 +228,7 @@ namespace Meta
         template <typename T>
         T &ValueRef () const
         {
-            assert (Valid ());
+            assert (IsValid ());
             if (type_id_ != GetTypeId<T> ())
                 throw std::bad_cast ();
             return *static_cast<T *> (Get ());
@@ -237,7 +237,7 @@ namespace Meta
         template <typename T>
         T Value () const
         {
-            assert (Valid ());
+            assert (IsValid ());
             if (type_id_ != GetTypeId<T> ())
             {
                 // type must be not null
@@ -272,24 +272,24 @@ namespace Meta
             return Value<T> ();
         }
 
-        [[nodiscard]] inline bool Valid () const noexcept
+        [[nodiscard]] inline bool IsValid () const noexcept
         {
             return type_id_ != NULL_TYPE_ID;
         }
 
         [[nodiscard]] operator bool () const noexcept
         {
-            return Valid ();
+            return IsValid ();
         }
 
         bool operator== (decltype (nullptr)) const noexcept
         {
-            return !Valid ();
+            return !IsValid ();
         }
 
         bool operator!= (decltype (nullptr)) const noexcept
         {
-            return Valid ();
+            return IsValid ();
         }
 
         [[nodiscard]] TypePtr Type () const;
@@ -309,14 +309,19 @@ namespace Meta
             return result;
         }
 
-        Any operator() (Any *args, size_t cnt) const;
-
-        template <typename... Args>
+        template <typename ... Args>
         Any operator() (Args &&...args) const
         {
-            Any arg_arr[] = {std::forward<Args> (args)..., {}};
-            return (*this) (&arg_arr[0], sizeof...(Args));
+            return Call(std::forward<Args>(args)...);
         }
+
+        template <typename ... Args>
+        Any Call(Args &&...args) const {
+            Any arg_arr[] = {std::forward<Args> (args)..., {}};
+            return this->CallWithArgs(&arg_arr[0], sizeof...(Args));
+        }
+
+        Any CallWithArgs(Any *args, size_t argc) const;
 
         template <typename T>
         bool operator== (const T &t) const
@@ -334,7 +339,7 @@ namespace Meta
         {
             if (type_id_ == other.type_id_)
             {
-                if (Valid ())
+                if (IsValid ())
                 {
                     return ops_.Equal (Get (), other.Get ());
                 }
@@ -411,5 +416,8 @@ namespace Meta
         details::AnyOps     ops_;
     };
 }  // namespace Meta
+
+LIBMETA_API
+std::ostream &operator<< (std::ostream &o, const Meta::Any &any);
 
 #endif /* LIBMETA_VARIANT_HPP */

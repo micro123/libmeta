@@ -77,11 +77,26 @@ Meta::TypePtr Meta::Any::Type () const
 {
     return TypeOf (type_id_);
 }
-Meta::Any Meta::Any::operator() (Any *args, size_t cnt) const
+Meta::Any Meta::Any::CallWithArgs (Meta::Any *args, size_t cnt) const
 {
-    // 需要是函数才能调用
+    // 1. this is a method
     if (auto m = ValuePtr<Method>()) {
         return m->InvokeWithArgs(args, cnt);
+    }
+    // 2. cnt >= 1 and args[0] is method name
+    else if (cnt >= 1)
+    {
+        str method_name = args[0].Value<str>();
+        auto type = Type();
+        if (type)
+        {
+            if (auto m = type->GetMethod(method_name))
+            {
+                // replace args[0] with this
+                args[0] = *this;
+                return m->InvokeWithArgs(args, cnt);
+            }
+        }
     }
     return {};
 }
@@ -98,7 +113,7 @@ void Meta::Any::Destroy () const
 }
 void Meta::Any::Assign (const Any &any)
 {
-    if (any.Valid ())
+    if (any.IsValid ())
     {
         type_id_ = any.type_id_;
         ops_     = any.ops_;
@@ -108,7 +123,7 @@ void Meta::Any::Assign (const Any &any)
 }
 void Meta::Any::Assign (Any &&any)
 {
-    if (any.Valid ())
+    if (any.IsValid ())
     {
         type_id_ = any.type_id_;
         ops_     = any.ops_;
@@ -135,7 +150,7 @@ bool Meta::AnyCast(const Any &in, TypeId src, Any& out, TypeId dst)
     if (g_fundamental_cast_ops.find(key) != end(g_fundamental_cast_ops))
     {
         out = g_fundamental_cast_ops.at(key)(in);
-        return out.Valid();
+        return out.IsValid();
     }
 
     // 2. use converter from type
@@ -146,4 +161,8 @@ bool Meta::AnyCast(const Any &in, TypeId src, Any& out, TypeId dst)
     return type->CanCast(dst) && type->Cast(in, out, dst);
 }
 
-constexpr size_t any_size = sizeof(Meta::Any);
+std::ostream &operator<< (std::ostream &o, const Meta::Any &any)
+{
+    o << any.Value<Meta::str>();
+    return o;
+}

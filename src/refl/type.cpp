@@ -100,5 +100,5 @@ bool Meta::Type::CanCast (TypeId dst) const
 bool Meta::Type::Cast (const Any &obj, Any &out, TypeId dst) const
 {
     out = cast_ops_.at (dst) (obj);
-    return out.Valid ();
+    return out.IsValid ();
 }

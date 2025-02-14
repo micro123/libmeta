@@ -78,4 +78,6 @@ TEST_CASE ("String Types")
     auto l = t->GetMethod("Length");
     auto len = l->Invoke(cStr);
     REQUIRE(len.Value<u32>() == 11);
+    REQUIRE((cStr("Length") == 11));
+    std::cout << cStr("Length") << std::endl;
 }
