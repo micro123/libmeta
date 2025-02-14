@@ -29,3 +29,5 @@ set_target_properties(
     PROPERTIES
     OUTPUT_NAME "meta"
 )
+
+source_tree(LIB_SOURCES)

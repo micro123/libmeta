@@ -16,6 +16,7 @@ function(AddTest)
     ${name} PROPERTIES
     FOLDER "Unit Tests"
   )
+  source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${arg_add_test_SRC})
 endfunction()
 
 macro(single_file_test name)

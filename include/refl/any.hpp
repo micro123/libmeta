@@ -1,6 +1,7 @@
 #ifndef LIBMETA_VARIANT_HPP
 #define LIBMETA_VARIANT_HPP
 
+#include <ostream>
 #include <stdexcept>
 #include <typeinfo>
 #include <utility>

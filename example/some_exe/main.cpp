@@ -9,6 +9,7 @@
 #include <serialization/jsonify.hpp>
 #include <serialization/xml.hpp>
 #include "lib.hpp"
+#include "custom_sections.hpp"
 
 static void PrintType(const Meta::TypePtr &ptr)
 {
@@ -50,6 +51,8 @@ static void PrintType(const Meta::TypePtr &ptr)
 
 int main(int argc, char const *argv[])
 {
+    call_all(&__start_reg, &__stop_reg);
+
     Meta::Registry::Instance ().VisitTypes ([](Meta::TypeId tid, Meta::TypePtr type) -> bool {
         std::cout << std::format("type {} has id {}\n", type->Name (), tid.operator std::string());
         PrintType(type);

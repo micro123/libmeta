@@ -1,6 +1,7 @@
 project(meta-parser C CXX)
 
 file(GLOB_RECURSE SRC_FILES *.*)
+source_tree(SRC_FILES)
 
 find_package(Clang REQUIRED)
 
@@ -52,6 +53,7 @@ endif ()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/system_include.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
 target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
+source_group("Generated Code" FILES ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
 
 # 注册目标需要生成反射代码
 function(meta_codegen tgt)
@@ -70,6 +72,7 @@ function(meta_codegen tgt)
       list(APPEND ALL_HEADERS ${file})
     endif ()
   endforeach()
+  message(STATUS "Target ${tgt} headers: ${ALL_HEADERS}")
   # 3. 判断是否需要生成代码
   if (ALL_HEADERS)
     # set(cmp_opts "${BIN_DIR}/compile_options.txt")
