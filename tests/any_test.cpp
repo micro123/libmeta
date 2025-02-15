@@ -1,6 +1,7 @@
 #include <catch_amalgamated.hpp>
 #include <refl/any.hpp>
 #include <refl/method.hpp>
+#include "refl/builders.hpp"
 
 TEST_CASE ("Any Basic")
 {
@@ -59,4 +60,26 @@ TEST_CASE("Any Callable") {
     Meta::Any p = Meta::MakeMethod("print", &print);
     auto r = p(42);
     REQUIRE(r == 42 + 42);
+}
+
+TEST_CASE ("Any Child & Subscript")
+{
+    struct ABC
+    {
+        int x = 1;
+        int y[5] = {1, 2, 3, 4, 5};
+    };
+
+    using namespace Meta;
+    (void)TypeBuilder::NewTypeBuilder<ABC> ()
+    .AddField (MakeField ("x", &ABC::x))
+    .AddField (MakeField ("y", &ABC::y))
+    .Register ();
+
+    Any a = ABC();
+    REQUIRE((a["x"] == 1));
+    REQUIRE((a["y"] == 1));
+    Any y = a["y"];
+    Any z = y[1];
+    REQUIRE(z == 2);
 }

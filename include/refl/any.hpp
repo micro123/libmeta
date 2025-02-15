@@ -94,6 +94,12 @@ namespace Meta
                 }
                 return ta < tb;
             }
+            template <typename T>
+            static void *Subscript(void *base, u32 idx)
+            {
+                auto p = static_cast<u8 *> (base);
+                return p + idx * sizeof (T);
+            }
 
         public:
 
@@ -103,10 +109,11 @@ namespace Meta
             void *(*Get) (void *)               = nullptr;
             bool (*Equal) (void *, void *)      = nullptr;
             bool (*Less) (void *, void *)       = nullptr;
+            void *(*At) (void *, u32)           = nullptr;
 
             // helpers
             template <typename T>
-            static AnyOps Of (std::enable_if_t<(sizeof (BufferView) < sizeof (T))> * = nullptr)
+            static const AnyOps* Of (std::enable_if_t<(sizeof (BufferView) < sizeof (T))> * = nullptr) // for big objects
             {
                 static AnyOps ops {
                         .Destroy = +[] (void *data) { delete static_cast<T *> (data); },
@@ -114,11 +121,11 @@ namespace Meta
                         .Equal   = &AnyOps::IsEqual<T>,
                         .Less    = &AnyOps::IsLess<T>,
                 };
-                return ops;
+                return &ops;
             }
 
             template <typename T>
-            static AnyOps Of (std::enable_if_t<(sizeof (BufferView) >= sizeof (T))> * = nullptr)
+            static const AnyOps* Of (std::enable_if_t<(sizeof (BufferView) >= sizeof (T))> * = nullptr) // for small objects
             {
                 static AnyOps ops {
                         .Destroy = +[] (void *data) { static_cast<T *> (data)->~T (); },
@@ -126,23 +133,25 @@ namespace Meta
                         .Equal   = &AnyOps::IsEqual<T>,
                         .Less    = &AnyOps::IsLess<T>,
                 };
-                return ops;
+                return &ops;
             }
 
             template <typename T>
-            static AnyOps OfPtr ()
+            static const AnyOps* OfPtr () // for reference
             {
                 static AnyOps ops {
-                        .Construct = +[] (void *stack, void *data) -> void * { return *(void**)data; },
-                        .Clone     = +[] (void *stack, void *data) -> void * { return data; },
+                        .Construct = +[] (void *stack, void *data) -> void * { *static_cast<void **> (stack) = *static_cast<void **> (data); return stack; },
+                        .Clone     = +[] (void *stack, void *data) -> void * { *static_cast<void **> (stack) = data; return stack; },
+                        .Get       = +[] (void *data) -> void * { return *static_cast<void **> (data); },
                         .Equal     = &AnyOps::IsEqual<T>,
                         .Less      = &AnyOps::IsLess<T>,
+                        .At        = &AnyOps::Subscript<T>,
                 };
-                return ops;
+                return &ops;
             }
 
             template <typename T>
-            static AnyOps OfRef ()
+            static const AnyOps* OfRef () // special for ref<T>
             {
                 static AnyOps ops {
                         .Construct = +[] (void *stack, void *data) -> void * { return new (stack) Ref<T> {*static_cast<Ref<T> *> (data)}; },
@@ -152,10 +161,10 @@ namespace Meta
                         .Equal     = &AnyOps::IsEqual<T>,
                         .Less      = &AnyOps::IsLess<T>,
                 };
-                return ops;
+                return &ops;
             }
 
-            static AnyOps Empty ();
+            static const AnyOps* Empty ();
         };
     }  // namespace details
 
@@ -262,13 +271,13 @@ namespace Meta
         }
 
         template <typename T>
-        [[nodiscard]] inline operator T * () const
+        [[nodiscard]] explicit inline operator T * () const
         {
             return ValuePtr<T> ();
         }
 
         template <typename T>
-        [[nodiscard]] inline operator T () const
+        [[nodiscard]] explicit inline operator T () const
         {
             return Value<T> ();
         }
@@ -278,7 +287,7 @@ namespace Meta
             return type_id_ != NULL_TYPE_ID;
         }
 
-        [[nodiscard]] operator bool () const noexcept
+        [[nodiscard]] explicit operator bool () const noexcept
         {
             return IsValid ();
         }
@@ -304,9 +313,9 @@ namespace Meta
         }
 
         template <typename T>
-        static Any RefWrap(T *obj, std::enable_if_t<!std::is_same_v<T, cstr>>* = nullptr) {
+        static Any RefWrap(T *obj, size_t cnt = 1, std::enable_if_t<!std::is_same_v<T, cstr>>* = nullptr) {
             Any result;
-            result.ConstructPointer(obj);
+            result.ConstructPointer(obj, cnt);
             return result;
         }
 
@@ -342,7 +351,7 @@ namespace Meta
             {
                 if (IsValid ())
                 {
-                    return ops_.Equal (Get (), other.Get ());
+                    return ops_->Equal (Get (), other.Get ());
                 }
             }
             return false;
@@ -353,9 +362,15 @@ namespace Meta
             return !(*this == other);
         }
 
+        Any operator[](str key) const;
+
+        Any operator[](size_t index) const;
+
     private:
         // special ctor
         explicit Any (TypeId tid);
+
+        Any (void *data, const TypeId& tid, const details::AnyOps *ops);
 
         // MARK: Helpers
         [[nodiscard]] bool IsSmallObj () const
@@ -378,14 +393,16 @@ namespace Meta
             {
                 data_ = new T {std::move (t)};
             }
+            cnt_ = 1;
         }
 
         template <typename T>
-        void ConstructPointer (T *ptr)
+        void ConstructPointer (T *ptr, u32 cnt)
         {
             type_id_ = GetTypeId<T> ();
             ops_     = details::AnyOps::OfPtr<T> ();
-            data_    = ops_.Construct (&buffer_, &ptr);
+            data_    = ops_->Construct (&buffer_, &ptr);
+            cnt_     = cnt;
         }
 
         template <typename T>
@@ -393,7 +410,8 @@ namespace Meta
         {
             type_id_ = GetTypeId<T> ();
             ops_     = details::AnyOps::OfRef<T> ();
-            data_    = ops_.Construct (&buffer_, &ref);
+            data_    = ops_->Construct (&buffer_, &ref);
+            cnt_     = 1;
         }
 
         void Assign (const Any &any);
@@ -408,13 +426,14 @@ namespace Meta
 
         [[nodiscard]] inline void *Get () const
         {
-            return ops_.Get ? ops_.Get (data_) : data_;
+            return ops_->Get ? ops_->Get (data_) : data_;
         }
 
-        details::BufferView buffer_ {};  // for small object
-        void               *data_ {};
-        TypeId              type_id_ {NULL_TYPE_ID};
-        details::AnyOps     ops_;
+        details::BufferView    buffer_ {};  // for small object
+        void                  *data_ {};
+        TypeId                 type_id_ {NULL_TYPE_ID};
+        u32                    cnt_;
+        const details::AnyOps *ops_;
     };
 }  // namespace Meta
 

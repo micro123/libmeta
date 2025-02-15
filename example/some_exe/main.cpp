@@ -62,5 +62,6 @@ int main(int argc, char const *argv[])
     Meta::Any test = MyClass("你好");
     std::cout << Meta::JsonSerialize(test,true) << std::endl;
     std::cout << Meta::XmlSerialize(test,true) << std::endl;
+    std::cout << test["dd"][0] << std::endl;
     return 0;
 }

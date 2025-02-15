@@ -54,11 +54,6 @@ TEST_CASE ("ReadField")
     auto pi = anyi.ValuePtr<int>();
     REQUIRE((anyi == ii));
 
-    int (*ppp)[] = &Simple::c;
-    int (Simple::*ooo)[] = &Simple::a;
-
-
-
     Meta::Any i;
     Meta::Any obj = Simple{1,2};
     i = x->Get(&obj);

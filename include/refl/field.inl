@@ -35,7 +35,7 @@ namespace Meta
             Any Get (const Any *, u32 index) const override
             {
                 assert (index == 0);
-                return Any::RefWrap(ptr_);
+                return Any::RefWrap(ptr_, 1);
             }
             Any Set (const Any *, Any value, u32 index) const override
             {
@@ -90,7 +90,7 @@ namespace Meta
             {
                 assert (index == 0);
                 auto t_obj = (M_T*) object->ValuePtr<void> ();
-                return Any::RefWrap(&(t_obj->*ptr_));
+                return Any::RefWrap(&(t_obj->*ptr_), 1);
             }
             Any Set (const Any *object, Any value, u32 index) const override
             {
@@ -144,7 +144,7 @@ namespace Meta
             {
                 assert (index < cnt_);
                 T* ptr = (*ptr_) + index;
-                return Any::RefWrap(ptr);
+                return Any::RefWrap(ptr, cnt_ - index);
             }
             Any Set (const Any *, Any value, u32 index) const override
             {
@@ -207,7 +207,7 @@ namespace Meta
                 assert (index < cnt_);
                 auto t_obj = (M_T *) object->ValuePtr<void> ();
                 T* ptr = (t_obj->*ptr_) + index;
-                return Any::RefWrap(ptr);
+                return Any::RefWrap(ptr, cnt_ - index);
             }
             Any Set (const Any *object, Any value, u32 index) const override
             {

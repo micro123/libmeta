@@ -50,9 +50,8 @@ function(source_tree_root root sources)
 endfunction()
 
 add_subdirectory(include)
-
-add_subdirectory(src)
 add_subdirectory(tools)
+add_subdirectory(src)
 
 if (BUILD_EXAMPLE)
   add_subdirectory(example)

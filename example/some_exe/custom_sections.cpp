@@ -1,6 +1,7 @@
 #include "custom_sections.hpp"
+#include <cstdint>
 
-EMPTY_SECTION(reg, FuncReg);
+EMPTY_SECTION (reg, FuncReg);
 
 void call_all(const FuncReg* begin, const FuncReg* end)
 {
@@ -8,6 +9,6 @@ void call_all(const FuncReg* begin, const FuncReg* end)
     for (auto x = begin; x < end; ++x)
     {
         if (x->func)
-            x->func ((void*)x->priority);
+            x->func ((void*)(uintptr_t)x->priority);
     }
 }
