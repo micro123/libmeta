@@ -9,12 +9,12 @@
 LIB_API
 void sayHello();
 
-STRUCT(LIB_API SomeData, Enabled, Fields)
+STRUCT(LIB_API SomeData,Fields)
 {
     int a, b, c, d;
 };
 
-CLASS(LIB_API MyClass, Enabled, All)
+CLASS(LIB_API MyClass,All)
 {
     REFL_BODY(MyClass)
 public:
@@ -22,7 +22,7 @@ public:
     MyClass(std::string name);
     ~MyClass();
     
-    META(Enabled)
+    META()
     void SayHello();
 
     int Test(double f) const;
@@ -37,7 +37,7 @@ private:
 };
 
 namespace Foo::Bar {
-    CLASS(Baz, Enabled) {
+    CLASS(Baz,All) {
         REFL_BODY(Baz)
     public:
         void foo(MyClass *obj) const;
@@ -46,14 +46,18 @@ namespace Foo::Bar {
         int z = 100;
     };
 
-    STRUCT(Bal, Enabled, Fields) {
+    STRUCT(Bal,All) {
         REFL_BODY(Bal)
     public:
+        enum {
+            A,B,C,D
+        };
+
         float x,y,z;
     };
 }
 
-enum CLASS(Van, Enabled, All)
+enum CLASS(Van,All)
 {
     Deep,
     Dark,

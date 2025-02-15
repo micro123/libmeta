@@ -197,21 +197,23 @@ bool AutoRegCodeGen::GenerateCode () const
     using namespace nlohmann;
     std::ofstream out(d->out_path_, std::ios::out | std::ios::trunc);
 
-    // build json
-    json data = json::object();
-    // headers
-    json headers = json::array();
-    for (const auto &header : d->headers_)
-        headers.push_back(header);
-    data["headers"] = headers;
-    // types
-    json types = json::array();
-    for (const auto &type : d->types_)
-        types.push_back(type);
-    data["types"] = types;
+    if (!d->headers_.empty() && !d->types_.empty())
+    {
+        // build json
+        json data = json::object();
+        // headers
+        json headers = json::array();
+        for (const auto &header : d->headers_)
+            headers.push_back(header);
+        data["headers"] = headers;
+        // types
+        json types = json::array();
+        for (const auto &type : d->types_)
+            types.push_back(type);
+        data["types"] = types;
 
-    render_to (out, auto_reg_template, data);
-
+        render_to (out, auto_reg_template, data);
+    }
     out.close();
     return true;
 }

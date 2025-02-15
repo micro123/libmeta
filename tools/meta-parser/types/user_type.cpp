@@ -34,20 +34,25 @@ void LanguageType::ParseDataType (const Cursor &cursor)
     auto children = cursor.Children ();
     for (auto &x: children)
     {
-        if (x.Kind () == CXCursor_FieldDecl) {
+        auto const kind = x.Kind();
+        if (kind == CXCursor_FieldDecl) {
             auto f = new Field(x, ns, this);
             if (f->ShouldCompile())
                 fields_.emplace_back (f);
             else
                 delete f;
         }
-        else if (x.Kind () == CXCursor_CXXMethod)
+        else if (kind == CXCursor_CXXMethod)
         {
             auto f = new Function(x, ns, this);
             if (f->ShouldCompile())
                 functions_.emplace_back (f);
             else
                 delete f;
+        }
+        else if (kind == CXCursor_EnumDecl)
+        {
+            ParseEnumType(x);
         }
     }
 }

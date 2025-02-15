@@ -141,7 +141,7 @@ namespace Meta
             {
                 static AnyOps ops {
                         .Construct = +[] (void *stack, void *data) -> void * { *static_cast<void **> (stack) = *static_cast<void **> (data); return stack; },
-                        .Clone     = +[] (void *stack, void *data) -> void * { *static_cast<void **> (stack) = data; return stack; },
+                        .Clone     = +[] (void *stack, void *data) -> void * { *static_cast<void **> (stack) = *static_cast<void **> (data); return stack; },
                         .Get       = +[] (void *data) -> void * { return *static_cast<void **> (data); },
                         .Equal     = &AnyOps::IsEqual<T>,
                         .Less      = &AnyOps::IsLess<T>,

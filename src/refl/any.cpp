@@ -73,7 +73,7 @@ Meta::Any &Meta::Any::operator= (const Any &var)
 Meta::Any &Meta::Any::operator= (Any &&var) noexcept
 {
     Destroy ();
-    Assign (var);
+    Assign (std::move(var));
     return *this;
 }
 Meta::TypePtr Meta::Any::Type () const
@@ -114,7 +114,7 @@ Meta::Any::Any (void *data, const TypeId& tid, const details::AnyOps *ops)
 {
     ops_ = ops;
     type_id_ = tid;
-    data_ = ops_->Clone (&buffer_, data);
+    data_ = ops_->Clone (&buffer_, &data);
     cnt_ = 1;
 }
 Meta::Any Meta::Any::operator[] (Meta::str key) const
