@@ -6,6 +6,8 @@
 #include "function.hpp"
 #include "constant.hpp"
 
+#include "utilities/clang_utils.hpp"
+
 LanguageType::LanguageType (const Namespace &ns, std::string name, const Cursor &cursor): TypeInfo (cursor, ns)
 {
     if (clang_Cursor_isAnonymous (cursor))
@@ -34,8 +36,9 @@ void LanguageType::ParseDataType (const Cursor &cursor)
     auto children = cursor.Children ();
     for (auto &x: children)
     {
+        // Print(x);
         auto const kind = x.Kind();
-        if (kind == CXCursor_FieldDecl) {
+        if (kind == CXCursor_FieldDecl || kind == CXCursor_VarDecl) {
             auto f = new Field(x, ns, this);
             if (f->ShouldCompile())
                 fields_.emplace_back (f);
@@ -44,6 +47,9 @@ void LanguageType::ParseDataType (const Cursor &cursor)
         }
         else if (kind == CXCursor_CXXMethod)
         {
+            auto name = x.DisplayName();
+            if (name.find("operator") == 0)
+                continue;
             auto f = new Function(x, ns, this);
             if (f->ShouldCompile())
                 functions_.emplace_back (f);
@@ -53,6 +59,10 @@ void LanguageType::ParseDataType (const Cursor &cursor)
         else if (kind == CXCursor_EnumDecl)
         {
             ParseEnumType(x);
+        }
+        else if ((kind == CXCursor_StructDecl || kind == CXCursor_UnionDecl) && clang_Cursor_isAnonymous(x))
+        {
+            ParseDataType(x);
         }
     }
 }

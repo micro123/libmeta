@@ -3,6 +3,9 @@
 #include <refl/method.hpp>
 #include "refl/builders.hpp"
 
+#include "types.h"
+using namespace Test;
+
 TEST_CASE ("Any Basic")
 {
     using namespace Meta;
@@ -16,21 +19,6 @@ TEST_CASE ("Any Basic")
 
 TEST_CASE ("Any Ref")
 {
-    struct Foo {
-        Foo (int x) : x (x)
-        {
-            puts ("Foo");
-        }
-        ~Foo ()
-        {
-            puts ("~Foo");
-        }
-        void print() const
-        {
-            printf("x = %d\n", x);
-        }
-        int x;
-    };
     Meta::Any a = Meta::MakeRef<Foo> (55);
     {
         auto b = a;
@@ -54,7 +42,7 @@ TEST_CASE ("Any Ref")
     }
 }
 
-int print(int x) { puts("printed!"); return 42 + x; }
+static int print(int x) { puts("printed!"); return 42 + x; }
 
 TEST_CASE("Any Callable") {
     Meta::Any p = Meta::MakeMethod("print", &print);
@@ -64,22 +52,10 @@ TEST_CASE("Any Callable") {
 
 TEST_CASE ("Any Child & Subscript")
 {
-    struct ABC
-    {
-        int x = 1;
-        int y[5] = {1, 2, 3, 4, 5};
-    };
-
-    using namespace Meta;
-    (void)TypeBuilder::NewTypeBuilder<ABC> ()
-    .AddField (MakeField ("x", &ABC::x))
-    .AddField (MakeField ("y", &ABC::y))
-    .Register ();
-
-    Any a = ABC();
+    Meta::Any a = ABC();
     REQUIRE((a["x"] == 1));
     REQUIRE((a["y"] == 1));
-    Any y = a["y"];
-    Any z = y[1];
+    Meta::Any y = a["y"];
+    Meta::Any z = y[1];
     REQUIRE(z == 2);
 }
