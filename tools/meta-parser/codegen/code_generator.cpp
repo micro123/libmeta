@@ -5,19 +5,20 @@
 #include "types/constant.hpp"
 #include "types/field.hpp"
 #include "types/function.hpp"
+#include "types/type_context.hpp"
 #include "types/user_type.hpp"
 
 class TypeCodeGen::Private
 {
 public:
-    const std::list<LanguageType> *types_;
+    const std::list<TypeContext> *contexts_;
     std::string header_;
     std::string out_path_;
 };
 
-TypeCodeGen::TypeCodeGen (std::string header, const std::list<LanguageType> &types, std::string output): d(new Private)
+TypeCodeGen::TypeCodeGen (std::string header, const std::list<TypeContext> &types, std::string output): d(new Private)
 {
-    d->types_ = &types;
+    d->contexts_ = &types;
     d->header_ = std::move(header);
     d->out_path_ = std::move(output);
 }
@@ -33,10 +34,12 @@ constexpr auto type_reg_template = R"(
 #include "{{header}}"
 
 // 3. generated body
-## for type in types
+## for ctx in contexts
 template<>
-void Meta::CodeGenFor<{{type.fullname}}>::Register() {
-    auto const r = TypeBuilder::NewTypeBuilder<{{type.fullname}}> ()
+void Meta::CodeGenFor<{{ctx.name}}>::Register() {
+## for type in ctx.types
+    // begin {{type.fullname}}
+    (void)TypeBuilder::NewTypeBuilder<{{type.fullname}}> ("{{type.name}}")
 ## for field in type.fields
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
 ## endfor
@@ -52,8 +55,13 @@ void Meta::CodeGenFor<{{type.fullname}}>::Register() {
         .Build()
     )
 ## endfor
+## if type.is_enum
+    .AddEnumOperations<{{type.fullname}}>()
+## endif
     .Register();
-    (void)r;
+    // end {{type.fullname}}
+
+## endfor
 };
 
 ## endfor
@@ -98,6 +106,7 @@ static nlohmann::json BuildType(const LanguageType &type)
     json t = json::object();
     t["fullname"] = type.FullName();
     t["name"] = type.Name();
+    t["is_enum"] = type.IsEnum();
     // constants
     json constants = json::array();
     for (auto &x: type.Constants ())
@@ -122,6 +131,20 @@ static nlohmann::json BuildType(const LanguageType &type)
     return t;
 }
 
+static nlohmann::json BuildContext (const TypeContext &tc)
+{
+    using namespace nlohmann;
+    json ctx = json::object();
+    ctx["name"] = tc.GetName ();
+    json types = json::array();
+    for (auto &x: tc.GetTypes ())
+    {
+        types.emplace_back(BuildType (x));
+    }
+    ctx["types"] = types;
+    return ctx;
+}
+
 bool TypeCodeGen::GenerateCode () const
 {
     using namespace inja;
@@ -129,15 +152,15 @@ bool TypeCodeGen::GenerateCode () const
 
     std::ofstream out(d->out_path_, std::ios::out | std::ios::trunc);
 
-    if (!d->types_->empty()) {
+    if (!d->contexts_->empty()) {
         json data = json::object();
         data["header"] = d->header_;
-        json types = json::array();
-        for (const auto &type : *d->types_)
+        json contexts = json::array();
+        for (const auto &ctx : *d->contexts_)
         {
-            types.emplace_back(BuildType (type));
+            contexts.emplace_back(BuildContext (ctx));
         }
-        data["types"] = types;
+        data["contexts"] = contexts;
         render_to (out, type_reg_template, data);
     }
 
@@ -150,14 +173,14 @@ class AutoRegCodeGen::Private
 {
 public:
     std::list<std::string> headers_;
-    std::list<std::string> types_;
+    std::list<std::string> contexts_;
     std::string out_path_;
 };
 
 AutoRegCodeGen::AutoRegCodeGen (const std::list<std::string> &headers, const std::list<std::string> &types, std::string output): d{new Private}
 {
     d->headers_ = headers;
-    d->types_ = types;
+    d->contexts_ = types;
     d->out_path_ = std::move(output);
 }
 AutoRegCodeGen::~AutoRegCodeGen () { delete d; }
@@ -197,7 +220,7 @@ bool AutoRegCodeGen::GenerateCode () const
     using namespace nlohmann;
     std::ofstream out(d->out_path_, std::ios::out | std::ios::trunc);
 
-    if (!d->headers_.empty() && !d->types_.empty())
+    if (!d->headers_.empty() && !d->contexts_.empty())
     {
         // build json
         json data = json::object();
@@ -208,7 +231,7 @@ bool AutoRegCodeGen::GenerateCode () const
         data["headers"] = headers;
         // types
         json types = json::array();
-        for (const auto &type : d->types_)
+        for (const auto &type : d->contexts_)
             types.push_back(type);
         data["types"] = types;
 

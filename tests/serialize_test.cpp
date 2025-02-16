@@ -25,3 +25,18 @@ TEST_CASE ("Serialization")
     REQUIRE((value == newValue));
     std::cout << Meta::XmlSerialize(newValue, true) << std::endl;
 }
+
+TEST_CASE ("Enum Serialize")
+{
+    using namespace Meta;
+    Any e = SomeEnum::First;
+    std::cout << e.Value<int> () << std::endl;
+    std::cout << e << std::endl;
+    e = SomeEnum::Second;
+    std::cout << e.Value<int> () << std::endl;
+    std::cout << e << std::endl;
+    e = SomeEnum::Last;
+    std::cout << e.Value<int> () << std::endl;
+    std::cout << e << std::endl;
+}
+

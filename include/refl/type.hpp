@@ -25,7 +25,8 @@ namespace Meta
     class LIBMETA_API Type
     {
     public:
-        using CastPorc = Any(*)(const Any &); // 内容转换函数
+        using CastPorc = Any(*)(const Any &in); // 内容转换函数
+        using ConvertProc = bool(*)(const Any &out, const Any &in); // 从别的东西构造
         Type (sview name, size_t size, u32 flags);
         virtual ~Type ();
 
@@ -87,28 +88,37 @@ namespace Meta
         virtual str                      ToString (const Any &obj) const;
         virtual bool                     FromString (const Any &obj, const str& data) const;
 
-        void AddConversion(CastPorc proc, TypeId type_id);
+        template <typename T>
+        inline void AddConverter(ConvertProc proc) { return AddConverter (proc, GetTypeId<T> ()); }
+        void AddConverter (ConvertProc proc, const TypeId& type_id);
 
         template <typename T>
         inline void AddConversion(CastPorc proc) { return AddConversion(proc, GetTypeId<T>()); }
+        void AddConversion(CastPorc proc, const TypeId& type_id);
 
         // cast check
-        bool CanCast(TypeId dst) const;
-
         template <typename T>
         bool CanCast() const { return CanCast(GetTypeId<T>()); }
-
-        bool Cast(const Any &obj, Any &out, TypeId dst) const;
+        bool CanCast(const TypeId& dst) const;
 
         template <typename T>
         bool Cast(const Any &obj, Any &out) const { return Cast(obj, out, GetTypeId<T>()); }
+        bool Cast(const Any &obj, Any &out, const TypeId& dst) const;
 
+        template <typename T>
+        bool CanConvertFrom() const { return CanConvertFrom(GetTypeId<T>()); }
+        bool CanConvertFrom(const TypeId& src) const;
+
+        template <typename T>
+        bool ConvertFrom(const Any &in, const Any &out) const { return ConvertFrom(in, out, GetTypeId<T>()); }
+        bool ConvertFrom(const Any &in, const Any &out, const TypeId& src) const;
     private:
         sview const  name_;
         size_t const size_;
         u32 const    flags_;
     protected:
-        std::unordered_map<TypeId, CastPorc> cast_ops_;
+        std::unordered_map<TypeId, CastPorc>      cast_ops_;
+        std::unordered_map<TypeId, ConvertProc>   construct_ops_;
     };
 
     namespace details {
@@ -142,7 +152,7 @@ namespace Meta
     }
 
     LIBMETA_API
-    TypePtr TypeOf (TypeId id);
+    TypePtr TypeOf (const TypeId& id);
 
     template <typename T>
     TypePtr TypeOf ()

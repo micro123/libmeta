@@ -25,5 +25,5 @@ const MetaInfo &TypeInfo::GetMetaInfo () const
 }
 bool TypeInfo::ShouldCompile () const
 {
-    return true;
+    return enabled_;
 }

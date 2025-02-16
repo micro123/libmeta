@@ -181,9 +181,16 @@ namespace Meta
 
         // By Value
         template <typename T>
-        Any (T value)
+        Any (T value, std::enable_if_t<!std::is_enum_v<T>>* = nullptr)
         {
             ConstructValue (std::move (value));
+        }
+
+        template <typename T>
+        Any (T value, std::enable_if_t<std::is_enum_v<T>>* = nullptr)
+        {
+            ConstructValue (static_cast<std::underlying_type_t<T>> (value));
+            type_id_ = GetTypeId<T> (); // update internal type id
         }
 
         // Ref<T>
@@ -200,11 +207,19 @@ namespace Meta
         ~Any ();
 
         // MARK: Assignment
-        template <typename T>
+        template <typename T, std::enable_if_t<!std::is_enum_v<T>>* = nullptr>
         Any &operator= (T t)
         {  // New Ref
             Destroy ();
             ConstructValue (t);
+            return *this;
+        }
+        template <typename T, std::enable_if_t<std::is_enum_v<T>>* = nullptr>
+        Any &operator= (T t)
+        {  // New Ref
+            Destroy ();
+            ConstructValue (static_cast<std::underlying_type_t<T>> (t));
+            type_id_ = GetTypeId<T> ();
             return *this;
         }
         template <typename T>
@@ -302,6 +317,11 @@ namespace Meta
             return IsValid ();
         }
 
+        [[nodiscard]] inline TypeId Id() const
+        {
+            return type_id_;
+        }
+
         [[nodiscard]] TypePtr Type () const;
 
         static const Any Void;
@@ -312,10 +332,18 @@ namespace Meta
             return Any (MakeRef<T> (std::forward<Args> (args)...));
         }
 
-        template <typename T>
+        template <typename T, std::enable_if_t<!std::is_enum_v<T>>* = nullptr>
         static Any RefWrap(T *obj, size_t cnt = 1, std::enable_if_t<!std::is_same_v<T, cstr>>* = nullptr) {
             Any result;
             result.ConstructPointer(obj, cnt);
+            return result;
+        }
+
+        template <typename T, std::enable_if_t<std::is_enum_v<T>>* = nullptr>
+        static Any RefWrap(T *obj, size_t cnt = 1, std::enable_if_t<!std::is_same_v<T, cstr>>* = nullptr) {
+            Any result;
+            using utype = std::underlying_type_t<std::remove_cv_t<T>>;
+            result.ConstructPointer(*reinterpret_cast<utype **> (&obj), cnt);
             return result;
         }
 
@@ -370,7 +398,7 @@ namespace Meta
         // special ctor
         explicit Any (TypeId tid);
 
-        Any (void *data, const TypeId& tid, const details::AnyOps *ops);
+        Any (void *data, const TypeId& tid, const details::AnyOps *ops, size_t cnt);
 
         // MARK: Helpers
         [[nodiscard]] bool IsSmallObj () const

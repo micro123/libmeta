@@ -54,7 +54,7 @@ namespace Meta::details {
         StringType();
 
         bool FromString(const Any &obj, const str &content) const override {
-            assert (obj.Type() == (const Type*)this);
+            assert (obj.Type() == static_cast<const Type *> (this));
             obj.ValueRef<str>().assign(content);
             return true;
         }

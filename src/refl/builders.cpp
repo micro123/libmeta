@@ -1,10 +1,12 @@
 #include "refl/builders.hpp"
+#include <format>
 #include <memory>
 #include <refl/field.hpp>
 #include <refl/method.hpp>
 #include <refl/registry.hpp>
 #include <utility>
 #include "refl/any.hpp"
+#include "refl/constant.hpp"
 
 class Meta::MethodBuilder::PrivateData
 {
@@ -55,6 +57,16 @@ Meta::TypeBuilder &Meta::TypeBuilder::AddMethod (MethodPtr method)
     d->type_->AddMethod (std::move (method));
     return *this;
 }
+Meta::TypeBuilder &Meta::TypeBuilder::AddCastTo (Type::CastPorc proc, const TypeId &type_id)
+{
+    d->type_->AddConversion (proc, type_id);
+    return *this;
+}
+Meta::TypeBuilder &Meta::TypeBuilder::AddConvertFrom (Type::ConvertProc proc, const TypeId &type_id)
+{
+    d->type_->AddConverter (proc, type_id);
+    return *this;
+}
 
 Meta::TypePtr      Meta::TypeBuilder::Register(TypeId tid) const
 {
@@ -71,12 +83,46 @@ Meta::TypeBuilder::~TypeBuilder ()
     delete d;
 }
 
-Meta::MethodBuilder::MethodBuilder (MethodPtr method): d (new PrivateData)
+Meta::MethodBuilder::MethodBuilder (MethodPtr method) : d (new PrivateData)
 {
-    d->method_ = std::move(method);
+    d->method_ = std::move (method);
+}
+Meta::Any Meta::TypeBuilder::EnumToString (const Any &value)
+{
+    auto type = value.Type ();
+    assert (type);
+    auto const constants = type->GetConstants ();
+    auto v1 = value.Value<u64> ();
+    for (auto &x: constants)
+    {
+        if (x->Value () == v1)
+        {
+            return std::format("{}::{}", type->Name (), x->Name ());
+        }
+    }
+    return std::format ("{}::<Unknown>({:x})", type->Name (), v1);
+}
+bool      Meta::TypeBuilder::EnumFromString (const Any &obj, const Any &value)
+{
+    auto type = value.Type ();
+    assert (type);
+    if (Any enum_v; AnyCast (value, value.Id (), enum_v, GetTypeId<s64> ()))
+    {
+        return type->ConvertFrom (enum_v, obj, enum_v.Id ());
+    }
+    auto key = value.Value<str> ();
+    auto const constants = type->GetConstants ();
+    for (auto &x: constants)
+    {
+        if (x->Name () == key)
+        {
+            return type->ConvertFrom (x->Value (), obj, GetTypeId<s64> ());
+        }
+    }
+    return false;
 }
 
-Meta::TypeBuilder::TypeBuilder (MyTypePtr type, TypeId tid): d (new PrivateData)
+Meta::TypeBuilder::TypeBuilder (MyTypePtr type, const TypeId& tid): d (new PrivateData)
 {
     d->type_ = std::move (type);
     d->type_id_ = tid;

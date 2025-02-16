@@ -1,5 +1,6 @@
 #include "refl/type.hpp"
 #include <format>
+#include <memory>
 #include <refl/any.hpp>
 #include "refl/registry.hpp"
 
@@ -63,9 +64,9 @@ namespace Meta
 
 }  // namespace Meta
 
-Meta::TypePtr Meta::TypeOf (Meta::TypeId tid)
+Meta::TypePtr Meta::TypeOf (const Meta::TypeId& id)
 {
-    return Meta::Registry::Instance ().Get (tid);
+    return Meta::Registry::Instance ().Get (id);
 }
 
 std::vector<Meta::TypePtr> Meta::Type::GetBaseClasses () const
@@ -84,21 +85,41 @@ std::string Meta::Type::ToString (const Any &obj) const
 
 bool Meta::Type::FromString (const Any &obj, const str &data) const
 {
+    auto const tid = GetTypeId<std::string> ();
+    if (auto const it = construct_ops_.find (tid); it != end (construct_ops_))
+    {
+        return it->second (obj, data);
+    }
     return false;
 }
 
-void Meta::Type::AddConversion (CastPorc proc, TypeId type_id)
+void Meta::Type::AddConverter (ConvertProc proc, const TypeId &type_id)
+{
+    construct_ops_[type_id] = proc;
+}
+
+void Meta::Type::AddConversion (const CastPorc proc, const TypeId& type_id)
 {
     cast_ops_[type_id] = proc;
 }
 
-bool Meta::Type::CanCast (TypeId dst) const
+bool Meta::Type::CanCast (const TypeId& dst) const
 {
-    return cast_ops_.find (dst) != end (cast_ops_);
+    return cast_ops_.contains (dst);
 }
 
-bool Meta::Type::Cast (const Any &obj, Any &out, TypeId dst) const
+bool Meta::Type::Cast (const Any &obj, Any &out, const TypeId &dst) const
 {
     out = cast_ops_.at (dst) (obj);
     return out.IsValid ();
+}
+
+bool Meta::Type::CanConvertFrom (const TypeId &src) const
+{
+    return construct_ops_.contains (src);
+}
+
+bool Meta::Type::ConvertFrom (const Any &in, const Any &out, const TypeId &src) const
+{
+    return construct_ops_.at (src)(out, in);
 }

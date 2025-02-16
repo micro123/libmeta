@@ -47,6 +47,13 @@ STRUCT(Component,All) {
     bool operator==(const Component& o) const = default;
 };
 
+enum CLASS(SomeEnum, All)
+{
+    First = 1,
+    Second = 2,
+    Last = 100,
+};
+
 }
 
 

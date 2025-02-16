@@ -110,12 +110,12 @@ Meta::Any::Any (TypeId tid)
     ops_     = details::AnyOps::Empty ();
     cnt_     = 0;
 }
-Meta::Any::Any (void *data, const TypeId& tid, const details::AnyOps *ops)
+Meta::Any::Any (void *data, const TypeId& tid, const details::AnyOps *ops, size_t cnt)
 {
     ops_ = ops;
     type_id_ = tid;
     data_ = ops_->Clone (&buffer_, &data);
-    cnt_ = 1;
+    cnt_ = cnt;
 }
 Meta::Any Meta::Any::operator[] (Meta::str key) const
 {
@@ -143,7 +143,7 @@ Meta::Any Meta::Any::operator[] (Meta::str key) const
 Meta::Any Meta::Any::operator[] (size_t index) const {
     if (ops_->At == nullptr || index >= cnt_)
         return {}; // not support
-    return {ops_->At(Get (), index), type_id_, ops_};
+    return {ops_->At(Get (), index), type_id_, ops_, cnt_ - index};
 }
 
 void Meta::Any::Destroy () const

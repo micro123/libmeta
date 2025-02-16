@@ -37,6 +37,10 @@ public:
     static void xxx();
 
 private:
+    struct META(All)
+    {
+        float x,y,z;
+    } vec3f;
     int a, b, c;
     double dd[5];
     std::string name_;

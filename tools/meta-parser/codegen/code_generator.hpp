@@ -4,7 +4,7 @@
 #include <list>
 #include <string>
 
-class LanguageType;
+class TypeContext;
 // 负责生成类型注册代码
 // 需要 当前头文件、类型列表、输出路径
 class TypeCodeGen final
@@ -12,7 +12,7 @@ class TypeCodeGen final
     class Private;
     Private * const d;
 public:
-    TypeCodeGen(std::string header, const std::list<LanguageType> &types, std::string output);
+    TypeCodeGen(std::string header, const std::list<TypeContext> &types, std::string output);
     ~TypeCodeGen();
 
     bool GenerateCode() const;

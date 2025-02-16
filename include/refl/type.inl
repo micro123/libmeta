@@ -17,6 +17,16 @@
     X (bool);                \
     X (char)
 
+#define INT_TYPES(X) \
+    X (s8);          \
+    X (s16);         \
+    X (s32);         \
+    X (s64);         \
+    X (u8);          \
+    X (u16);         \
+    X (u32);         \
+    X (u64)
+
 #define LINKAGE_TYPEID(type) \
     template <>              \
     TypeId LIBMETA_API details::GetTypeIdImpl<type> ()
