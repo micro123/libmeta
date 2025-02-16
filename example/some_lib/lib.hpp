@@ -17,6 +17,13 @@ STRUCT(LIB_API SomeData,Fields)
 CLASS(LIB_API MyClass,All)
 {
     REFL_BODY(MyClass)
+
+    enum {
+        Test1,
+        Test2,
+        Test3,
+        Test4,
+    };
 public:
     MyClass();
     MyClass(std::string name);

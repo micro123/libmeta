@@ -25,7 +25,15 @@ function(AddTest)
   set_target_properties(
     ${name} PROPERTIES
     FOLDER "Unit Tests"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests-bin"
   )
+  if (WIN32)
+    add_custom_command(
+      TARGET ${name} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:libmeta> $<TARGET_FILE_DIR:${name}>
+      COMMENT "Copy runtime dlls to test binary directory"
+    )
+  endif()
   source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${arg_add_test_SRC})
 endfunction()
 

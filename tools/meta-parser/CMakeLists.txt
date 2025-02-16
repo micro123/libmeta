@@ -29,6 +29,7 @@ target_include_directories(
   ${LLVM_INCLUDE_DIRS}
   ${CLANG_INCLUDE_DIRS}
 )
+set_property(TARGET ${PROJECT_NAME} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tools-bin")
 
 if (WIN32)
   set(CLANG_DLL "${LLVM_TOOLS_BINARY_DIR}/libclang.dll")

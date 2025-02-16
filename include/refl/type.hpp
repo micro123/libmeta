@@ -16,6 +16,7 @@ namespace Meta
         eTypeIsRef     = 0x4,
         eTypeIsPtr     = 0x8,
         eTypeIsVirtual = 0x10,
+        eTypeIsEnum    = 0x20,
     };
 
     template <typename T>
@@ -61,6 +62,10 @@ namespace Meta
         inline bool IsVirtual () const
         {
             return flags_ & eTypeIsVirtual;
+        }
+        inline bool IsEnum () const
+        {
+            return flags_ & eTypeIsEnum;
         }
 
         // 成员信息

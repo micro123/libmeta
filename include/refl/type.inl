@@ -59,13 +59,16 @@ namespace Meta
 
         template <typename T>
         constexpr u32 f_virtual = cond_value<std::is_abstract_v<T>, eTypeIsVirtual>::value;
+
+        template <typename T>
+        constexpr u32 f_enum = cond_value<std::is_enum_v<T>, eTypeIsEnum>::value;
     }  // namespace details
 
     template <typename T>
     constexpr u32 CalcTypeFlags ()
     {
         using namespace details;
-        return f_pod<T> + f_const<T> + f_ptr<T> + f_ref<T> + f_virtual<T>;
+        return f_pod<T> + f_const<T> + f_ptr<T> + f_ref<T> + f_virtual<T> + f_enum<T>;
     }
 }  // namespace Meta
 

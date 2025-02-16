@@ -63,5 +63,9 @@ int main(int argc, char const *argv[])
     std::cout << Meta::JsonSerialize(test,true) << std::endl;
     std::cout << Meta::XmlSerialize(test,true) << std::endl;
     std::cout << test["data_"]["d"] << std::endl;
+    std::cout << test["Test1"] << std::endl;
+    std::cout << test["Test2"] << std::endl;
+    std::cout << test["Test3"] << std::endl;
+    std::cout << test["Test4"] << std::endl;
     return 0;
 }
