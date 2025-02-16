@@ -100,11 +100,11 @@ Meta::Any Meta::TypeBuilder::EnumToString (const Any &value)
             return std::format("{}::{}", type->Name (), x->Name ());
         }
     }
-    return std::format ("{}::<Unknown>({:x})", type->Name (), v1);
+    return std::format ("{}::<Unknown>(0x{:X})", type->Name (), v1);
 }
 bool      Meta::TypeBuilder::EnumFromString (const Any &obj, const Any &value)
 {
-    auto type = value.Type ();
+    auto type = obj.Type ();
     assert (type);
     if (Any enum_v; AnyCast (value, value.Id (), enum_v, GetTypeId<s64> ()))
     {

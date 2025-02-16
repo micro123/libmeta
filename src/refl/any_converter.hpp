@@ -57,18 +57,25 @@ namespace Meta {
     struct Converter<cstr, T>
     {
         static Any Convert(const Any& in) {
-            cstr& value = in.ValueRef<cstr>();
+            const cstr & value = in.ValueRef<cstr>();
+            char *end = nullptr;
             if constexpr (std::is_signed_v<T>)
             {
-                return static_cast<T> (std::strtoll(value, nullptr, 0));
+                T r = static_cast<T> (std::strtoll(value, &end, 0));
+                if (end != value)
+                    return r;
             }
             else if constexpr (std::is_unsigned_v<T>)
             {
-                return static_cast<T> (std::strtoull(value, nullptr, 0));
+                T r = static_cast<T> (std::strtoull(value, &end, 0));
+                if (end != value)
+                    return r;
             }
             else if constexpr (std::is_floating_point_v<T>)
             {
-                return static_cast<T> (std::strtod(value, nullptr));
+                T r = static_cast<T> (std::strtod(value, &end));
+                if (end != value)
+                    return r;
             }
             return {};
         }

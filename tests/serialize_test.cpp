@@ -38,5 +38,11 @@ TEST_CASE ("Enum Serialize")
     e = SomeEnum::Last;
     std::cout << e.Value<int> () << std::endl;
     std::cout << e << std::endl;
+    e.Type ()->ConvertFrom ("Second", e, GetTypeId<cstr>());
+    std::cout << e.Value<int> () << std::endl;
+    std::cout << e << std::endl;
+    e.Type ()->ConvertFrom<s8> (s8{-1}, e);
+    std::cout << e.Value<int> () << std::endl;
+    std::cout << e << std::endl;
 }
 

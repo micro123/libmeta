@@ -116,6 +116,7 @@ namespace Meta {
             // For string
             AddCastTo (&EnumToString, GetTypeId<str>());
             AddConvertFrom (&EnumFromString, GetTypeId<str>());
+            AddConvertFrom (&EnumFromString, GetTypeId<cstr>());
             return *this;
         }
 

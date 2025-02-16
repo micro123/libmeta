@@ -195,7 +195,8 @@ bool Meta::AnyCast (const Any &in, TypeId src, Any &out, TypeId dst)
     if (g_fundamental_cast_ops.find (key) != end (g_fundamental_cast_ops))
     {
         out = g_fundamental_cast_ops.at (key) (in);
-        return out.IsValid ();
+        if (out.IsValid ())
+            return true;
     }
 
     // 2. use converter from type
