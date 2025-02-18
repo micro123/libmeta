@@ -330,6 +330,16 @@ namespace Meta
 
         [[nodiscard]] TypePtr Type () const;
 
+        template <typename T>
+        Any &AssignValue(T &&t) {
+            if (IsValid()) {
+                Type()->ConvertFrom(std::forward<T>(t), *this);
+            } else {
+                *this = Any(std::forward<T>(t));
+            }
+            return *this;
+        }
+
         static const Any Void;
 
         template <typename T, typename... Args>

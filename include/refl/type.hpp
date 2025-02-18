@@ -110,7 +110,8 @@ namespace Meta
         bool CanConvertFrom(const TypeId& src) const;
 
         template <typename T>
-        bool ConvertFrom(const Any &in, const Any &out) const { return ConvertFrom(in, out, GetTypeId<T>()); }
+        bool ConvertFrom(T &&in, const Any &out) const { return ConvertFrom(in, out, GetTypeId<T>()); }
+        bool ConvertFrom(cstr in, const Any &out) const;
         bool ConvertFrom(const Any &in, const Any &out, const TypeId& src) const;
     private:
         sview const  name_;
@@ -123,7 +124,7 @@ namespace Meta
 
     namespace details {
         template <typename T>
-        TypeId GetTypeId ();
+        TypeId GetTypeIdImpl ();
 
         // template <typename T, size_t N>
         // TypeId GetTypeId<T(&)[N]> () {

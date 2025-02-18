@@ -123,3 +123,8 @@ bool Meta::Type::ConvertFrom (const Any &in, const Any &out, const TypeId &src) 
 {
     return construct_ops_.at (src)(out, in);
 }
+
+bool Meta::Type::ConvertFrom(cstr in, const Any& out) const 
+{
+    return ConvertFrom(Any{in}, out, GetTypeId<cstr>());
+}
