@@ -305,6 +305,10 @@ namespace Meta
                     return Get();
                 }
             }
+            else if (std::is_same_v<cstr, T>)
+            {
+                return ValueRef<T> ();
+            }
             return ValuePtr<std::remove_pointer_t<T>> ();
         }
 
