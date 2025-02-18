@@ -259,7 +259,9 @@ namespace Meta
             return *static_cast<T *> (Get ());
         }
 
-        template <typename T, std::enable_if_t<!std::is_reference_v<T>>* = nullptr>
+        template <typename T,
+            std::enable_if_t<!std::is_reference_v<T>>* = nullptr,
+            std::enable_if_t<!std::is_pointer_v<T>>* = nullptr>
         T Value () const
         {
             assert (IsValid ());
@@ -283,6 +285,27 @@ namespace Meta
                 }
             }
             return *ValuePtr<T> ();
+        }
+
+        template <typename T,
+            std::enable_if_t<!std::is_reference_v<T>>* = nullptr,
+            std::enable_if_t<std::is_pointer_v<T>>* = nullptr>
+        T Value () const
+        {
+            assert (IsValid ());
+            if (type_id_ != GetTypeId<T> ())
+            {
+                // type must be not null
+                auto type = Type ();
+                if (!type)
+                    throw std::bad_cast ();
+
+                if constexpr (std::is_same_v<void*, T>)
+                {
+                    return Get();
+                }
+            }
+            return ValuePtr<std::remove_pointer_t<T>> ();
         }
 
         template <typename T, std::enable_if_t<std::is_reference_v<T>>* = nullptr>
@@ -343,7 +366,7 @@ namespace Meta
         static const Any Void;
 
         template <typename T, typename... Args>
-        static Any New (Args &&...args)
+        static Any NewRef (Args &&...args)
         {
             return Any (MakeRef<T> (std::forward<Args> (args)...));
         }

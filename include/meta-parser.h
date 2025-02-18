@@ -20,9 +20,7 @@
 #define UNION(name, ...)  union  name
 #define ENUM(name, ...)   enum   name
 #define REFL_BODY(name) \
-private:\
     friend class Meta::CodeGenFor<name>;\
-public:
 
 namespace Meta {
     template <typename T>

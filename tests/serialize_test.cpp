@@ -10,7 +10,7 @@ using namespace Test;
 
 TEST_CASE ("Serialization")
 {
-    Meta::Any value = Meta::Any::New<Component>(1.f,2.f,3.f, "fucking deep");
+    Meta::Any value = Meta::Any::NewRef<Component>(1.f,2.f,3.f, "fucking deep");
     auto s = Meta::JsonSerialize(value);
     std::cout << s << std::endl;
     Meta::Any newValue = Component{};

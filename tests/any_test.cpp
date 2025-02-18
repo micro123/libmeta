@@ -30,7 +30,7 @@ TEST_CASE ("Any Ref")
         puts("after");
     }
 
-    Meta::Any b = Meta::Any::New<Foo> (55);
+    Meta::Any b = Meta::Any::NewRef<Foo> (55);
     {
         auto c = b;
         c.ValueRef<Foo>().print();

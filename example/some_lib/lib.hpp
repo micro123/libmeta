@@ -34,7 +34,7 @@ public:
 
     int Test(double f) const;
 
-    void Inc(int &origin);
+    void Inc(int &origin, f32 *f);
 
     static void xxx();
 

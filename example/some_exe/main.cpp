@@ -64,8 +64,9 @@ int main(int argc, char const *argv[])
     std::cout << Meta::XmlSerialize(test,true) << std::endl;
     std::cout << test["data"]["d"] << std::endl;
     std::cout << test("Test", 999) << std::endl;
-    Meta::Any x = Meta::Any::New<int>(42);
-    test("Inc", x);
-    std::cout << x << std::endl;
+    Meta::Any x = Meta::Any::NewRef<int>(42);
+    Meta::Any y = Meta::Any::NewRef<f32>(3.14f);
+    std::cout << test("Inc", x, y) << "\n";
+    std::cout << x << ' ' << y << std::endl;
     return 0;
 }

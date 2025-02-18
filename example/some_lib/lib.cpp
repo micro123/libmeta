@@ -5,8 +5,10 @@ void sayHello () {
     puts("你好");
 }
 
-void MyClass::Inc (int &origin) {
+void MyClass::Inc (int &origin, f32 *f) {
     origin += 5;
+    if (f)
+        *f *= this->a;
 }
 
 void MyClass::xxx () {}
