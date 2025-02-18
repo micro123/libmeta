@@ -15,9 +15,17 @@ MetaInfo::MetaInfo (const Cursor &cursor)
     }
 }
 MetaInfo::~MetaInfo () = default;
-bool MetaInfo::GetFlag (const std::string &key) const
+// bool MetaInfo::GetFlag (const std::string &key) const
+// {
+//     return properties_.contains (key);
+// }
+bool MetaInfo::IsEnabled () const
 {
-    return properties_.contains (key);
+    return !IsDisabled() && properties_.contains(NativeProperty::Enabled);
+}
+bool MetaInfo::IsDisabled () const
+{
+    return properties_.contains(NativeProperty::Disabled);
 }
 std::string MetaInfo::GetProperty (const std::string &key) const
 {

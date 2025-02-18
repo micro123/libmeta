@@ -39,13 +39,6 @@ function(AddTest)
 endfunction()
 
 macro(single_file_test name)
-#  if (NOT DEFINED ARGV0)
-#    message(STATUS "test ${name} NOT use test_types")
-#    AddTest(USE_COMMON OFF NAME ${name} SRC ${name}_test.cpp LINK libmeta libmeta_headers)
-#  else()
-#    message(STATUS "test ${name} use test_types? ${ARGV1}")
-#    AddTest(USE_COMMON ${ARGV0} NAME ${name} SRC ${name}_test.cpp LINK libmeta libmeta_headers)
-#  endif()
   AddTest(USE_COMMON ${ARGV1} NAME ${name} SRC ${name}_test.cpp LINK libmeta libmeta_headers)
 endmacro()
 

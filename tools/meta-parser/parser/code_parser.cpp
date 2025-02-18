@@ -80,7 +80,7 @@ void MetaParser::Private::VisitAst (const Cursor &c)
             VisitAst (child);
             current_ns_.Pop ();
         }
-        else if (child.IsUserType () && !child.IsAnonymous ())
+        else if (child.IsUserType () && !child.IsAnonymous ()) // anonymous type in global namespace was not support
         {
             contexts_.emplace_back (child, current_ns_);
             if (!contexts_.back().ShouldCompile())

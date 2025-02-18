@@ -17,12 +17,7 @@ bool Function::ShouldCompile () const
 {
     if (parent_->ShouldCompile())
     {
-        auto &pm = parent_->GetMetaInfo();
-        auto const disabled_ = meta_info_.GetFlag(NativeProperty::Disabled);
-        if ((pm.GetFlag(NativeProperty::All) || pm.GetFlag(NativeProperty::Methods)) && !disabled_)
-            return true;
-        if (pm.GetFlag(NativeProperty::WhileListMethods) && enabled_)
-            return true;
+        return GetCursor().IsPublicAccess() || meta_info_.IsEnabled();
     }
     return false;
 }

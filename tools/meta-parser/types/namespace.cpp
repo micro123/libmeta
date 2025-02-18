@@ -15,7 +15,9 @@ std::string Namespace::GetFullQualifiedName (std::string ns_or_type) const
     {
         if (x.empty ())
             continue;
-        result.append ("::").append (x);
+        if (!x.starts_with("decltype"))
+            result.append ("::");
+        result.append(x);
     }
     if (!ns_or_type.empty ())
         result.append ("::").append (ns_or_type);

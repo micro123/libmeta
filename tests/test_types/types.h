@@ -17,6 +17,7 @@ STRUCT(Foo,All) {
     const int b[10];
     static int c[10];
     static const int d[10];
+    int &zzz;
 
     Foo(int x);
     ~Foo();
@@ -52,6 +53,21 @@ enum CLASS(SomeEnum, All)
     First = 1,
     Second = 2,
     Last = 100,
+};
+
+STRUCT(Base1, All)
+{
+    int x;
+};
+
+STRUCT(Base2, All)
+{
+    int y;
+};
+
+STRUCT(Derived, All): public Base1, private Base2
+{
+    int z;
 };
 
 }

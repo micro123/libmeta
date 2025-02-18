@@ -9,18 +9,9 @@
 namespace NativeProperty
 {
 #define PROP(name) constexpr auto name = #name
-    PROP (All);
-
-    PROP (Fields);
-    PROP (Methods);
-    PROP (Constants);
-
     PROP (Enabled);
     PROP (Disabled);
-
-    PROP (WhileListFields);
-    PROP (WhileListMethods);
-    PROP (WhileListConstants);
+    PROP (Property);
 #undef PROP
 }
 
@@ -30,7 +21,8 @@ public:
     MetaInfo(const Cursor &cursor);
     ~MetaInfo();
 
-    bool GetFlag(const std::string &key) const;
+    bool IsEnabled() const;
+    bool IsDisabled() const;
     std::string GetProperty(const std::string &key) const;
 private:
     std::unordered_map<std::string, std::string> properties_;

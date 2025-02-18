@@ -9,21 +9,21 @@
 LIB_API
 void sayHello();
 
-STRUCT(LIB_API SomeData,Fields)
+STRUCT(LIB_API SomeData)
 {
     int a, b, c, d;
 };
 
-CLASS(LIB_API MyClass,All)
+CLASS(LIB_API MyClass)
 {
     REFL_BODY(MyClass)
 
-    enum {
+    enum META() {
         Test1,
         Test2,
         Test3,
         Test4,
-    };
+    } hello_world_;
 public:
     MyClass();
     MyClass(std::string name);
@@ -34,10 +34,12 @@ public:
 
     int Test(double f) const;
 
+    void Inc(int &origin);
+
     static void xxx();
 
 private:
-    struct META(All)
+    struct META()
     {
         float x,y,z;
     } vec3f;
@@ -48,7 +50,7 @@ private:
 };
 
 namespace Foo::Bar {
-    CLASS(Baz,All) {
+    CLASS(Baz) {
         REFL_BODY(Baz)
     public:
         void foo(MyClass *obj) const;
@@ -57,7 +59,7 @@ namespace Foo::Bar {
         int z = 100;
     };
 
-    STRUCT(Bal,All) {
+    STRUCT(Bal) {
         REFL_BODY(Bal)
     public:
         enum {
@@ -68,11 +70,11 @@ namespace Foo::Bar {
     };
 }
 
-enum CLASS(Van,All)
+enum CLASS(Van)
 {
     Deep,
     Dark,
-    Fantasy,
+    META(Disabled) Fantasy,
     Other = 10086,
 };
 

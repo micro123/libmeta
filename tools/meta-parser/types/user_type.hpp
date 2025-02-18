@@ -32,14 +32,14 @@ private:
     // 枚举解析，用于枚举
     void ParseEnumType(const Cursor &cursor);
 
-    std::string           name_;
-    std::string           custom_name_;
-    bool                  enum_;
-    bool                  anno_;
+    std::string           name_; // type name
+    std::string           custom_name_; // use custom name instead of Namespace::Type
+    bool                  enum_; // enum type
+    bool                  anon_; // anonymous
     std::list<Field *>    fields_;
     std::list<Function *> functions_;
     std::list<Constant *> constants_;
-    std::list<LanguageType> &container_;
+    std::list<LanguageType> &container_; // parser result
 };
 
 #endif /* USER_TYPE_HPP */

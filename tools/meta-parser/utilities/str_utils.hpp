@@ -16,5 +16,6 @@ std::string join (const std::vector<std::string> &context_list, const std::strin
 
 std::string trim(std::string& source_string, const std::string& trim_chars);
 
+std::string toCamelCase(const std::string &input);
 
 #endif  // STR_UTILS_HPP

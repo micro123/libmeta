@@ -6,6 +6,8 @@
 #include <list>
 #include <string>
 
+#include "clang/cursor_type.hpp"
+
 class Cursor final
 {
 public:
@@ -22,6 +24,7 @@ public:
     [[nodiscard]] std::string SourceFile() const;
     [[nodiscard]] std::string LangType() const;
 
+    [[nodiscard]] bool IsPublicAccess() const;
     [[nodiscard]] bool IsUserType() const;
     [[nodiscard]] bool IsDataType() const;
     [[nodiscard]] bool IsEnumType() const;
@@ -29,6 +32,7 @@ public:
     [[nodiscard]] bool IsAnonymous() const;
 
     [[nodiscard]] CXCursorKind Kind() const { return cursor_.kind; }
+    [[nodiscard]] CursorType Type() const;
 
 private:
     CXCursor cursor_;

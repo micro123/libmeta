@@ -4,7 +4,8 @@
 TypeContext::TypeContext (const Cursor &cursor, Namespace namespace_): TypeInfo (cursor, namespace_)
 {
     class_name_ = namespace_.GetFullQualifiedName (cursor.DisplayName ());
-    VisitAst (cursor);
+    if (enabled_)
+        VisitAst (cursor);
 }
 
 TypeContext::~TypeContext () = default;
@@ -27,5 +28,5 @@ void TypeContext::VisitAst (const Cursor &cursor)
 }
 bool TypeContext::ShouldCompile () const
 {
-    return TypeInfo::ShouldCompile () && !type_list_.empty ();
+    return enabled_ && !type_list_.empty ();
 }

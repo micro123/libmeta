@@ -66,6 +66,11 @@ std::string Cursor::LangType () const
     return ToString (clang_getTypeSpelling (type));
 }
 
+bool Cursor::IsPublicAccess () const
+{
+    return clang_getCXXAccessSpecifier(cursor_) == CX_CXXPublic;
+}
+
 bool Cursor::IsUserType () const
 {
     return IsEnumType () || IsDataType ();
@@ -78,6 +83,11 @@ bool Cursor::IsNamespace () const
 bool Cursor::IsAnonymous () const
 {
     return clang_Cursor_isAnonymous (cursor_);
+}
+
+CursorType Cursor::Type () const
+{
+    return CursorType (clang_getCursorType(cursor_));
 }
 
 bool Cursor::IsDataType () const

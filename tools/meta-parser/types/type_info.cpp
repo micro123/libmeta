@@ -4,7 +4,7 @@
 
 TypeInfo::TypeInfo (const Cursor &cursor, Namespace namespace_, TypeInfo *parent): meta_info_ (cursor), namespace_(std::move(namespace_)), parent_ (parent), cursor_(cursor)
 {
-    enabled_ = meta_info_.GetFlag (NativeProperty::Enabled);
+    enabled_ = meta_info_.IsEnabled();
 }
 TypeInfo::~TypeInfo () = default;
 Namespace       TypeInfo::GetNamespace () const

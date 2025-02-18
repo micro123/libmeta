@@ -74,3 +74,19 @@ std::string trim (std::string &source_string, const std::string &trim_chars)
     }
     return source_string;
 }
+
+std::string toCamelCase (const std::string &input)
+{
+    auto parts = split(input, "_");
+    std::string result;
+    bool use_upper_case = parts.size() > 1;
+    for (auto &x: parts)
+    {
+        if (x.empty())
+            continue;
+        if (use_upper_case)
+            x[0] = std::toupper(x[0]);
+        result.append(x);
+    }
+    return result;
+}

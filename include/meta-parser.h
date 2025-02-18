@@ -9,6 +9,7 @@
 #define CLASS(name, ...)  class  ANNO(#__VA_ARGS__) ANNO("Enabled") name
 #define STRUCT(name, ...) struct ANNO(#__VA_ARGS__) ANNO("Enabled") name
 #define UNION(name, ...)  union  ANNO(#__VA_ARGS__) ANNO("Enabled") name
+#define ENUM(name, ...)   enum   ANNO(#__VA_ARGS__) ANNO("Enabled") name
 #define REFL_BODY(...)
 
 #else
@@ -17,6 +18,7 @@
 #define CLASS(name, ...)  class  name
 #define STRUCT(name, ...) struct name
 #define UNION(name, ...)  union  name
+#define ENUM(name, ...)   enum   name
 #define REFL_BODY(name) \
 private:\
     friend class Meta::CodeGenFor<name>;\

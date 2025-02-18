@@ -259,7 +259,7 @@ namespace Meta
             return *static_cast<T *> (Get ());
         }
 
-        template <typename T>
+        template <typename T, std::enable_if_t<!std::is_reference_v<T>>* = nullptr>
         T Value () const
         {
             assert (IsValid ());
@@ -283,6 +283,12 @@ namespace Meta
                 }
             }
             return *ValuePtr<T> ();
+        }
+
+        template <typename T, std::enable_if_t<std::is_reference_v<T>>* = nullptr>
+        T Value () const
+        {
+            return ValueRef<std::remove_reference_t<T>>();
         }
 
         template <typename T>

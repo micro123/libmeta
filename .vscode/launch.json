@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug meta-parser (LLDB)",
+            "program": "${workspaceFolder}/build/tools-bin/meta-parser",
+            "args": [
+                "${workspaceFolder}/build/example/some_lib/compile_headers.txt",
+                "${workspaceFolder}/build/example/some_lib/_generated/auto_register.cpp",
+                "-I/home/tang/Workspace/libmeta/include -I/usr/include",
+                "-DLIB_EXPORT",
+                "-H"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "name": "Debug CMake Launch Target",
             "type": "cppdbg",
             "request": "launch",
@@ -32,7 +46,7 @@
             "name": "Debug meta-parser",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/meta-parser",
+            "program": "${workspaceFolder}/build/tools-bin/meta-parser",
             "args": [
                 "${workspaceFolder}/build/example/some_lib/compile_headers.txt",
                 "${workspaceFolder}/build/example/some_lib/_generated/auto_register.cpp",

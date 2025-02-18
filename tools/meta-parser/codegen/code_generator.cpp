@@ -7,6 +7,7 @@
 #include "types/function.hpp"
 #include "types/type_context.hpp"
 #include "types/user_type.hpp"
+#include <utilities/str_utils.hpp>
 
 class TypeCodeGen::Private
 {
@@ -25,20 +26,22 @@ TypeCodeGen::TypeCodeGen (std::string header, const std::list<TypeContext> &type
 TypeCodeGen::~TypeCodeGen () { delete d; }
 
 constexpr auto type_reg_template = R"(
-// 1. fixed
+{# 1. fixed headers from libmeta #}
 #include <refl/builders.hpp>
 #include <refl/field.hpp>
 #include <refl/constant.hpp>
 
-// 2. user header
+{# 2. user headers #}
 #include "{{header}}"
 
-// 3. generated body
+{# 3. generated body #}
 ## for ctx in contexts
 template<>
 void Meta::CodeGenFor<{{ctx.name}}>::Register() {
+
+{# 4. type register bodies #}
 ## for type in ctx.types
-    // begin {{type.fullname}}
+// begin of {{type.fullname}}
     (void)TypeBuilder::NewTypeBuilder<{{type.fullname}}> ("{{type.name}}")
 ## for field in type.fields
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
@@ -59,7 +62,8 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
     .AddEnumOperations<{{type.fullname}}>()
 ## endif
     .Register();
-    // end {{type.fullname}}
+// end of {{type.fullname}}
+
 
 ## endfor
 };
@@ -71,7 +75,7 @@ static nlohmann::json BuildConstant(const Constant *c)
 {
     using namespace nlohmann;
     json j = json::object();
-    j["name"] = c->Name ();
+    j["name"] = toCamelCase(c->Name ());
     j["value"] = c->Value ();
     return j;
 }
@@ -80,7 +84,7 @@ static nlohmann::json BuildField(const Field *f)
 {
     using namespace nlohmann;
     json j = json::object();
-    j["name"] = f->Name ();
+    j["name"] = toCamelCase(f->Name ());
     j["fullname"] = f->GetNamespace ().GetFullQualifiedName (f->Name ());
     return j;
 }
@@ -89,7 +93,7 @@ static nlohmann::json BuildMethod(const Function *m)
 {
     using namespace nlohmann;
     json j = json::object();
-    j["name"] = m->Name ();
+    j["name"] = toCamelCase(m->Name ());
     j["fullname"] = m->GetNamespace ().GetFullQualifiedName (m->Name ());
     json args = json::array();
     for (auto &x: m->Arguments())
@@ -186,32 +190,34 @@ AutoRegCodeGen::AutoRegCodeGen (const std::list<std::string> &headers, const std
 AutoRegCodeGen::~AutoRegCodeGen () { delete d; }
 
 constexpr auto auto_reg_template = R"(
-// 1. fixed headers
+{# 1. fixed headers #}
 #include <meta-parser.h>
 
-// 2. user sources
+{# 2. user sources #}
 ## for header in headers
 #include "{{header}}"
 ## endfor
 
-// 3. extern define
+{# 3. extern define #}
 ## for type in types
 extern template struct Meta::CodeGenFor<{{type}}>;
 ## endfor
 
-// 4. function start
+{# 4. function start #}
 void RegisterTypes() {
 
-    // 5. call register functions
+{# 5. call register functions #}
 ## for type in types
     Meta::CodeGenFor<{{type}}>::Register();
 ## endfor
+
+
 }
 
-// 6. auto call
+{# 6. auto call #}
 static struct AutoRegister_ { AutoRegister_(){ RegisterTypes(); } } auto_register;
 
-// 7. end
+{# 7. end #}
 )";
 
 bool AutoRegCodeGen::GenerateCode () const

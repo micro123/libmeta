@@ -46,12 +46,12 @@ namespace Meta
                 using TupleType = std::tuple<Param...>;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
 
@@ -107,12 +107,12 @@ namespace Meta
                 M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
@@ -167,12 +167,12 @@ namespace Meta
                 M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
@@ -227,12 +227,12 @@ namespace Meta
                 M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_) (args[Idx].ValueRef<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;

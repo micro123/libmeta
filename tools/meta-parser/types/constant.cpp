@@ -19,14 +19,5 @@ uint64_t    Constant::Value () const
 }
 bool        Constant::ShouldCompile () const
 {
-    if (parent_->ShouldCompile())
-    {
-        auto &pm = parent_->GetMetaInfo();
-        auto const disabled_ = meta_info_.GetFlag(NativeProperty::Disabled);
-        if ((pm.GetFlag(NativeProperty::All) || pm.GetFlag(NativeProperty::Constants)) && !disabled_)
-            return true;
-        if (pm.GetFlag(NativeProperty::WhileListConstants) && enabled_)
-            return true;
-    }
-    return false;
+    return parent_->ShouldCompile();
 }

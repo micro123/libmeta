@@ -62,10 +62,10 @@ int main(int argc, char const *argv[])
     Meta::Any test = MyClass("你好");
     std::cout << Meta::JsonSerialize(test,true) << std::endl;
     std::cout << Meta::XmlSerialize(test,true) << std::endl;
-    std::cout << test["data_"]["d"] << std::endl;
-    std::cout << test["Test1"] << std::endl;
-    std::cout << test["Test2"] << std::endl;
-    std::cout << test["Test3"] << std::endl;
-    std::cout << test["Test4"] << std::endl;
+    std::cout << test["data"]["d"] << std::endl;
+    std::cout << test("Test", 999) << std::endl;
+    Meta::Any x = Meta::Any::New<int>(42);
+    test("Inc", x);
+    std::cout << x << std::endl;
     return 0;
 }
