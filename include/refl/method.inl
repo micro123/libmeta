@@ -12,9 +12,10 @@ namespace Meta
         class NormalMethod : public Method
         {
         public:
-            NormalMethod (sview name, R (*ptr) (Param...)) : Method (name, TypeOf<R> ()), ptr_ (ptr)
+            NormalMethod (sview name, R (*ptr) (Param...)) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ (ptr)
             {
                 assert (ptr_ != nullptr);
+                SetArgTypes<Param...>();
             }
             ~NormalMethod () override {}
 
@@ -37,6 +38,11 @@ namespace Meta
                     return {};
                 else
                     return Apply (args, std::make_index_sequence<sizeof...(Param)> {});
+            }
+
+            TypePtr ResultType() const
+            {
+                return TypeOf<R>();
             }
 
         private:
@@ -71,9 +77,10 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberMethodNormal (sview name, R (C::*ptr) (Param...)) : Method (name, TypeOf<R> ()), ptr_ ((Ptr) ptr)
+            MemberMethodNormal (sview name, R (C::*ptr) (Param...)) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ ((Ptr) ptr)
             {
                 assert (ptr_ != nullptr);
+                SetArgTypes<Param...>();
             }
             ~MemberMethodNormal () {}
 
@@ -131,9 +138,10 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberMethodConst (sview name, R (C::*ptr) (Param...) const) : Method (name, TypeOf<R> ()), ptr_ ((Ptr ) ptr)
+            MemberMethodConst (sview name, R (C::*ptr) (Param...) const) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ ((Ptr ) ptr)
             {
                 assert (ptr_ != nullptr);
+                SetArgTypes<Param...>();
             }
             ~MemberMethodConst () {}
 
@@ -191,9 +199,10 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile) : Method (name, TypeOf<R> ()), ptr_ ((Ptr ) ptr)
+            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ ((Ptr ) ptr)
             {
                 assert (ptr_ != nullptr);
+                SetArgTypes<Param...>();
             }
             ~MemberMethodVolatile () {}
 

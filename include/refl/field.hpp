@@ -13,6 +13,7 @@ namespace Meta {
         virtual ~Field();
 
         inline sview Name() const { return name_; }
+        [[nodiscard]] str ToString() const;
         virtual TypePtr Type() const = 0;
 
         virtual bool IsMember() const = 0;

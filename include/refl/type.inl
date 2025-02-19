@@ -35,6 +35,16 @@ namespace Meta
 {
     FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
 
+    // UserType
+    LINKAGE_TYPEID(Type);
+    // FieldType
+    LINKAGE_TYPEID(Field);
+    // MethodType
+    LINKAGE_TYPEID(Method);
+    // DelegateType
+    LINKAGE_TYPEID(Delegate);
+    // ConstantType
+    LINKAGE_TYPEID(Constant);
     // void type
     LINKAGE_TYPEID(void);
     // str

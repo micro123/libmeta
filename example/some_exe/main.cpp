@@ -63,10 +63,12 @@ int main(int argc, char const *argv[])
     std::cout << Meta::JsonSerialize(test,true) << std::endl;
     std::cout << Meta::XmlSerialize(test,true) << std::endl;
     std::cout << test["data"]["d"] << std::endl;
-    std::cout << test("Test", 999) << std::endl;
+    std::cout << test["Test"](999) << std::endl;
     Meta::Any x = Meta::Any::NewRef<int>(42);
     Meta::Any y = Meta::Any::NewRef<f32>(3.14f);
-    std::cout << test("Inc", x, y) << "\n";
+    std::cout << test["Inc"](x, y) << "\n";
     std::cout << x << ' ' << y << std::endl;
+    Meta::Any type = test.Type();
+    std::cout << type << '\n';
     return 0;
 }

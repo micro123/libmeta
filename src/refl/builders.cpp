@@ -21,9 +21,9 @@ public:
     TypeId    type_id_;
 };
 
-Meta::MethodBuilder &Meta::MethodBuilder::AddParam (sview name, TypeId type_id, Any def)
+Meta::MethodBuilder &Meta::MethodBuilder::AddParam (u32 idx, sview name, Any def)
 {
-    d->method_->AddParam (name, type_id, std::move (def));
+    d->method_->AddParamInfo (idx, name, std::move (def));
     return *this;
 }
 

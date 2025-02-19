@@ -64,7 +64,7 @@ static bool FromXml (const Meta::Any &obj, const xml_node &node)
     auto fields = type->GetFields ();
     if (fields.empty ())
     {
-        return type->FromString (obj, node.text ().as_string ());
+        return type->ValueFromString (obj, node.text ().as_string ());
     }
     bool ok = true;
     for (auto &x: fields)

@@ -18,6 +18,8 @@ namespace Meta {
         sview Name () const;
         Any   Value () const;
 
+        [[nodiscard]] str ToString() const;
+
     private:
         sview const name_;
         Any const   value_;

@@ -46,7 +46,7 @@ static bool FromJson(const Meta::Any& obj, const json &content)
         return true;
     auto fields = type->GetFields();
     if (fields.empty()) {
-        return type->FromString(obj, content.get<Meta::str>());
+        return type->ValueFromString(obj, content.get<Meta::str>());
     }
     for (auto &x: fields) {
         if (x->IsMember()) {

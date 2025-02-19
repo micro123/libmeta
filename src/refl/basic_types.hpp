@@ -17,7 +17,7 @@ namespace Meta::details {
             );
         }
 
-        bool FromString(const Any &obj, const str &content) const override {
+        bool ValueFromString(const Any &obj, const str &content) const override {
             assert (obj.Type() == this);
             try {
                 if constexpr (std::is_signed_v<T>)
@@ -53,7 +53,7 @@ namespace Meta::details {
     public:
         StringType();
 
-        bool FromString(const Any &obj, const str &content) const override {
+        bool ValueFromString(const Any &obj, const str &content) const override {
             assert (obj.Type() == static_cast<const Type *> (this));
             obj.ValueRef<str>().assign(content);
             return true;
@@ -63,6 +63,31 @@ namespace Meta::details {
     class NullType final : public Type {
     public:
         NullType();
+    };
+
+    class UserType final : public GenericType {
+    public:
+        UserType();
+    };
+
+    class MethodType final : public GenericType {
+    public:
+        MethodType();
+    };
+
+    class DelegateType final : public GenericType {
+    public:
+        DelegateType();
+    };
+
+    class ConstantType final : public GenericType {
+    public:
+        ConstantType();
+    };
+
+    class FieldType final : public GenericType {
+    public:
+        FieldType();
     };
 
     void RegisterFundamentalTypes(Registry *reg);

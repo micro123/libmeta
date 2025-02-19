@@ -4,6 +4,7 @@
 #include "refl/constant.hpp"
 #include "refl/field.hpp"
 #include "refl/method.hpp"
+#include "refl/delegate.hpp"
 
 using cvt_key_t = std::pair<Meta::TypeId, Meta::TypeId>;
 
@@ -43,9 +44,9 @@ static void __register_fundamental_type_cast_ops ()
 
 const Meta::Any Meta::Any::Void {Meta::GetTypeId<void> ()};
 
-const Meta::details::AnyOps* Meta::details::AnyOps::Empty ()
+const Meta::details::AnyOps *Meta::details::AnyOps::Empty ()
 {
-    static AnyOps empty{};
+    static AnyOps empty {};
     return &empty;
 }
 Meta::Any::Any ()
@@ -73,7 +74,7 @@ Meta::Any &Meta::Any::operator= (const Any &var)
 Meta::Any &Meta::Any::operator= (Any &&var) noexcept
 {
     Destroy ();
-    Assign (std::move(var));
+    Assign (std::move (var));
     return *this;
 }
 Meta::TypePtr Meta::Any::Type () const
@@ -87,20 +88,10 @@ Meta::Any Meta::Any::CallWithArgs (Meta::Any *args, size_t cnt) const
     {
         return m->InvokeWithArgs (args, cnt);
     }
-    // 2. cnt >= 1 and args[0] is method name
-    else if (cnt >= 1)
+    // 2. check for delegate
+    else if (auto d = ValuePtr<Delegate> ())
     {
-        str  method_name = args[0].Value<str> ();
-        auto type        = Type ();
-        if (type)
-        {
-            if (auto m = type->GetMethod (method_name))
-            {
-                // replace args[0] with this
-                args[0] = *this;
-                return m->InvokeWithArgs (args, cnt);
-            }
-        }
+        return d->InvokeWithArgs(args, cnt);
     }
     return {};
 }
@@ -110,40 +101,61 @@ Meta::Any::Any (TypeId tid)
     ops_     = details::AnyOps::Empty ();
     cnt_     = 0;
 }
-Meta::Any::Any (void *data, const TypeId& tid, const details::AnyOps *ops, size_t cnt)
+Meta::Any::Any (void *data, const TypeId &tid, const details::AnyOps *ops, size_t cnt)
 {
-    ops_ = ops;
+    ops_     = ops;
     type_id_ = tid;
-    data_ = ops_->Clone (&buffer_, &data);
-    cnt_ = cnt;
+    data_    = ops_->Clone (&buffer_, &data);
+    cnt_     = cnt;
 }
 Meta::Any Meta::Any::operator[] (Meta::str key) const
 {
     assert (IsValid ());
 
-    auto const type = Type ();
-    // must have type
-    if (!type)
-        return {};
+    // ordering: field > method > constant
 
-    // 1. try field
-    if (auto f = type->GetField (key))
+    // 1. check if this hold a type
+    if (Id () == Meta::GetTypeId<Meta::Type> ())
     {
-        return f->Get (this);
+        auto *t = ValuePtr<Meta::Type> ();
+        if (auto f = t->GetField (key))
+            return f;
+        if (auto m = t->GetMethod (key))
+            return m;
+        if (auto c = t->GetConstant (key))
+            return c;
     }
-
-    if (auto c = type->GetConstant (key))
+    else
     {
-        return c->Value ();
-    }
+        // 2. it an object
+        auto const type = Type ();
+        // must have type
+        if (!type)
+            return {};
 
+        if (auto m = type->GetMethod (key))
+        {
+            return Any::NewRef<Delegate>(m, *this);
+        }
+
+        if (auto f = type->GetField (key))
+        {
+            return f->Get (this);
+        }
+
+        if (auto c = type->GetConstant (key))
+        {
+            return c->Value ();
+        }
+    }
     return {};
 }
 
-Meta::Any Meta::Any::operator[] (size_t index) const {
+Meta::Any Meta::Any::operator[] (size_t index) const
+{
     if (ops_->At == nullptr || index >= cnt_)
-        return {}; // not support
-    return {ops_->At(Get (), index), type_id_, ops_, cnt_ - index};
+        return {};  // not support
+    return {ops_->At (Get (), index), type_id_, ops_, cnt_ - index};
 }
 
 void Meta::Any::Destroy () const
@@ -209,7 +221,7 @@ bool Meta::AnyCast (const Any &in, TypeId src, Any &out, TypeId dst)
 
 std::ostream &operator<< (std::ostream &o, const Meta::Any &any)
 {
-    if (any.IsValid())
+    if (any.IsValid ())
         o << any.Value<Meta::str> ();
     else
         o << "nil";

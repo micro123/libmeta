@@ -274,7 +274,7 @@ namespace Meta
 
                 if constexpr (std::is_same_v<str, T>)
                 {
-                    return type->ToString (*this);
+                    return type->ValueToString (*this);
                 }
                 else
                 {

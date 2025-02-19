@@ -42,6 +42,7 @@ namespace Meta
         {
             return size_;
         }
+        [[nodiscard]] str ToString() const;
 
         // 类型特性
         inline bool IsPod () const
@@ -85,8 +86,8 @@ namespace Meta
         virtual std::vector<TypePtr>     GetBaseClasses () const;
 
         // 一般工具
-        virtual str                      ToString (const Any &obj) const;
-        virtual bool                     FromString (const Any &obj, const str& data) const;
+        virtual str                      ValueToString (const Any &obj) const;
+        virtual bool                     ValueFromString (const Any &obj, const str& data) const;
 
         template <typename T>
         inline void AddConverter(ConvertProc proc) { return AddConverter (proc, GetTypeId<T> ()); }

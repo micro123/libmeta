@@ -18,6 +18,7 @@ namespace Meta
     FWDC (Method);
     FWDC (Field);
     FWDC (Constant);
+    FWDC (Delegate);
     class Any;
     class Registry;
     class TypeBuilder;

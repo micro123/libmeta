@@ -44,7 +44,7 @@ TEST_CASE ("TYPE BUILDER")
     )
     .AddMethod (
         MethodBuilder::NewMethodBuilder ("test", &Foo::test)
-        .AddParam ("x", NParamId (Foo::test, 0), 42)
+        .AddParam (0, "x", 42)
         .Build()
     )
     .Register ();

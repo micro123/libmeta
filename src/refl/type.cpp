@@ -40,6 +40,11 @@ Meta::ConstantPtr Meta::Type::GetConstant (sview name) const
     return {};
 }
 
+Meta::str Meta::Type::ToString() const
+{
+    return std::format("Type({})", name_);
+}
+
 #define LINKAGE_TYPEID(type)                \
     template <>                             \
     TypeId details::GetTypeIdImpl<type> ()  \
@@ -52,6 +57,11 @@ namespace Meta
 {
     FUNDAMENTAL_TYPES (LINKAGE_TYPEID);
 
+    LINKAGE_TYPEID(Type);
+    LINKAGE_TYPEID(Field);
+    LINKAGE_TYPEID(Method);
+    LINKAGE_TYPEID(Delegate);
+    LINKAGE_TYPEID(Constant);
     LINKAGE_TYPEID (void);
     LINKAGE_TYPEID (str);
 
@@ -74,7 +84,7 @@ std::vector<Meta::TypePtr> Meta::Type::GetBaseClasses () const
     return {};
 }
 
-std::string Meta::Type::ToString (const Any &obj) const
+std::string Meta::Type::ValueToString (const Any &obj) const
 {
     auto const tid = GetTypeId<std::string> ();
     auto const it  = cast_ops_.find (tid);
@@ -83,7 +93,7 @@ std::string Meta::Type::ToString (const Any &obj) const
     return it->second (obj).Value<std::string> ();
 }
 
-bool Meta::Type::FromString (const Any &obj, const str &data) const
+bool Meta::Type::ValueFromString (const Any &obj, const str &data) const
 {
     auto const tid = GetTypeId<std::string> ();
     if (auto const it = construct_ops_.find (tid); it != end (construct_ops_))

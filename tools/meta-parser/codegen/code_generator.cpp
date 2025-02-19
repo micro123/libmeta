@@ -53,7 +53,7 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
     .AddMethod(
         MethodBuilder::NewMethodBuilder ("{{method.name}}", &{{method.fullname}})
 ## for arg in method.args
-        .AddParam ("{{arg}}", NParamId ({{method.fullname}}, {{loop.index}}))
+        .AddParam ({{loop.index}}, "{{arg}}")
 ## endfor
         .Build()
     )
