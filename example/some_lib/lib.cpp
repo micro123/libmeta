@@ -9,6 +9,7 @@ void MyClass::Inc (int &origin, f32 *f) {
     origin += 5;
     if (f)
         *f *= this->a;
+    printf("f = %p\n", f);
 }
 
 void MyClass::xxx () {}

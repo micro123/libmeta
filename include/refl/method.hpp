@@ -54,10 +54,19 @@ namespace Meta
 
         [[nodiscard]] str ToString () const;
 
+        inline u32  DefaultParameterStart() const { return default_param_start_; }
+        inline bool HasDefaultParameter() const { return ~default_param_start_ != 0; }
+        inline bool ParameterCountCheck(u32 total, u32 pass) const 
+        {
+            return (!HasDefaultParameter() && pass >= total) || (HasDefaultParameter() && pass + 1 >= DefaultParameterStart());
+        }
+        
     protected:
         void AddParamInfo (u32 idx, sview name, Any def);
         void SetArgType (u32 idx, TypeId id);
         void SetArgTypes (TypeId *ids, u32 cnt);
+        bool Verify() const;
+        const Any *ParameterOfDefault(Any *argv, u32 argn, u32 param_idx) const;
 
         template <typename ... Args>
         inline void SetArgTypes() {
@@ -79,6 +88,7 @@ namespace Meta
         sview   desc_;
         TypePtr result_type_;
         Params  params_;
+        u32     default_param_start_;
     };
 }  // namespace Meta
 

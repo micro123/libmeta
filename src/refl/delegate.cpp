@@ -39,7 +39,7 @@ Meta::str Meta::Delegate::ToString () const
 Meta::Any Meta::Delegate::InvokeWithArgs (Any *args, u32 cnt) const
 {
     auto const total = (IsMember () ? 1 : 0) + mehtod_->ParameterCount ();
-    if (cnt + prefilled_args_.size () < total)
+    if (!mehtod_->ParameterCountCheck(total, cnt))
         return {};
     std::vector<Any> vec_arg (total);
     vec_arg.assign (begin (prefilled_args_), end (prefilled_args_));

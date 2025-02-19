@@ -34,10 +34,11 @@ namespace Meta
 
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
-                if (cnt < sizeof...(Param))
+                // check passed arg count
+                if (!ParameterCountCheck(sizeof...(Param), cnt))
                     return {};
                 else
-                    return Apply (args, std::make_index_sequence<sizeof...(Param)> {});
+                    return Apply (args, cnt, std::make_index_sequence<sizeof...(Param)> {});
             }
 
             TypePtr ResultType() const
@@ -47,17 +48,17 @@ namespace Meta
 
         private:
             template <size_t... Idx>
-            Any Apply (Any *args, std::index_sequence<Idx...>) const
+            Any Apply (Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
 
@@ -99,27 +100,28 @@ namespace Meta
 
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
-                if (cnt < sizeof...(Param) + 1)
+                // check passed arg count
+                if (!ParameterCountCheck(sizeof...(Param) + 1 /* plus this pointer */, cnt))
                     return {};
                 // args[0] is class instance
                 void *obj = args[0].ValuePtr<void> ();
-                return Apply (obj, args + 1, std::make_index_sequence<sizeof...(Param)> {});
+                return Apply (obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
             }
 
         private:
             template <size_t... Idx>
-            Any Apply (void *obj, Any *args, std::index_sequence<Idx...>) const
+            Any Apply (void *obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
                 M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
@@ -160,27 +162,28 @@ namespace Meta
 
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
-                if (cnt < sizeof...(Param) + 1)
+                // check passed arg count
+                if (!ParameterCountCheck(sizeof...(Param) + 1 /* plus this pointer */, cnt))
                     return {};
                 // args[0] is class instance
                 void *obj = args[0].ValuePtr<void> ();
-                return Apply (obj, args + 1, std::make_index_sequence<sizeof...(Param)> {});
+                return Apply (obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
             }
 
         private:
             template <size_t... Idx>
-            Any Apply (void *obj, Any *args, std::index_sequence<Idx...>) const
+            Any Apply (void *obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
                 M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;
@@ -221,27 +224,28 @@ namespace Meta
 
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
-                if (cnt < sizeof...(Param) + 1)
+                // check passed arg count
+                if (!ParameterCountCheck(sizeof...(Param) + 1 /* plus this pointer */, cnt))
                     return {};
                 // args[0] is class instance
                 void *obj = args[0].ValuePtr<void> ();
-                return Apply (obj, args + 1, std::make_index_sequence<sizeof...(Param)> {});
+                return Apply (obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
             }
 
         private:
             template <size_t... Idx>
-            Any Apply (void *obj, Any *args, std::index_sequence<Idx...>) const
+            Any Apply (void *obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
                 M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
-                    (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                     return Any::Void;
                 }
                 else
                 {
-                    return (t_obj->*ptr_) (args[Idx].Value<std::tuple_element_t<Idx, TupleType>> ()...);
+                    return (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
             Ptr ptr_;

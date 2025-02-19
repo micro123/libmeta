@@ -29,6 +29,8 @@ Meta::MethodBuilder &Meta::MethodBuilder::AddParam (u32 idx, sview name, Any def
 
 Meta::MethodPtr      Meta::MethodBuilder::Build () const
 {
+    if (!d->method_->Verify())
+        throw std::runtime_error("Method Verify Failed!");
     return std::move(d->method_);
 }
 
