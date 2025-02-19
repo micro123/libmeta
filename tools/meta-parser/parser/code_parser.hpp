@@ -11,7 +11,9 @@ public:
     ~MetaParser();
 
     bool Generate() const;
+    std::string GetSource(unsigned offset, unsigned length) const;
 
+    static MetaParser *Current();
     static void Prepare(std::vector<const char*> clang_args);
     static bool GenerateRegisterFile(const std::string &path);
 private:

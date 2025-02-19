@@ -7,6 +7,14 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Debug CMake Launch Target (LLDB)",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "cwd": "${workspaceFolder}/bin"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Debug meta-parser (LLDB)",
             "program": "${workspaceFolder}/build/tools-bin/meta-parser",
             "args": [

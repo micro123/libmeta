@@ -34,7 +34,7 @@ TEST_CASE ("TYPE BUILDER")
 {
     using namespace Meta;
 
-    auto type = TypeBuilder::NewTypeBuilder<Foo> ()
+    TypeBuilder::NewTypeBuilder<Foo> ()
     .AddField (MakeField("x", &Foo::x))
     .AddField (MakeField("y", &Foo::y))
     .AddField (MakeField("z", &Foo::z))
@@ -46,7 +46,6 @@ TEST_CASE ("TYPE BUILDER")
         MethodBuilder::NewMethodBuilder ("test", &Foo::test)
         .AddParam (0, "x", 42)
         .Build()
-    )
-    .Register ();
-    REQUIRE (type->Name () == "Foo");
+    );
+    REQUIRE (TypeOf<Foo>()->Name () == "Foo");
 }

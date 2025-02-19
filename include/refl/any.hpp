@@ -235,7 +235,6 @@ namespace Meta
         template <typename T>
         T *ValuePtr () const
         {
-            assert (IsValid ());
             if constexpr (std::is_same_v<void, T>)
             {
                 return Get ();
@@ -253,7 +252,8 @@ namespace Meta
         template <typename T>
         T &ValueRef () const
         {
-            assert (IsValid ());
+            if (!IsValid ())
+                throw std::bad_cast ();
             if (type_id_ != GetTypeId<T> ())
                 throw std::bad_cast ();
             return *static_cast<T *> (Get ());
@@ -264,7 +264,6 @@ namespace Meta
             std::enable_if_t<!std::is_pointer_v<T>>* = nullptr>
         T Value () const
         {
-            assert (IsValid ());
             if (type_id_ != GetTypeId<T> ())
             {
                 // type must be not null
@@ -292,7 +291,6 @@ namespace Meta
             std::enable_if_t<std::is_pointer_v<T>>* = nullptr>
         T Value () const
         {
-            assert (IsValid ());
             if (type_id_ != GetTypeId<T> ())
             {
                 // type must be not null
@@ -424,6 +422,7 @@ namespace Meta
                 {
                     return ops_->Equal (Get (), other.Get ());
                 }
+                return !other.IsValid();
             }
             return false;
         }

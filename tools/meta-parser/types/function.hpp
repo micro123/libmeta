@@ -8,6 +8,7 @@
 
 struct Parameter {
     std::string name;
+    std::string init_value;
 };
 
 class Function final : public TypeInfo

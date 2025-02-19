@@ -32,9 +32,9 @@ public:
     META()
     void SayHello();
 
-    int Test(double f) const;
+    int Test(double f = (1,2,3.14)) const;
 
-    void Inc(int &origin, f32 *f);
+    void Inc(int &origin, f32 *f = nullptr);
 
     static void xxx();
 

@@ -53,7 +53,7 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
     .AddMethod(
         MethodBuilder::NewMethodBuilder ("{{method.name}}", &{{method.fullname}})
 ## for arg in method.args
-        .AddParam ({{loop.index}}, "{{arg}}")
+        .AddParam ({{loop.index}}, "{{arg.name}}"{% if arg.has_init %}, (NParamT({{method.fullname}},{{loop.index}})){{arg.init}}{% endif %})
 ## endfor
         .Build()
     )
@@ -61,7 +61,7 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## if type.is_enum
     .AddEnumOperations<{{type.fullname}}>()
 ## endif
-    .Register();
+    ;
 // end of {{type.fullname}}
 
 
@@ -98,7 +98,11 @@ static nlohmann::json BuildMethod(const Function *m)
     json args = json::array();
     for (auto &x: m->Arguments())
     {
-        args.emplace_back(x.name);
+        json arg = json::object();
+        arg["name"] = x.name;
+        arg["has_init"] = !x.init_value.empty();
+        arg["init"] = x.init_value;
+        args.emplace_back(arg);
     }
     j["args"] = args;
     return j;

@@ -43,7 +43,7 @@ static void PrintType(const Meta::TypePtr &ptr)
             auto const cnt = x->ParameterCount();
             for (auto i=0u; i<cnt; ++i)
             {
-                std::cout << std::format("      Parameter #{}: {} with type {}\n", i+1, x->ParameterName(i), x->ParameterType(i)->Name());
+                std::cout << std::format("      Parameter #{}: {} with type {} and default value {}\n", i+1, x->ParameterName(i), x->ParameterType(i)->Name(), x->ParameterDefault(i).Value<Meta::str>());
             }
         }
     }
@@ -69,6 +69,6 @@ int main(int argc, char const *argv[])
     std::cout << test["Inc"](x, y) << "\n";
     std::cout << x << ' ' << y << std::endl;
     Meta::Any type = test.Type();
-    std::cout << type << '\n';
+    std::cout << type["Inc"] << '\n';
     return 0;
 }

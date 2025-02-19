@@ -18,7 +18,7 @@ bool TranslateUnit::Parse (const char *file, const char **argv, int argc)
 {
     if (unit_ != nullptr)
         clang_disposeTranslationUnit (unit_);
-    constexpr int     parseFlags = 0;
+    constexpr int     parseFlags = CXTranslationUnit_Incomplete | CXTranslationUnit_SkipFunctionBodies;
     const CXErrorCode ec         = clang_parseTranslationUnit2 (index_, file, argv, argc, nullptr, 0, parseFlags, &unit_);
     return ec == CXError_Success;
 }

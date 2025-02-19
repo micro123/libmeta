@@ -68,14 +68,10 @@ Meta::TypeBuilder &Meta::TypeBuilder::AddConvertFrom (Type::ConvertProc proc, co
     return *this;
 }
 
-Meta::TypePtr      Meta::TypeBuilder::Register(TypeId tid) const
+void Meta::TypeBuilder::Register() const
 {
-    if (tid == NULL_TYPE_ID)
-        tid = d->type_id_;
-    assert (TypeOf(tid) == nullptr); // 必须没有注册过
     TypePtr type = d->type_;
-    Registry::Instance ().RegisterType (type, tid);
-    return std::move(type);
+    Registry::Instance ().RegisterType (type, d->type_id_);
 }
 
 Meta::TypeBuilder::~TypeBuilder ()
@@ -126,4 +122,5 @@ Meta::TypeBuilder::TypeBuilder (MyTypePtr type, const TypeId& tid): d (new Priva
 {
     d->type_ = std::move (type);
     d->type_id_ = tid;
+    Register();
 }

@@ -5,16 +5,20 @@
 #include "clang/translate_unit.hpp"
 #include "codegen/code_generator.hpp"
 #include "types/type_context.hpp"
+#include <cassert>
+#include <fstream>
 
 class MetaParser::Private {
 public:
-
     void VisitAst (const Cursor &c);
 
     bool GenCode() const;
 
     void RecordTypes() const;
 
+    std::string GetSource(unsigned offset, unsigned length) const;
+
+    std::string source_;
     std::string in_, out_;
     Namespace   current_ns_;
     std::list<TypeContext> contexts_;
@@ -22,19 +26,33 @@ public:
     static std::vector<const char*> clang_args_;
     static std::list<std::string>   user_headers_;
     static std::list<std::string>   auto_register_contexts_;
+    static MetaParser              *inst_;
 };
 
 std::vector<const char*> MetaParser::Private::clang_args_;
 std::list<std::string>   MetaParser::Private::user_headers_;
 std::list<std::string>   MetaParser::Private::auto_register_contexts_;
+MetaParser*              MetaParser::Private::inst_;
 
 MetaParser::MetaParser (std::string input, std::string output): d{new Private} {
+    assert (!Private::inst_);
     d->in_ = std::move(input);
     d->out_ = std::move(output);
+    Private::inst_ = this;
+    // read all sources
+    std::ifstream ifs(d->in_, std::ios::in | std::ios::binary);
+    if (ifs.is_open()) {
+        ifs.seekg(0, std::ios::end);
+        d->source_.resize(ifs.tellg());
+        ifs.seekg(0, std::ios::beg);
+        ifs.read(&d->source_[0], d->source_.length());
+        ifs.close();
+    }
 }
 
 MetaParser::~MetaParser ()
 {
+    Private::inst_ = nullptr;
     delete d;
 }
 
@@ -58,7 +76,18 @@ bool MetaParser::Generate () const
     return true;
 }
 
-void MetaParser::Prepare (std::vector<const char *> clang_args) {
+std::string MetaParser::GetSource (unsigned offset, unsigned length) const
+{
+    return d->GetSource(offset, length);
+}
+
+MetaParser *MetaParser::Current ()
+{
+    return Private::inst_;
+}
+
+void MetaParser::Prepare (std::vector<const char *> clang_args)
+{
     Private::clang_args_ = std::move(clang_args);
 }
 
@@ -107,4 +136,10 @@ void MetaParser::Private::RecordTypes () const
     }
     if (!empty)
         user_headers_.emplace_back(in_);
+}
+
+std::string MetaParser::Private::GetSource (unsigned offset, unsigned length) const
+{
+    assert (offset < source_.length());
+    return source_.substr(offset, length);
 }

@@ -49,7 +49,7 @@ namespace Meta {
     template <typename F, size_t N>
     using n_param_t = typename details::MethodParamType<F, N>::Type;
 
-#define NParamId(F,N) GetTypeId<n_param_t<decltype(&F), N>>()
+#define NParamT(F,N) n_param_t<decltype(&F), N>
 
     class LIBMETA_API MethodBuilder final
     {
@@ -120,9 +120,10 @@ namespace Meta {
             return *this;
         }
 
-        [[nodiscard]] TypePtr Register(TypeId tid = NULL_TYPE_ID) const;
         ~TypeBuilder();
     private:
+        void Register() const;
+        
         TypeBuilder(MyTypePtr type, const TypeId& tid);
     };
 }

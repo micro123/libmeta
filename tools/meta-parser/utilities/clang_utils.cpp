@@ -33,3 +33,20 @@ void Print(CXCursor cursor, bool newline)
     if (newline)
         std::cout << std::endl;
 }
+
+std::pair<unsigned, unsigned> GetSourceRange (CXSourceRange range)
+{
+    if (clang_Range_isNull(range))
+        return {0,0};
+    auto beg = clang_getRangeStart(range);
+    auto end = clang_getRangeEnd(range);
+
+    unsigned offset0, offset1;
+    clang_getFileLocation(beg, nullptr, nullptr, nullptr, &offset0);
+    clang_getFileLocation(end, nullptr, nullptr, nullptr, &offset1);
+    if (offset1 > offset0) {
+        return {offset0, offset1 - offset0};
+    }
+
+    return {0,0};
+}
