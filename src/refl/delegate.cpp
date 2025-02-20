@@ -39,7 +39,7 @@ Meta::str Meta::Delegate::ToString () const
 Meta::Any Meta::Delegate::InvokeWithArgs (Any *args, u32 cnt) const
 {
     auto const total = (IsMember () ? 1 : 0) + mehtod_->ParameterCount ();
-    if (!mehtod_->ParameterCountCheck(total, cnt))
+    if (!mehtod_->ParameterCountCheck(total, cnt + prefilled_args_.size()))
         return {};
     std::vector<Any> vec_arg (total);
     vec_arg.assign (begin (prefilled_args_), end (prefilled_args_));
@@ -47,7 +47,7 @@ Meta::Any Meta::Delegate::InvokeWithArgs (Any *args, u32 cnt) const
     {
         vec_arg.emplace_back (args[i]);
     }
-    return mehtod_->InvokeWithArgs (vec_arg.data (), total);
+    return mehtod_->InvokeWithArgs (vec_arg.data (), vec_arg.size());
 }
 
 u32 Meta::Delegate::ParameterCount () const

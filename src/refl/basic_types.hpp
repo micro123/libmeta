@@ -12,7 +12,8 @@ namespace Meta::details {
         FundamentalType(sview name): Type(name, sizeof(T), CalcTypeFlags<T>()) {
             AddConversion<std::string>(
                 +[](const Any &obj) -> Any {
-                    return std::to_string(obj.template ValueRef<T>());
+                    T *ptr = obj.template ValuePtr<T>();
+                    return ptr ? std::to_string(*ptr) : "f32*(null)";
                 }
             );
         }

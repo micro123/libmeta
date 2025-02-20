@@ -183,7 +183,10 @@ namespace Meta
         template <typename T>
         Any (T value, std::enable_if_t<!std::is_enum_v<T>>* = nullptr)
         {
-            ConstructValue (std::move (value));
+            if constexpr (std::is_same_v<cstr, T> || !std::is_pointer_v<T>)
+                ConstructValue (std::move (value));
+            else
+                ConstructPointer(value, 1);
         }
 
         template <typename T>
