@@ -168,7 +168,7 @@ namespace Meta
         };
     }  // namespace details
 
-    bool LIBMETA_API AnyCast (const Any &in, TypeId src, Any &out, TypeId dst);
+    bool LIBMETA_API AnyCast (const Any &in, Any &out, TypeId dst);
 
     class LIBMETA_API Any
     {
@@ -244,8 +244,13 @@ namespace Meta
             }
             else
             {
-                if (type_id_ != GetTypeId<T> ())
+                auto dst = GetTypeId<T> ();
+                if (type_id_ != dst)
                 {
+                    // try cast
+                    Any a;
+                    if (AnyCast(*this, a, dst))
+                        return a.ValuePtr<T> ();
                     return nullptr;
                 }
                 return static_cast<T *> (Get ());
@@ -281,7 +286,7 @@ namespace Meta
                 else
                 {
                     Any result;
-                    if (!AnyCast (*this, type_id_, result, GetTypeId<T> ()))
+                    if (!AnyCast (*this, result, GetTypeId<T> ()))
                         throw std::bad_cast ();
                     return result.Value<T> ();
                 }

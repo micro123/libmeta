@@ -7,6 +7,7 @@
 #include "types/type_context.hpp"
 #include <cassert>
 #include <fstream>
+#include <utilities/clang_utils.hpp>
 
 class MetaParser::Private {
 public:
@@ -105,12 +106,16 @@ void MetaParser::Private::VisitAst (const Cursor &c)
     {
         if (child.IsNamespace ())
         {
-            current_ns_.Push (child.Spelling ());
+            // Print(child);
+            if (!child.IsAnonymous())
+                current_ns_.Push (child.Spelling ());
             VisitAst (child);
-            current_ns_.Pop ();
+            if (!child.IsAnonymous())
+                current_ns_.Pop ();
         }
         else if (child.IsUserType () && !child.IsAnonymous ()) // anonymous type in global namespace was not support
         {
+            // Print(child);
             contexts_.emplace_back (child, current_ns_);
             if (!contexts_.back().ShouldCompile())
                 contexts_.pop_back();

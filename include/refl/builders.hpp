@@ -50,6 +50,7 @@ namespace Meta {
     using n_param_t = typename details::MethodParamType<F, N>::Type;
 
 #define NParamT(F,N) n_param_t<decltype(&F), N>
+#define BaseCvt(T,B) +[](const Meta::Any &in)-> Meta::Any { return static_cast<B*>(in.ValuePtr<T>()); }
 
     class LIBMETA_API MethodBuilder final
     {
@@ -88,11 +89,12 @@ namespace Meta {
             };
         }
 
+        TypeBuilder &AddBaseType(TypeId id, Type::CastProc cast);
         TypeBuilder &AddField(FieldPtr field);
         TypeBuilder &AddConstant(ConstantPtr constant);
         TypeBuilder &AddMethod(MethodPtr method);
 
-        TypeBuilder &AddCastTo(Type::CastPorc proc, const TypeId &type_id);
+        TypeBuilder &AddCastTo(Type::CastProc proc, const TypeId &type_id);
         TypeBuilder &AddConvertFrom(Type::ConvertProc proc, const TypeId &type_id);
 
         template<typename Enum>

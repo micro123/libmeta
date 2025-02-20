@@ -46,3 +46,23 @@ TEST_CASE ("Enum Serialize")
     std::cout << e << std::endl;
 }
 
+
+TEST_CASE ("Base Type Serialization")
+{
+    using namespace Meta;
+    
+    Derived d;
+    d.SetValue(1,2,3,4);
+    Derived other;
+    Any a = &d;
+    Any b = &other;
+    auto data = XmlSerialize(a, true);
+    std::cout << data << '\n';
+    XmlDeserialize(b, data);
+    REQUIRE(memcmp(&d, &other, sizeof(d)) == 0);
+    d.SetValue(4,3,2,1);
+    data = JsonSerialize(a, true);
+    std::cout << data << '\n';
+    JsonDeserialize(b, data);
+    REQUIRE(memcmp(&d, &other, sizeof(d)) == 0);
+}

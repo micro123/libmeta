@@ -35,7 +35,7 @@ namespace Meta
             Any Get (const Any *, u32 index) const override
             {
                 assert (index == 0);
-                return Any::RefWrap(ptr_, 1);
+                return Any::RefWrap (ptr_, 1);
             }
             Any Set (const Any *, Any value, u32 index) const override
             {
@@ -68,7 +68,7 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberField (sview name, T (C::*ptr)) : Field (name), ptr_ ((Ptr) ptr)
+            MemberField (sview name, T (C::*ptr)) : Field (name), ptr_ ((Ptr) ptr), cls_id_ (GetTypeId<C> ())
             {
             }
             ~MemberField () override {}
@@ -89,13 +89,13 @@ namespace Meta
             Any Get (const Any *object, u32 index) const override
             {
                 assert (index == 0);
-                auto t_obj = (M_T*) object->ValuePtr<void> ();
-                return Any::RefWrap(&(t_obj->*ptr_), 1);
+                auto t_obj = GetObject(object);
+                return Any::RefWrap (&(t_obj->*ptr_), 1);
             }
             Any Set (const Any *object, Any value, u32 index) const override
             {
                 assert (index == 0);
-                auto t_obj = (M_T *) object->ValuePtr<void> ();
+                auto t_obj = GetObject(object);
                 if constexpr (std::is_const_v<T>)
                 {
                     return Get (object, index);
@@ -108,16 +108,35 @@ namespace Meta
             }
 
         private:
-            Ptr ptr_;
+            inline M_T *GetObject (const Any *object) const
+            {
+                if (object->Id () == cls_id_)
+                    return (M_T *) object->ValuePtr<void> ();
+                else
+                {
+                    // try cast
+                    Any cls_obj;
+                    if (AnyCast (*object, cls_obj, cls_id_))
+                        return (M_T *) cls_obj.ValuePtr<void> ();
+                }
+                return nullptr;
+            }
+
+            Ptr          ptr_;
+            TypeId const cls_id_;
         };
 
         template <typename T>
-        class NormalArrayField : public Field {
-            using Ptr = T(*)[];
+        class NormalArrayField : public Field
+        {
+            using Ptr = T (*)[];
+
         public:
             template <size_t N>
-            NormalArrayField(sview name, T (*ptr)[N]): Field(name), ptr_((Ptr) ptr), cnt_(N) {}
-            ~NormalArrayField() = default;
+            NormalArrayField (sview name, T (*ptr)[N]) : Field (name), ptr_ ((Ptr) ptr), cnt_ (N)
+            {
+            }
+            ~NormalArrayField () = default;
 
             bool IsMember () const override
             {
@@ -127,13 +146,13 @@ namespace Meta
             {
                 return std::is_const_v<T>;
             }
-            bool IsArray() const override
+            bool IsArray () const override
             {
                 return true;
             }
-            u32 Count() const override
+            u32 Count () const override
             {
-                return (u32)cnt_;
+                return (u32) cnt_;
             }
             TypePtr Type () const override
             {
@@ -143,8 +162,8 @@ namespace Meta
             Any Get (const Any *, u32 index) const override
             {
                 assert (index < cnt_);
-                T* ptr = (*ptr_) + index;
-                return Any::RefWrap(ptr, cnt_ - index);
+                T *ptr = (*ptr_) + index;
+                return Any::RefWrap (ptr, cnt_ - index);
             }
             Any Set (const Any *, Any value, u32 index) const override
             {
@@ -161,8 +180,8 @@ namespace Meta
             }
 
         private:
-            Ptr           ptr_;
-            size_t  const cnt_;
+            Ptr          ptr_;
+            size_t const cnt_;
         };
 
 #ifdef EXPLICIT_CLASS_NAME
@@ -170,16 +189,20 @@ namespace Meta
 #else
         template <typename T>
 #endif
-        class MemberArrayField : public Field {
-            using Ptr = T(M_T::*)[];
+        class MemberArrayField : public Field
+        {
+            using Ptr = T (M_T::*)[];
+
         public:
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C, size_t N>
 #else
             template <size_t N>
 #endif
-            MemberArrayField(sview name, T(C::*ptr)[N]): Field(name), ptr_((Ptr) ptr), cnt_(N) {}
-            ~MemberArrayField() = default;
+            MemberArrayField (sview name, T (C::*ptr)[N]) : Field (name), ptr_ ((Ptr) ptr), cnt_ (N), cls_id_ (GetTypeId<C> ())
+            {
+            }
+            ~MemberArrayField () = default;
 
             bool IsMember () const override
             {
@@ -189,13 +212,13 @@ namespace Meta
             {
                 return std::is_const_v<T>;
             }
-            bool IsArray() const override
+            bool IsArray () const override
             {
                 return true;
             }
-            u32 Count() const override
+            u32 Count () const override
             {
-                return (u32)cnt_;
+                return (u32) cnt_;
             }
             TypePtr Type () const override
             {
@@ -205,14 +228,14 @@ namespace Meta
             Any Get (const Any *object, u32 index) const override
             {
                 assert (index < cnt_);
-                auto t_obj = (M_T *) object->ValuePtr<void> ();
-                T* ptr = (t_obj->*ptr_) + index;
-                return Any::RefWrap(ptr, cnt_ - index);
+                auto t_obj = GetObject(object);
+                T   *ptr   = (t_obj->*ptr_) + index;
+                return Any::RefWrap (ptr, cnt_ - index);
             }
             Any Set (const Any *object, Any value, u32 index) const override
             {
                 assert (index < cnt_);
-                auto t_obj = (M_T *) object->ValuePtr<void> ();
+                auto t_obj = GetObject(object);
                 if constexpr (std::is_const_v<T>)
                 {
                     return Get (object, index);
@@ -223,9 +246,25 @@ namespace Meta
                     return Get (object, index);
                 }
             }
+
         private:
+            inline M_T *GetObject (const Any *object) const
+            {
+                if (object->Id () == cls_id_)
+                    return (M_T *) object->ValuePtr<void> ();
+                else
+                {
+                    // try cast
+                    Any cls_obj;
+                    if (AnyCast (*object, cls_obj, cls_id_))
+                        return (M_T *) cls_obj.ValuePtr<void> ();
+                }
+                return nullptr;
+            }
+
             Ptr          ptr_;
             size_t const cnt_;
+            TypeId const cls_id_;
         };
 
         template <typename T>
@@ -245,13 +284,13 @@ namespace Meta
         }
 
         template <typename T, size_t N>
-        FieldPtr MakeField(sview name, T(*ptr)[N])
+        FieldPtr MakeField (sview name, T (*ptr)[N])
         {
-            return new NormalArrayField{name, ptr};
+            return new NormalArrayField {name, ptr};
         }
 
         template <typename T, typename C, size_t N>
-        FieldPtr MakeField(sview name, T(C::*ptr)[N])
+        FieldPtr MakeField (sview name, T (C::*ptr)[N])
         {
 #ifdef EXPLICIT_CLASS_NAME
             return new MemberArrayField<C, T> {name, ptr};

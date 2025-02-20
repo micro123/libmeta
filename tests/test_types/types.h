@@ -65,9 +65,17 @@ STRUCT(Base2, All)
     int y;
 };
 
-STRUCT(Derived, All): public Base1, private Base2
+namespace __internal {
+     STRUCT(Internal) { int w; };
+}
+
+STRUCT(Derived, All): public Base1, private Base2, protected __internal::Internal
 {
+    REFL_BODY(Derived)
+
     int z;
+
+    void SetValue(int a, int b, int c, int d);
 };
 
 }

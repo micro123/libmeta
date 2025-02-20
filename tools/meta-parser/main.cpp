@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include "types/user_type.hpp"
 
 static bool ParseAndGen(const std::string &in, const std::string &out, const std::vector<const char*> &args)
 {
@@ -40,15 +41,20 @@ int main(int argc, char const *argv[])
     
     MetaParser::Prepare(std::move(args));
 
+    int code = 0;
+
     for (auto const &x: files) {
         if (!ParseAndGen(x.first, x.second, args))
         {
-            return 1;
+            code = 1;
+            break;
         }
         all_headers.emplace_back(x.first);
     }
     if (!MetaParser::GenerateRegisterFile(auto_register_file))
-        return 1;
+        code = 2;
+
+    LanguageType::Clean();
 
     return 0;
 }

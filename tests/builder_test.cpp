@@ -4,8 +4,15 @@
 #include <refl/field.hpp>
 #include <refl/registry.hpp>
 
-struct Foo
+struct Bar {
+    int a;
+    float b;
+};
+
+struct Foo : Bar
 {
+    Foo(int yy): y(yy) {}
+
     int x;
     const int y;
     static int z;
@@ -34,7 +41,12 @@ TEST_CASE ("TYPE BUILDER")
 {
     using namespace Meta;
 
+    TypeBuilder::NewTypeBuilder<Bar> ()
+    .AddField (MakeField("a", &Bar::a))
+    .AddField (MakeField("b", &Bar::b));
+
     TypeBuilder::NewTypeBuilder<Foo> ()
+    .AddBaseType (GetTypeId<Bar>(), BaseCvt(Foo,Bar))
     .AddField (MakeField("x", &Foo::x))
     .AddField (MakeField("y", &Foo::y))
     .AddField (MakeField("z", &Foo::z))
@@ -48,4 +60,7 @@ TEST_CASE ("TYPE BUILDER")
         .Build()
     );
     REQUIRE (TypeOf<Foo>()->Name () == "Foo");
+
+    Any f = Foo(45);
+    REQUIRE(f.ValuePtr<Bar>() != nullptr);
 }

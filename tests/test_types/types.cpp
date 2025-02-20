@@ -16,4 +16,12 @@ namespace Test {
     void Foo::print() const {
         puts("void Foo::print() const");
     }
+
+    void Derived::SetValue(int a, int b, int c, int d)
+    {
+        x = a;
+        y = b;
+        z = c;
+        w = d;
+    }
 }

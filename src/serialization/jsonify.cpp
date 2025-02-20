@@ -8,14 +8,25 @@ using namespace nlohmann;
 
 static json ToJson(const Meta::Any &value)
 {
+    json result = json::object();
     auto type = value.Type();
     if (!type)
         return json{nullptr};
+    auto type_ids = type->GetBaseTypeIds();
+    for (auto const &id: type_ids) {
+        Meta::Any temp;
+        if (Meta::AnyCast(value, temp, id))
+        {
+            auto base_type = temp.Type();
+            if (!base_type)
+                continue;
+            result[base_type->Name()] = ToJson(temp);
+        }
+    }
     auto fields = type->GetFields();
     if (fields.empty())
         return value.Value<Meta::str>();
     else {
-        nlohmann::json result = nlohmann::json::object();
         for (auto &x: fields) {
             if (x->IsMember()) {
                 const u32 cnt = x->Count();
@@ -44,6 +55,17 @@ static bool FromJson(const Meta::Any& obj, const json &content)
     auto type = obj.Type();
     if (!type)
         return true;
+    auto type_ids = type->GetBaseTypeIds();
+    for (auto const &id: type_ids) {
+        Meta::Any temp;
+        if (Meta::AnyCast(obj, temp, id))
+        {
+            auto base_type = temp.Type();
+            if (!base_type)
+                continue;
+            FromJson(temp, content[base_type->Name()]);
+        }
+    }
     auto fields = type->GetFields();
     if (fields.empty()) {
         return type->ValueFromString(obj, content.get<Meta::str>());

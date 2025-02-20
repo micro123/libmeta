@@ -7,14 +7,35 @@
 #include "function.hpp"
 #include "utilities/clang_utils.hpp"
 
-LanguageType::LanguageType (std::string name, const Namespace &ns, TypeInfo *parent, const Cursor &cursor, std::list<LanguageType> &type_container)
-: TypeInfo (cursor, ns, parent)
-, container_ (type_container)
+std::unordered_map<unsigned, LanguageType *> LanguageType::all_types_;
+
+void LanguageType::Clean ()
 {
-    name_ = std::move(name);
-    if (!ShouldCompile())
+    for (auto &x: all_types_)
+    {
+        delete x.second;
+    }
+    all_types_.clear ();
+}
+
+std::string LanguageType::GetTypeFullName (unsigned hash)
+{
+    auto it = all_types_.find (hash);
+    if (it != end (all_types_))
+        return it->second->FullName ();
+    return "";
+}
+
+LanguageType::LanguageType (std::string name, const Namespace &ns, TypeInfo *parent, const Cursor &cursor,
+                            std::list<LanguageType *> &type_container) : TypeInfo (cursor, ns, parent), container_ (type_container)
+{
+    all_types_[clang_hashCursor (cursor)] = this;
+    // Print(cursor, false);
+    name_ = std::move (name);
+    // std::cout << " " << FullName() << '\n';
+    if (!ShouldCompile ())
         return;
-    assert (cursor.IsUserType());
+    assert (cursor.IsUserType ());
     enum_ = cursor.IsEnumType ();
     anon_ = cursor.IsAnonymous ();
     if (enum_)
@@ -24,9 +45,12 @@ LanguageType::LanguageType (std::string name, const Namespace &ns, TypeInfo *par
 }
 LanguageType::~LanguageType ()
 {
-    for (auto &x: fields_) delete x;
-    for (auto &x: functions_) delete x;
-    for (auto &x: constants_) delete x;
+    for (auto &x: fields_)
+        delete x;
+    for (auto &x: functions_)
+        delete x;
+    for (auto &x: constants_)
+        delete x;
 }
 void LanguageType::ParseDataType (const Cursor &cursor)
 {
@@ -38,55 +62,71 @@ void LanguageType::ParseDataType (const Cursor &cursor)
     for (auto it = children.begin (); it != children.end (); ++it)
     {
         // Print(*it);
-        auto const kind = it->Kind();
-        if (kind == CXCursor_FieldDecl || kind == CXCursor_VarDecl) {
-            if (it->Type().IsReferenced())
+        auto const kind = it->Kind ();
+        if (kind == CXCursor_CXXBaseSpecifier)
+        {
+            auto base = clang_hashCursor (clang_getCursorDefinition (*it));
+            // std::cout << "base class " << GetTypeFullName (base) << "\n";
+            auto basename = GetTypeFullName(base);
+            if (!basename.empty())
+                base_types_.emplace_back(std::move(basename));
+        }
+        else if (kind == CXCursor_FieldDecl || kind == CXCursor_VarDecl)
+        {
+            if (it->Type ().IsReferenced ())
                 continue;
-            auto f = new Field(*it, ns, this);
-            if (f->ShouldCompile())
+            auto f = new Field (*it, ns, this);
+            if (f->ShouldCompile ())
                 fields_.emplace_back (f);
             else
                 delete f;
         }
+        else if (kind == CXCursor_Constructor)
+        {
+            // TODO: add constructors here
+            Print(*it);
+        }
         else if (kind == CXCursor_CXXMethod)
         {
-            auto name = it->DisplayName();
-            if (name.find("operator") == 0)
+            auto name = it->DisplayName ();
+            if (name.find ("operator") == 0) // not allow operators
                 continue;
-            auto f = new Function(*it, ns, this);
-            if (f->ShouldCompile())
+            auto f = new Function (*it, ns, this);
+            if (f->ShouldCompile ())
                 functions_.emplace_back (f);
             else
                 delete f;
         }
         else if (kind == CXCursor_EnumDecl)
         {
-            if (it->IsAnonymous ()) {
+            if (it->IsAnonymous ())
+            {
                 auto const decl = clang_getCursorLocation (*it);
-                auto const bak = it;
+                auto const bak  = it;
                 // check next field decl is this type
-                while (it != end(children) && it->Kind () != CXCursor_FieldDecl)
+                while (it != end (children) && it->Kind () != CXCursor_FieldDecl)
                     ++it;
-                if (it != end(children))
+                if (it != end (children))
                 {
                     // check item type
-                    auto type = clang_getCursorType (*it);
+                    auto type      = clang_getCursorType (*it);
                     auto type_decl = clang_getCursorLocation (clang_getTypeDeclaration (type));
                     if (clang_equalLocations (decl, type_decl))
                     {
                         if (anon_)
                         {
-                            it = bak; // restore
-                            continue; // anonymous in anonymous was not supported
+                            it = bak;  // restore
+                            continue;  // anonymous in anonymous was not supported
                         }
 
                         // parse a new type
-                        std::string name = std::format ("Enum_{:X}", clang_hashCursor (*bak));
+                        std::string name      = std::format ("Enum_{:X}", clang_hashCursor (*bak));
                         std::string qualifier = std::format ("decltype({})", ns.GetFullQualifiedName (it->DisplayName ()));
-                        Namespace custom; custom.Push (qualifier);
-                        auto& r = container_.emplace_back (std::move(name), custom, this, *bak, container_);
-                        r.custom_name_ = qualifier;
-                        if (!container_.back().ShouldCompile())
+                        Namespace   custom;
+                        custom.Push (qualifier);
+                        auto &r         = container_.emplace_back (new LanguageType {std::move (name), custom, this, *bak, container_});
+                        r->custom_name_ = qualifier;
+                        if (!container_.back ()->ShouldCompile ())
                             container_.pop_back ();
                     }
                     else
@@ -100,12 +140,12 @@ void LanguageType::ParseDataType (const Cursor &cursor)
                     // directly parse into this type
                     ParseEnumType (*bak);
                 }
-                it = bak; // restore iter
+                it = bak;  // restore iter
             }
             else
             {
-                container_.emplace_back (it->DisplayName (), ns, this, *it, container_);
-                if (!container_.back().ShouldCompile())
+                container_.emplace_back (new LanguageType {it->DisplayName (), ns, this, *it, container_});
+                if (!container_.back ()->ShouldCompile ())
                     container_.pop_back ();
             }
         }
@@ -114,30 +154,31 @@ void LanguageType::ParseDataType (const Cursor &cursor)
             if (it->IsAnonymous ())
             {
                 auto const decl = clang_getCursorLocation (*it);
-                auto const bak = it;
+                auto const bak  = it;
                 // check next field decl is this type
-                while (it != end(children) && it->Kind () != CXCursor_FieldDecl)
+                while (it != end (children) && it->Kind () != CXCursor_FieldDecl)
                     ++it;
-                if (it != end(children))
+                if (it != end (children))
                 {
                     // check item type
-                    auto type = clang_getCursorType (*it);
+                    auto type      = clang_getCursorType (*it);
                     auto type_decl = clang_getCursorLocation (clang_getTypeDeclaration (type));
                     if (clang_equalLocations (decl, type_decl))
                     {
                         if (anon_)
                         {
-                            it = bak; // restore
-                            continue; // anonymous in anonymous was not supported
+                            it = bak;  // restore
+                            continue;  // anonymous in anonymous was not supported
                         }
 
                         // parse a new type
-                        std::string name = std::format ("Type_{:X}", clang_hashCursor (*bak));
+                        std::string name      = std::format ("Type_{:X}", clang_hashCursor (*bak));
                         std::string qualifier = std::format ("decltype({})", ns.GetFullQualifiedName (it->DisplayName ()));
-                        Namespace custom; custom.Push (qualifier);
-                        auto& r = container_.emplace_back (std::move(name), custom, this, *bak, container_);
-                        r.custom_name_ = qualifier;
-                        if (!container_.back().ShouldCompile())
+                        Namespace   custom;
+                        custom.Push (qualifier);
+                        auto &r         = container_.emplace_back (new LanguageType {std::move (name), custom, this, *bak, container_});
+                        r->custom_name_ = qualifier;
+                        if (!container_.back ()->ShouldCompile ())
                             container_.pop_back ();
                     }
                     else
@@ -151,12 +192,12 @@ void LanguageType::ParseDataType (const Cursor &cursor)
                     // directly parse into this type
                     ParseEnumType (*bak);
                 }
-                it = bak; // restore iter
+                it = bak;  // restore iter
             }
             else
             {
-                container_.emplace_back (it->DisplayName (), ns, this, *it, container_);
-                if (!container_.back().ShouldCompile())
+                container_.emplace_back (new LanguageType {it->DisplayName (), ns, this, *it, container_});
+                if (!container_.back ()->ShouldCompile ())
                     container_.pop_back ();
             }
         }
@@ -172,9 +213,9 @@ void LanguageType::ParseEnumType (const Cursor &cursor)
     {
         if (x.Kind () == CXCursor_EnumConstantDecl)
         {
-            auto c = new Constant(x, ns, this);
-            if (c->ShouldCompile())
-                constants_.emplace_back (new Constant(x, ns, this));
+            auto c = new Constant (x, ns, this);
+            if (c->ShouldCompile ())
+                constants_.emplace_back (new Constant (x, ns, this));
             else
                 delete c;
         }
@@ -197,9 +238,13 @@ bool LanguageType::IsEnum () const
 }
 bool LanguageType::ShouldCompile () const
 {
-    return parent_ ? parent_->ShouldCompile() : enabled_;
+    return parent_ ? parent_->ShouldCompile () : enabled_;
 }
-const std::list<Field *>    &LanguageType::Fields () const
+const std::list<std::string> &LanguageType::BaseTypes () const
+{
+    return base_types_;
+}
+const std::list<Field *> &LanguageType::Fields () const
 {
     return fields_;
 }

@@ -39,6 +39,12 @@ Meta::MethodBuilder::~MethodBuilder ()
     delete d;
 }
 
+Meta::TypeBuilder &Meta::TypeBuilder::AddBaseType (TypeId id, Type::CastProc cast)
+{
+    d->type_->AddBaseClass(id, cast);
+    return *this;
+}
+
 Meta::TypeBuilder &Meta::TypeBuilder::AddField (FieldPtr field)
 {
     assert (field);
@@ -59,7 +65,7 @@ Meta::TypeBuilder &Meta::TypeBuilder::AddMethod (MethodPtr method)
     d->type_->AddMethod (std::move (method));
     return *this;
 }
-Meta::TypeBuilder &Meta::TypeBuilder::AddCastTo (Type::CastPorc proc, const TypeId &type_id)
+Meta::TypeBuilder &Meta::TypeBuilder::AddCastTo (Type::CastProc proc, const TypeId &type_id)
 {
     d->type_->AddConversion (proc, type_id);
     return *this;
@@ -104,7 +110,7 @@ bool      Meta::TypeBuilder::EnumFromString (const Any &obj, const Any &value)
 {
     auto type = obj.Type ();
     assert (type);
-    if (Any enum_v; AnyCast (value, value.Id (), enum_v, GetTypeId<s64> ()))
+    if (Any enum_v; AnyCast (value, enum_v, GetTypeId<s64> ()))
     {
         return type->ConvertFrom (enum_v, obj, enum_v.Id ());
     }

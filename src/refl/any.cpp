@@ -2,9 +2,9 @@
 #include <unordered_map>
 #include "any_converter.hpp"
 #include "refl/constant.hpp"
+#include "refl/delegate.hpp"
 #include "refl/field.hpp"
 #include "refl/method.hpp"
-#include "refl/delegate.hpp"
 
 using cvt_key_t = std::pair<Meta::TypeId, Meta::TypeId>;
 
@@ -16,7 +16,7 @@ struct std::hash<cvt_key_t> {
     }
 };
 
-static std::unordered_map<cvt_key_t, Meta::Type::CastPorc> g_fundamental_cast_ops;
+static std::unordered_map<cvt_key_t, Meta::Type::CastProc> g_fundamental_cast_ops;
 
 static void __register_fundamental_type_cast_ops ()
 {
@@ -91,7 +91,7 @@ Meta::Any Meta::Any::CallWithArgs (Meta::Any *args, size_t cnt) const
     // 2. check for delegate
     else if (auto d = ValuePtr<Delegate> ())
     {
-        return d->InvokeWithArgs(args, cnt);
+        return d->InvokeWithArgs (args, cnt);
     }
     return {};
 }
@@ -135,7 +135,7 @@ Meta::Any Meta::Any::operator[] (Meta::str key) const
 
         if (auto m = type->GetMethod (key))
         {
-            return Any::NewRef<Delegate>(m, *this);
+            return Any::NewRef<Delegate> (m, *this);
         }
 
         if (auto f = type->GetField (key))
@@ -194,16 +194,21 @@ void Meta::Any::Assign (Any &&any)
     }
 }
 
-bool Meta::AnyCast (const Any &in, TypeId src, Any &out, TypeId dst)
+bool Meta::AnyCast (const Any &in, Any &out, TypeId dst)
 {
-    // 1. check for fundamental types cvt
     static struct CastMapInit {
         CastMapInit ()
         {
             __register_fundamental_type_cast_ops ();
         }
     } __init__;
-    auto key = std::make_pair (src, dst);
+
+    if (!in.IsValid ())
+        return false;
+
+    // 1. check for fundamental types cvt
+    auto const src = in.Id ();
+    auto       key = std::make_pair (src, dst);
     if (g_fundamental_cast_ops.find (key) != end (g_fundamental_cast_ops))
     {
         out = g_fundamental_cast_ops.at (key) (in);

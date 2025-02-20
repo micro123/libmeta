@@ -23,14 +23,14 @@ see `example` folder.
 > TODO: More documents
 
 ## TODO LIST
-- Add default parameter support to `meta-parser`
-- Use older c++ standard (maybe c++11?)
-- Add construct method to type
-- Add overloaded method support
-- Add base class records & converter
-- Add custom properties to field
-- Add n-dim arrays
-- Add more unit tests
-- And more
+- [x] Add default parameter support to `meta-parser`
+- [ ] Use older c++ standard (maybe c++11?)
+- [ ] Add construct method to type
+- [ ] Add overloaded method support
+- [x] Add base class records & converters
+- [ ] Add custom properties to field
+- [ ] Add n-dim arrays
+- [ ] Add more unit tests
+- [ ] And more
 
 ## Happy coding ~~~

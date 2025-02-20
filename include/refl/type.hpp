@@ -25,8 +25,9 @@ namespace Meta
     class LIBMETA_API Type
     {
     public:
-        using CastPorc = Any(*)(const Any &in); // 内容转换函数
-        using ConvertProc = bool(*)(const Any &out, const Any &in); // 从别的东西构造
+        using CastProc = Any(*)(const Any &in); // this type object to other type
+        using ConvertProc = bool(*)(const Any &out, const Any &in); // other type object to this type
+
         Type (sview name, size_t size, u32 flags);
         virtual ~Type ();
 
@@ -84,6 +85,7 @@ namespace Meta
 
         // 基类信息
         virtual std::vector<TypePtr>     GetBaseClasses () const;
+        virtual std::vector<TypeId>      GetBaseTypeIds () const;
 
         // 一般工具
         virtual str                      ValueToString (const Any &obj) const;
@@ -94,8 +96,8 @@ namespace Meta
         void AddConverter (ConvertProc proc, const TypeId& type_id);
 
         template <typename T>
-        inline void AddConversion(CastPorc proc) { return AddConversion(proc, GetTypeId<T>()); }
-        void AddConversion(CastPorc proc, const TypeId& type_id);
+        inline void AddConversion(CastProc proc) { return AddConversion(proc, GetTypeId<T>()); }
+        void AddConversion(CastProc proc, const TypeId& type_id);
 
         // cast check
         template <typename T>
@@ -119,8 +121,8 @@ namespace Meta
         size_t const size_;
         u32 const    flags_;
     protected:
-        std::unordered_map<TypeId, CastPorc>      cast_ops_;
-        std::unordered_map<TypeId, ConvertProc>   construct_ops_;
+        std::unordered_map<TypeId, CastProc>      cast_to_;
+        std::unordered_map<TypeId, ConvertProc>   cast_from_;
     };
 
     namespace details {

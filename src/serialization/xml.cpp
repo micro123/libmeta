@@ -11,6 +11,19 @@ static void ToXml (const Meta::Any &value, xml_node &node)
     auto type = value.Type ();
     if (!type)
         return;
+    auto type_ids = type->GetBaseTypeIds();
+    for (auto const &id: type_ids) {
+        Meta::Any temp;
+        if (Meta::AnyCast(value, temp, id))
+        {
+            auto base_type = temp.Type();
+            if (!base_type)
+                continue;
+            auto n = node.append_child(base_type->Name());
+            n.append_attribute("class").set_value(id.operator std::string());
+            ToXml(temp, n);
+        }
+    }
     auto fields = type->GetFields ();
     if (fields.empty ())
     {
@@ -61,6 +74,19 @@ static bool FromXml (const Meta::Any &obj, const xml_node &node)
     auto type = obj.Type ();
     if (!type)
         return true;
+    auto type_ids = type->GetBaseTypeIds();
+    for (auto const &id: type_ids) {
+        Meta::Any temp;
+        if (Meta::AnyCast(obj, temp, id))
+        {
+            auto base_type = temp.Type();
+            if (!base_type)
+                continue;
+            auto n = node.child(base_type->Name());
+            if (n)
+                FromXml(temp, n);
+        }
+    }
     auto fields = type->GetFields ();
     if (fields.empty ())
     {

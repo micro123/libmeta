@@ -27,9 +27,9 @@ void Print(CXSourceLocation loc, bool newline)
 void Print(CXCursor cursor, bool newline)
 {
     // cursor {type: spelling}
-    std::cout << std::format("Cursor {{{}: {}}}",
+    std::cout << std::format("Cursor {{{}: {}}} Hash: 0x{:08X}",
         ToString(clang_getCursorKindSpelling(cursor.kind)),
-        ToString(clang_getCursorDisplayName(cursor)));
+        ToString(clang_getCursorDisplayName(cursor)), clang_hashCursor(cursor));
     if (newline)
         std::cout << std::endl;
 }

@@ -18,6 +18,10 @@
 - Can add `Disabled` to explicit `Disable` item
 - `Property` will add extra infomations (to be implement)
 
+## REFL_BODY(TypeName)
+
+If you get member/type access error (like protected or private), try adding this macro inside class/struct.
+
 ## Note
 - Anonymous types in **GLOBAL** namespace was **NOT** supported
 - Nested anonymous types are also **NOT** supported

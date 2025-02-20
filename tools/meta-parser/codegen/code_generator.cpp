@@ -43,6 +43,9 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## for type in ctx.types
 // begin of {{type.fullname}}
     (void)TypeBuilder::NewTypeBuilder<{{type.fullname}}> ("{{type.name}}")
+## for base in type.base_types
+    .AddBaseType (GetTypeId<{{base}}>(), BaseCvt({{type.fullname}},{{base}}))
+## endfor
 ## for field in type.fields
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
 ## endfor
@@ -115,6 +118,13 @@ static nlohmann::json BuildType(const LanguageType &type)
     t["fullname"] = type.FullName();
     t["name"] = type.Name();
     t["is_enum"] = type.IsEnum();
+    // base types
+    json base_types = json::array();
+    for (auto &x: type.BaseTypes())
+    {
+        base_types.emplace_back(x);
+    }
+    t["base_types"] = base_types;
     // constants
     json constants = json::array();
     for (auto &x: type.Constants ())
@@ -147,7 +157,7 @@ static nlohmann::json BuildContext (const TypeContext &tc)
     json types = json::array();
     for (auto &x: tc.GetTypes ())
     {
-        types.emplace_back(BuildType (x));
+        types.emplace_back(BuildType (*x));
     }
     ctx["types"] = types;
     return ctx;
