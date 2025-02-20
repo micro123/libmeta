@@ -46,52 +46,53 @@ namespace Meta
         template <typename X, typename Y>
         concept PtrCastable = requires (X *&x, Y *y) { x = y; };
 
+        using DisposeFunc = void (*) (void *);
+        template <typename T>
+        static inline void DefaultDeleter(void* data)
+        {
+            if constexpr (IsDisposable<T>)
+            {
+                static_cast<T *> (data)->Dispose ();
+            }
+            else
+            {
+                delete static_cast<T *> (data);
+            }
+        }
+
         template <typename T>
         class RefCounted : public RefCountedBase
         {
             template <typename> friend class RefCounted;
 
-            using DisposeFunc = void (*) (void *);
-
-            RefCounted () : data_ (nullptr), dispose_ (nullptr) {}
+            RefCounted () : origin_ (nullptr), data_ (nullptr), dispose_ (nullptr) {}
 
             template <typename U>
                 requires PtrCastable<T, U>
-            RefCounted (U *ptr) : data_ (ptr)
+            RefCounted (U *ptr, void *base, DisposeFunc d = {}) : origin_ (base), data_ (ptr), dispose_ (d)
             {
-                if constexpr (IsDisposable<T>)
-                {
-                    dispose_ = +[] (void *data) {
-                        if (data)
-                            ((T *) data)->Dispose ();
-                    };
-                }
-                else
-                {
-                    dispose_ = +[] (void *data) { delete (T *) data; };
-                }
+                if (!dispose_)
+                    dispose_ = &DefaultDeleter<U>;
             }
-            ~RefCounted ()
+            ~RefCounted () override
             {
                 if (dispose_)
-                    dispose_ (data_);
+                    dispose_ (origin_);
             }
-
-            RefCounted (T *ptr, DisposeFunc d) : RefCountedBase (ptr), dispose_ (d) {}
 
         public:
             template <typename U = T>
                 requires PtrCastable<U, T>
             inline U *Ptr () const
             {
-                return (U *) data_;
+                return static_cast<U *> (data_);
             }
 
             template <typename U> requires PtrCastable<U, T>
             RefCounted<U> *Clone()
             {
                 AddRef();
-                return new RefCounted<U> (static_cast<U *> (data_));
+                return new RefCounted<U> (static_cast<U *> (data_), origin_, dispose_);
             }
 
             static RefCounted<T> *Create ()
@@ -100,12 +101,13 @@ namespace Meta
             }
 
             template <typename U>
-            static RefCounted<T> *Create (U *u)
+            static RefCounted<T> *Create (U *u, void *base, DisposeFunc d)
             {
-                return new RefCounted<T> (u);
+                return new RefCounted<T> (u, base, d);
             }
 
         private:
+            void       *origin_; // original pointer to object
             T          *data_;
             DisposeFunc dispose_;
         };
@@ -152,7 +154,8 @@ namespace Meta
         Ref () : ptr_ (nullptr) {}
         template <typename U>
             requires details::PtrCastable<T, U>
-        Ref (U *u) : ptr_ (details::RefCounted<T>::Create (u))
+        Ref (U *u, details::DisposeFunc dispose = {})
+        : ptr_ (details::RefCounted<T>::Create (u, u, dispose ? dispose : &details::DefaultDeleter<U>))
         {
         }
         ~Ref ()
@@ -211,6 +214,21 @@ namespace Meta
             if (ptr_)
                 return ptr_->template Ptr<T>();
             return nullptr;
+        }
+
+        inline void Release () noexcept
+        {
+            auto bak = ptr_;
+            ptr_ = nullptr;
+            if (bak)
+                bak->UnRef ();
+        }
+
+        template <typename U> requires details::PtrCastable<T, U>
+        inline void Reset(U *u, details::DisposeFunc d)
+        {
+            Release ();
+            ptr_ = details::RefCounted<T>::Create (u, u, d ? d : &details::DefaultDeleter<U>);
         }
 
         operator bool () const

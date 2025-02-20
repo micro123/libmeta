@@ -2,6 +2,7 @@
 #define CURSOR_TYPE_HPP
 
 #include <clang-c/Index.h>
+#include <string>
 
 class CursorType final {
 public:
@@ -11,6 +12,10 @@ public:
     [[nodiscard]] bool IsReferenced() const;
     [[nodiscard]] bool IsConstQualified() const;
     [[nodiscard]] CXTypeKind Kind() const;
+    [[nodiscard]] unsigned GetNumArguments() const;
+    [[nodiscard]] std::string Spelling() const;
+    [[nodiscard]] operator CXType () const { return type_; }
+
 private:
     CXType type_;
 };

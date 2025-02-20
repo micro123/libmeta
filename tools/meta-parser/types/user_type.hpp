@@ -23,6 +23,7 @@ public:
 
     const std::list<std::string> &BaseTypes () const;
     const std::list<Field *>     &Fields () const;
+    const std::list<Function *>  &Constructors () const;
     const std::list<Function *>  &Functions () const;
     const std::list<Constant *>  &Constants () const;
 
@@ -44,6 +45,7 @@ private:
     bool                       anon_;         // anonymous
     std::list<std::string>     base_types_;   // base class/struct
     std::list<Field *>         fields_;
+    std::list<Function *>      constructors_;
     std::list<Function *>      functions_;
     std::list<Constant *>      constants_;
     std::list<LanguageType *> &container_;  // parser result

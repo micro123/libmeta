@@ -1,4 +1,5 @@
 #include "cursor_type.hpp"
+#include "utilities/clang_utils.hpp"
 
 CursorType::CursorType(CXType type): type_(type) {}
 
@@ -17,4 +18,14 @@ bool CursorType::IsConstQualified () const
 CXTypeKind CursorType::Kind () const
 {
     return type_.kind;
+}
+
+unsigned    CursorType::GetNumArguments () const
+{
+    return clang_getNumArgTypes(type_);
+}
+
+std::string CursorType::Spelling () const
+{
+    return ToString (clang_getTypeSpelling(type_));
 }

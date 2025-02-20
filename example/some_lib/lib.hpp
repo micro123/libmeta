@@ -14,6 +14,11 @@ STRUCT(LIB_API SomeData)
     int a, b, c, d;
 };
 
+namespace A::B::C::D
+{
+    STRUCT(SomeParam) {};
+}
+
 CLASS(LIB_API MyClass)
 {
     REFL_BODY(MyClass)
@@ -54,7 +59,8 @@ namespace Foo::Bar {
         REFL_BODY(Baz)
     public:
         void foo(MyClass *obj) const;
-
+        void bar(A::B::C::D::SomeParam const* param) const {}
+        void bar(int,double){}
     private:
         int z = 100;
     };

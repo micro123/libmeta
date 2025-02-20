@@ -86,10 +86,20 @@ namespace Meta
         // 基类信息
         virtual std::vector<TypePtr>     GetBaseClasses () const;
         virtual std::vector<TypeId>      GetBaseTypeIds () const;
+        virtual std::vector<MethodPtr>   GetConstructors () const;
 
         // 一般工具
         virtual str                      ValueToString (const Any &obj) const;
         virtual bool                     ValueFromString (const Any &obj, const str& data) const;
+
+        // 对象创建
+        template <typename ... Args>
+        bool Instantiate(Any &obj, Args && ... args) const
+        {
+            Any va_arr[] = { std::forward<Args>(args)..., {} };
+            return InstantiateWithArgs (obj, va_arr, sizeof... (Args));
+        }
+        virtual bool InstantiateWithArgs(Any &obj, Any *argv, size_t argc) const;
 
         template <typename T>
         inline void AddConverter(ConvertProc proc) { return AddConverter (proc, GetTypeId<T> ()); }
@@ -129,29 +139,73 @@ namespace Meta
         template <typename T>
         TypeId GetTypeIdImpl ();
 
-        // template <typename T, size_t N>
-        // TypeId GetTypeId<T(&)[N]> () {
-        //     return GetTypeId<T>();
-        // }
-
-        // template <typename T>
-        // TypeId GetTypeId<T*> () {
-        //     return GetTypeId<T>();
-        // }
-
         template <typename T>
         TypeId GetTypeIdImpl ()
         {
             static StringName store(GetTypeName<T>());
             return store;
         }
+
+        template <typename T>
+        struct NoPtr
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoPtr<T*>
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoRef
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoRef<T&>
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoRef<Ref<T>>
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoConst
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoConst<const T>
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoVolatile
+        {
+            using type = T;
+        };
+
+        template <typename T>
+        struct NoVolatile<volatile T>
+        {
+            using type = T;
+        };
     }
 
     template <typename T>
     TypeId GetTypeId ()
     {
-        using no_pointer_t = std::remove_pointer_t<T>;
-        using no_cvref_t = std::remove_cvref_t<no_pointer_t>;
+        using no_pointer_t = typename details::NoPtr<T>::type;
+        using no_cvref_t = typename details::NoConst<typename details::NoVolatile<typename details::NoRef<no_pointer_t>::type>::type>::type;
         return details::GetTypeIdImpl<no_cvref_t>();
     }
 

@@ -1,13 +1,14 @@
 #include "code_generator.hpp"
 #include <fstream>
+#include <utilities/str_utils.hpp>
 #include <utility>
 #include "inja.hpp"
+#include "refl/method.hpp"
 #include "types/constant.hpp"
 #include "types/field.hpp"
 #include "types/function.hpp"
 #include "types/type_context.hpp"
 #include "types/user_type.hpp"
-#include <utilities/str_utils.hpp>
 
 class TypeCodeGen::Private
 {
@@ -46,6 +47,15 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## for base in type.base_types
     .AddBaseType (GetTypeId<{{base}}>(), BaseCvt({{type.fullname}},{{base}}))
 ## endfor
+## for ctor in type.constructors
+    .AddConstructor(
+        MethodBuilder::NewMethodBuilder ("{{ctor.name}}", &Meta::Ctor::Of<{{type.fullname}}{{ctor.type}}>)
+## for arg in ctor.args
+        .AddParam ({{loop.index}}, "{{arg.name}}"{% if arg.has_init %}, (NParamT({{method.fullname}},{{loop.index}})){{arg.init}}{% endif %})
+## endfor
+        .Build()
+    )
+## endfor
 ## for field in type.fields
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
 ## endfor
@@ -54,7 +64,7 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## endfor
 ## for method in type.methods
     .AddMethod(
-        MethodBuilder::NewMethodBuilder ("{{method.name}}", &{{method.fullname}})
+        MethodBuilder::NewMethodBuilder ("{{method.name}}", Meta::Overloaded<{{method.type}}>::Of(&{{method.fullname}}))
 ## for arg in method.args
         .AddParam ({{loop.index}}, "{{arg.name}}"{% if arg.has_init %}, (NParamT({{method.fullname}},{{loop.index}})){{arg.init}}{% endif %})
 ## endfor
@@ -92,12 +102,32 @@ static nlohmann::json BuildField(const Field *f)
     return j;
 }
 
+static nlohmann::json BuildConstructor(const Function *m)
+{
+    using namespace nlohmann;
+    json j = json::object();
+    j["name"] = "Constructor";
+    j["type"] = m->Type ();
+    json args = json::array();
+    for (auto &x: m->Arguments())
+    {
+        json arg = json::object();
+        arg["name"] = x.name;
+        arg["has_init"] = !x.init_value.empty();
+        arg["init"] = x.init_value;
+        args.emplace_back(arg);
+    }
+    j["args"] = args;
+    return j;
+}
+
 static nlohmann::json BuildMethod(const Function *m)
 {
     using namespace nlohmann;
     json j = json::object();
     j["name"] = toCamelCase(m->Name ());
     j["fullname"] = m->GetNamespace ().GetFullQualifiedName (m->Name ());
+    j["type"] = m->Type ();
     json args = json::array();
     for (auto &x: m->Arguments())
     {
@@ -125,6 +155,13 @@ static nlohmann::json BuildType(const LanguageType &type)
         base_types.emplace_back(x);
     }
     t["base_types"] = base_types;
+    // constructors
+    json constructors = json::array();
+    for (auto x: type.Constructors())
+    {
+        constructors.emplace_back(BuildConstructor (x));
+    }
+    t["constructors"] = constructors;
     // constants
     json constants = json::array();
     for (auto &x: type.Constants ())

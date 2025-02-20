@@ -5,7 +5,6 @@
 static std::string ArgGetDefault(Cursor c) {
     std::string result;
     auto children = c.Children();
-    bool found = false;
     for (auto const &x: children)
     {
         auto kind = x.Kind();
@@ -24,6 +23,24 @@ static std::string ArgGetDefault(Cursor c) {
 Function::Function (const Cursor &cursor, const Namespace &ns, TypeInfo *parent) : TypeInfo (cursor, ns, parent)
 {
     name_ = cursor.Spelling ();
+    if (cursor.Kind () == CXCursor_Constructor)
+    {
+        // extract param list
+        auto ftype = cursor.Type ();
+        auto const cnt = ftype.GetNumArguments ();
+        if (cnt > 0)
+        {
+            for (auto i = 0u; i < cnt; ++i)
+            {
+                CursorType t = clang_getArgType (ftype, i);
+                func_type_.append (",").append (t.Spelling ());
+            }
+        }
+    }
+    else
+    {
+        func_type_ = cursor.Type ().Spelling ();
+    }
     auto count = clang_Cursor_getNumArguments(cursor);
     for (int i = 0; i < count; ++i) {
         Cursor arg = clang_Cursor_getArgument(cursor, i);

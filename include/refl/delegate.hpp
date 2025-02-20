@@ -17,13 +17,13 @@ namespace Meta
         Delegate (MethodPtr m);
         ~Delegate () override;
 
-        bool    IsMember () const override;
-        bool    IsConst () const override;
-        bool    IsVolatile () const override;
-        u32     ParameterCount () const override;
-        TypePtr ParameterType (u32 index) const override;
-        sview   ParameterName (u32 index) const override;
-        Any     ParameterDefault (u32 index) const override;
+        bool   IsMember () const override;
+        bool   IsConst () const override;
+        bool   IsVolatile () const override;
+        u32    ParameterCount () const override;
+        TypeId ParameterType (u32 index) const override;
+        sview  ParameterName (u32 index) const override;
+        Any    ParameterDefault (u32 index) const override;
 
         Any InvokeWithArgs (Any *args, u32 cnt) const override;
 

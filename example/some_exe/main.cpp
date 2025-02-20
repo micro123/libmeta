@@ -11,6 +11,14 @@
 #include "lib.hpp"
 #include "custom_sections.hpp"
 
+static std::string GetTypeName(Meta::TypeId id)
+{
+    auto t = TypeOf(id);
+    if (t)
+        return {t->Name ().data (), t->Name ().size ()};
+    return "<unknown>";
+}
+
 static void PrintType(const Meta::TypePtr &ptr)
 {
     auto fields = ptr->GetFields();
@@ -43,10 +51,36 @@ static void PrintType(const Meta::TypePtr &ptr)
             auto const cnt = x->ParameterCount();
             for (auto i=0u; i<cnt; ++i)
             {
-                std::cout << std::format("      Parameter #{}: {} with type {} and default value {}\n", i+1, x->ParameterName(i), x->ParameterType(i)->Name(), x->ParameterDefault(i).Value<Meta::str>());
+                std::cout << std::format("      Parameter #{}: {} with type {} and default value {}\n", i+1, x->ParameterName(i), GetTypeName (x->ParameterType(i)), x->ParameterDefault(i).Value<Meta::str>());
             }
         }
     }
+
+    auto constructors = ptr->GetConstructors();
+    if (!constructors.empty())
+    {
+        std::cout << "  Constructors:\n";
+        for (auto &x: constructors)
+        {
+            std::cout << std::format("    {}\n", x->Name());
+            auto const cnt = x->ParameterCount();
+            for (auto i=0u; i<cnt; ++i)
+            {
+                std::cout << std::format("      Parameter #{}: {} with type {} and default value {}\n", i+1, x->ParameterName(i), GetTypeName (x->ParameterType(i)), x->ParameterDefault(i).Value<Meta::str>());
+            }
+        }
+    }
+}
+
+static void test_ctor()
+{
+    using namespace Meta;
+    auto cls = TypeOf<MyClass>();
+    assert (cls != nullptr);
+    Any obj;
+    bool ok = cls->Instantiate (obj, "👋");
+    assert (ok);
+    std::cout << JsonSerialize(obj, true) << std::endl;
 }
 
 int main(int argc, char const *argv[])
@@ -70,5 +104,8 @@ int main(int argc, char const *argv[])
     std::cout << x << ' ' << y << std::endl;
     Meta::Any type = test.Type();
     std::cout << type["Inc"] << '\n';
+
+    test_ctor();
+
     return 0;
 }

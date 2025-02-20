@@ -11,6 +11,7 @@
 class Meta::MethodBuilder::PrivateData
 {
 public:
+    bool      is_member_{};
     MethodPtr method_;
 };
 
@@ -23,7 +24,7 @@ public:
 
 Meta::MethodBuilder &Meta::MethodBuilder::AddParam (u32 idx, sview name, Any def)
 {
-    d->method_->AddParamInfo (idx, name, std::move (def));
+    d->method_->AddParamInfo (idx + (d->is_member_ ? 1 : 0), name, std::move (def));
     return *this;
 }
 
@@ -65,6 +66,11 @@ Meta::TypeBuilder &Meta::TypeBuilder::AddMethod (MethodPtr method)
     d->type_->AddMethod (std::move (method));
     return *this;
 }
+Meta::TypeBuilder &Meta::TypeBuilder::AddConstructor (MethodPtr method)
+{
+    d->type_->AddConstructor (std::move(method));
+    return *this;
+}
 Meta::TypeBuilder &Meta::TypeBuilder::AddCastTo (Type::CastProc proc, const TypeId &type_id)
 {
     d->type_->AddConversion (proc, type_id);
@@ -90,6 +96,7 @@ Meta::TypeBuilder::~TypeBuilder ()
 Meta::MethodBuilder::MethodBuilder (MethodPtr method) : d (new PrivateData)
 {
     d->method_ = std::move (method);
+    d->is_member_ = d->method_->IsMember ();
 }
 Meta::Any Meta::TypeBuilder::EnumToString (const Any &value)
 {

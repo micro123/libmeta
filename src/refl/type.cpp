@@ -89,6 +89,11 @@ std::vector<Meta::TypeId> Meta::Type::GetBaseTypeIds () const
     return {};
 }
 
+std::vector<Meta::MethodPtr> Meta::Type::GetConstructors () const
+{
+    return {};
+}
+
 std::string Meta::Type::ValueToString (const Any &obj) const
 {
     auto const tid = GetTypeId<std::string> ();
@@ -105,6 +110,11 @@ bool Meta::Type::ValueFromString (const Any &obj, const str &data) const
     {
         return it->second (obj, data);
     }
+    return false;
+}
+
+bool Meta::Type::InstantiateWithArgs (Any &obj, Any *argv, size_t argc) const
+{
     return false;
 }
 

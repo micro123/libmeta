@@ -62,8 +62,7 @@ void LanguageType::ParseDataType (const Cursor &cursor)
     for (auto it = children.begin (); it != children.end (); ++it)
     {
         // Print(*it);
-        auto const kind = it->Kind ();
-        if (kind == CXCursor_CXXBaseSpecifier)
+        if (auto const kind = it->Kind (); kind == CXCursor_CXXBaseSpecifier)
         {
             auto base = clang_hashCursor (clang_getCursorDefinition (*it));
             // std::cout << "base class " << GetTypeFullName (base) << "\n";
@@ -83,8 +82,11 @@ void LanguageType::ParseDataType (const Cursor &cursor)
         }
         else if (kind == CXCursor_Constructor)
         {
-            // TODO: add constructors here
-            Print(*it);
+            auto f = new Function (*it, ns, this);
+            if (f->ShouldCompile ())
+                constructors_.emplace_back (f);
+            else
+                delete f;
         }
         else if (kind == CXCursor_CXXMethod)
         {
@@ -247,6 +249,10 @@ const std::list<std::string> &LanguageType::BaseTypes () const
 const std::list<Field *> &LanguageType::Fields () const
 {
     return fields_;
+}
+const std::list<Function *> &LanguageType::Constructors () const
+{
+    return constructors_;
 }
 const std::list<Function *> &LanguageType::Functions () const
 {

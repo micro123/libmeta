@@ -12,7 +12,7 @@ namespace Meta
         class NormalMethod : public Method
         {
         public:
-            NormalMethod (sview name, R (*ptr) (Param...)) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ (ptr)
+            NormalMethod (sview name, R (*ptr) (Param...)) : Method (name, GetTypeId<R> (), sizeof...(Param)), ptr_ (ptr)
             {
                 assert (ptr_ != nullptr);
                 SetArgTypes<Param...>();
@@ -35,7 +35,7 @@ namespace Meta
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 // check passed arg count
-                if (!ParameterCountCheck(sizeof...(Param), cnt))
+                if (!ParameterCountCheck(cnt))
                     return {};
                 else
                     return Apply (args, cnt, std::make_index_sequence<sizeof...(Param)> {});
@@ -78,9 +78,12 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberMethodNormal (sview name, R (C::*ptr) (Param...)) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ ((Ptr) ptr)
+            MemberMethodNormal (sview name, R (C::*ptr) (Param...))
+            : Method (name, GetTypeId<R> (), sizeof...(Param) + 1), ptr_ ((Ptr) ptr), cls_id_ (GetTypeId<C> ())
             {
                 assert (ptr_ != nullptr);
+                SetArgType (0, cls_id_);
+                AddParamInfo (0, "this");
                 SetArgTypes<Param...>();
             }
             ~MemberMethodNormal () {}
@@ -101,19 +104,20 @@ namespace Meta
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 // check passed arg count
-                if (!ParameterCountCheck(sizeof...(Param) + 1 /* plus this pointer */, cnt))
+                if (!ParameterCountCheck(cnt))
                     return {};
                 // args[0] is class instance
-                void *obj = args[0].ValuePtr<void> ();
-                return Apply (obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
+                auto t_obj = GetObject(args);
+                if (!t_obj)
+                    return {};
+                return Apply (t_obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
             }
 
         private:
             template <size_t... Idx>
-            Any Apply (void *obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
+            Any Apply (M_T *t_obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
-                M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
@@ -124,7 +128,21 @@ namespace Meta
                     return (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
+            inline M_T *GetObject (const Any *object) const
+            {
+                if (object->Id () == cls_id_)
+                    return (M_T *) object->ValuePtr<void> ();
+                else
+                {
+                    // try cast
+                    Any cls_obj;
+                    if (AnyCast (*object, cls_obj, cls_id_))
+                        return (M_T *) cls_obj.ValuePtr<void> ();
+                }
+                return nullptr;
+            }
             Ptr ptr_;
+            TypeId const cls_id_;
         };
 
 #ifdef EXPLICIT_CLASS_NAME
@@ -140,9 +158,12 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberMethodConst (sview name, R (C::*ptr) (Param...) const) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ ((Ptr ) ptr)
+            MemberMethodConst (sview name, R (C::*ptr) (Param...) const)
+            : Method (name, GetTypeId<R> (), sizeof...(Param) + 1), ptr_ ((Ptr ) ptr), cls_id_ (GetTypeId<C> ())
             {
                 assert (ptr_ != nullptr);
+                SetArgType (0, cls_id_);
+                AddParamInfo (0, "this");
                 SetArgTypes<Param...>();
             }
             ~MemberMethodConst () {}
@@ -163,19 +184,20 @@ namespace Meta
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 // check passed arg count
-                if (!ParameterCountCheck(sizeof...(Param) + 1 /* plus this pointer */, cnt))
+                if (!ParameterCountCheck(cnt))
                     return {};
                 // args[0] is class instance
-                void *obj = args[0].ValuePtr<void> ();
-                return Apply (obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
+                auto t_obj = GetObject(args);
+                if (!t_obj)
+                    return {};
+                return Apply (t_obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
             }
 
         private:
             template <size_t... Idx>
-            Any Apply (void *obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
+            Any Apply (M_T *t_obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
-                M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
@@ -186,7 +208,21 @@ namespace Meta
                     return (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
+            inline M_T *GetObject (const Any *object) const
+            {
+                if (object->Id () == cls_id_)
+                    return (M_T *) object->ValuePtr<void> ();
+                else
+                {
+                    // try cast
+                    Any cls_obj;
+                    if (AnyCast (*object, cls_obj, cls_id_))
+                        return (M_T *) cls_obj.ValuePtr<void> ();
+                }
+                return nullptr;
+            }
             Ptr ptr_;
+            TypeId const cls_id_;
         };
 
 #ifdef EXPLICIT_CLASS_NAME
@@ -202,9 +238,12 @@ namespace Meta
 #ifndef EXPLICIT_CLASS_NAME
             template <typename C>
 #endif
-            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile) : Method (name, TypeOf<R> (), sizeof...(Param)), ptr_ ((Ptr ) ptr)
+            MemberMethodVolatile (sview name, R (C::*ptr) (Param...) volatile)
+            : Method (name, GetTypeId<R> (), sizeof...(Param) + 1), ptr_ ((Ptr ) ptr), cls_id_ (GetTypeId<C> ())
             {
                 assert (ptr_ != nullptr);
+                SetArgType (0, cls_id_);
+                AddParamInfo (0, "this");
                 SetArgTypes<Param...>();
             }
             ~MemberMethodVolatile () {}
@@ -225,19 +264,20 @@ namespace Meta
             Any InvokeWithArgs (Any *args, u32 cnt) const override
             {
                 // check passed arg count
-                if (!ParameterCountCheck(sizeof...(Param) + 1 /* plus this pointer */, cnt))
+                if (!ParameterCountCheck(cnt))
                     return {};
                 // args[0] is class instance
-                void *obj = args[0].ValuePtr<void> ();
-                return Apply (obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
+                auto t_obj = GetObject(args);
+                if (!t_obj)
+                    return {};
+                return Apply (t_obj, args + 1, cnt - 1, std::make_index_sequence<sizeof...(Param)> {});
             }
 
         private:
             template <size_t... Idx>
-            Any Apply (void *obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
+            Any Apply (M_T *t_obj, Any *args, u32 cnt, std::index_sequence<Idx...>) const
             {
                 using TupleType = std::tuple<Param...>;
-                M_T *t_obj      = (M_T *) obj;
                 if constexpr (std::is_same_v<void, R>)
                 {
                     (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
@@ -248,7 +288,21 @@ namespace Meta
                     return (t_obj->*ptr_) (ParameterOfDefault(args, cnt, Idx)->Value<std::tuple_element_t<Idx, TupleType>> ()...);
                 }
             }
+            inline M_T *GetObject (const Any *object) const
+            {
+                if (object->Id () == cls_id_)
+                    return (M_T *) object->ValuePtr<void> ();
+                else
+                {
+                    // try cast
+                    Any cls_obj;
+                    if (AnyCast (*object, cls_obj, cls_id_))
+                        return (M_T *) cls_obj.ValuePtr<void> ();
+                }
+                return nullptr;
+            }
             Ptr ptr_;
+            TypeId const cls_id_;
         };
 
         template <typename R, typename... Param>

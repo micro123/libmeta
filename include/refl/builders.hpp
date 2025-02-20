@@ -49,6 +49,55 @@ namespace Meta {
     template <typename F, size_t N>
     using n_param_t = typename details::MethodParamType<F, N>::Type;
 
+    struct Ctor
+    {
+        template <typename T>
+        static void Release(void *p)
+        {
+            if constexpr (Meta::details::IsDisposable<T>)
+            {
+                static_cast<T*>(p)->Dispose();
+            }
+            else
+            {
+                delete static_cast<T*>(p);
+            }
+        }
+
+        template <typename T, typename ... Args>
+        static Ref<T> Of(Args ... args)
+        {
+            return {new T(args...), &Ctor::Release<T>};
+        }
+    };
+
+    template<typename T>
+    struct Overloaded;
+
+    template<typename R, typename... Args>
+    struct Overloaded<R(Args...)>
+    {
+        static constexpr auto Of(R(*p)(Args...))
+        {
+            return p;
+        }
+        template <typename C>
+        static constexpr auto Of(R(C::*p)(Args...))
+        {
+            return p;
+        }
+    };
+
+    template<typename R, typename... Args>
+    struct Overloaded<R(Args...)const>
+    {
+        template <typename C>
+        static constexpr auto Of(R(C::*p)(Args...)const)
+        {
+            return p;
+        }
+    };
+
 #define NParamT(F,N) n_param_t<decltype(&F), N>
 #define BaseCvt(T,B) +[](const Meta::Any &in)-> Meta::Any { return static_cast<B*>(in.ValuePtr<T>()); }
 
@@ -93,6 +142,7 @@ namespace Meta {
         TypeBuilder &AddField(FieldPtr field);
         TypeBuilder &AddConstant(ConstantPtr constant);
         TypeBuilder &AddMethod(MethodPtr method);
+        TypeBuilder &AddConstructor(MethodPtr method);
 
         TypeBuilder &AddCastTo(Type::CastProc proc, const TypeId &type_id);
         TypeBuilder &AddConvertFrom(Type::ConvertProc proc, const TypeId &type_id);

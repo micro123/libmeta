@@ -21,7 +21,7 @@ namespace Meta
         friend class MethodBuilder;
 
     public:
-        Method (sview name, TypePtr rtype, u32 param_count);
+        Method (sview name, TypeId rtype, u32 param_count);
         virtual ~Method ();
 
         [[nodiscard]] inline sview Name () const
@@ -33,11 +33,12 @@ namespace Meta
             return desc_;
         }
 
-        TypePtr         ResultType () const;
-        virtual u32     ParameterCount () const;
-        virtual TypePtr ParameterType (u32 index) const;
-        virtual sview   ParameterName (u32 index) const;
-        virtual Any     ParameterDefault (u32 index) const;
+        TypeId         ResultType () const;
+        virtual u32    ParameterCount () const;
+        virtual TypeId ParameterType (u32 index) const;
+        virtual sview  ParameterName (u32 index) const;
+        virtual Any    ParameterDefault (u32 index) const;
+        virtual s32    ParameterMatches (const Any *argv, const TypePtr *argt, u32 argc) const;
 
         virtual bool IsMember () const   = 0;
         virtual bool IsConst () const    = 0;
@@ -54,41 +55,51 @@ namespace Meta
 
         [[nodiscard]] str ToString () const;
 
-        inline u32  DefaultParameterStart() const { return default_param_start_; }
-        inline bool HasDefaultParameter() const { return ~default_param_start_ != 0; }
-        inline bool ParameterCountCheck(u32 total, u32 pass) const 
+        inline u32 DefaultParameterStart () const
         {
-            return (!HasDefaultParameter() && pass >= total) || (HasDefaultParameter() && pass + 1 >= DefaultParameterStart());
+            return default_param_start_;
         }
-        
-    protected:
-        void AddParamInfo (u32 idx, sview name, Any def);
-        void SetArgType (u32 idx, TypeId id);
-        void SetArgTypes (TypeId *ids, u32 cnt);
-        bool Verify() const;
-        const Any *ParameterOfDefault(Any *argv, u32 argn, u32 param_idx) const;
+        inline bool HasDefaultParameter () const
+        {
+            return ~default_param_start_ != 0;
+        }
+        inline bool ParameterCountCheck (u32 pass) const
+        {
+            u32 const total = ParameterCount ();
+            return (pass == total) || (HasDefaultParameter () && pass + 1 >= DefaultParameterStart () && pass < total);
+        }
 
-        template <typename ... Args>
-        inline void SetArgTypes() {
+    protected:
+        void       AddParamInfo (u32 idx, sview name, Any def = {});
+        void       SetArgType (u32 idx, TypeId id);
+        void       SetArgTypes (TypeId *ids, u32 cnt);
+        bool       Verify () const;
+        const Any *ParameterOfDefault (Any *argv, u32 argn, u32 param_idx) const;
+
+        template <typename... Args>
+        inline void SetArgTypes ()
+        {
             constexpr size_t argn = sizeof...(Args);
-            if constexpr (argn > 0) {
+            if constexpr (argn > 0)
+            {
                 using TupleType = std::tuple<Args...>;
-                SetArgTypes<TupleType>(std::make_index_sequence<argn>{});
+                SetArgTypes<TupleType> (std::make_index_sequence<argn> {});
             }
         }
 
-        template <typename T, size_t ... Idx>
-        inline void SetArgTypes(std::index_sequence<Idx...>) {
-            TypeId ids[] = { GetTypeId<std::tuple_element_t<Idx, T>>()..., {} };
-            SetArgTypes(ids, (u32)std::tuple_size_v<T>);
+        template <typename T, size_t... Idx>
+        inline void SetArgTypes (std::index_sequence<Idx...>)
+        {
+            TypeId ids[] = {GetTypeId<std::tuple_element_t<Idx, T>> ()..., {}};
+            SetArgTypes (ids, (u32) std::tuple_size_v<T>);
         }
 
     private:
-        sview   name_;
-        sview   desc_;
-        TypePtr result_type_;
-        Params  params_;
-        u32     default_param_start_;
+        sview  name_;
+        sview  desc_;
+        TypeId result_type_;
+        Params params_;
+        u32    default_param_start_;
     };
 }  // namespace Meta
 

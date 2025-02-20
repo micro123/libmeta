@@ -3,7 +3,7 @@
 
 Meta::Delegate::Delegate (MethodPtr m) : Method ("anonymous", m->ResultType (), 0), mehtod_ (m)
 {
-    prefilled_args_.reserve (m->ParameterCount () + IsMember () ? 1 : 0);
+    prefilled_args_.reserve (m->ParameterCount ());
 }
 Meta::Delegate::~Delegate () = default;
 
@@ -24,10 +24,7 @@ bool Meta::Delegate::IsVolatile () const
 
 void Meta::Delegate::AppendArg (const Any &any)
 {
-    if (IsMember ())
-        assert (prefilled_args_.size () <= mehtod_->ParameterCount ());
-    else
-        assert (prefilled_args_.size () + 1 <= mehtod_->ParameterCount ());
+    assert (prefilled_args_.size () + 1 <= mehtod_->ParameterCount ());
     prefilled_args_.emplace_back (any);
 }
 
@@ -38,8 +35,8 @@ Meta::str Meta::Delegate::ToString () const
 
 Meta::Any Meta::Delegate::InvokeWithArgs (Any *args, u32 cnt) const
 {
-    auto const total = (IsMember () ? 1 : 0) + mehtod_->ParameterCount ();
-    if (!mehtod_->ParameterCountCheck(total, cnt + prefilled_args_.size()))
+    auto const total = ParameterCount ();
+    if (!mehtod_->ParameterCountCheck(prefilled_args_.size() + cnt))
         return {};
     std::vector<Any> vec_arg (total);
     vec_arg.assign (begin (prefilled_args_), end (prefilled_args_));
@@ -54,7 +51,7 @@ u32 Meta::Delegate::ParameterCount () const
 {
     return mehtod_->ParameterCount () - prefilled_args_.size ();
 }
-Meta::TypePtr Meta::Delegate::ParameterType (u32 index) const
+Meta::TypeId Meta::Delegate::ParameterType (u32 index) const
 {
     assert (index < ParameterCount ());
     return mehtod_->ParameterType (index + prefilled_args_.size ());

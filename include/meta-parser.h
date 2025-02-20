@@ -21,12 +21,14 @@
 #define ENUM(name, ...)   enum   name
 #define REFL_BODY(name) \
     friend class Meta::CodeGenFor<name>;\
+    friend struct Meta::Ctor;
 
 namespace Meta {
     template <typename T>
     struct CodeGenFor {
         static void Register();
     };
+    struct Ctor;
 }
 
 #endif

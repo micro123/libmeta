@@ -21,6 +21,10 @@ public:
     {
         return name_;
     }
+    std::string Type() const
+    {
+        return func_type_;
+    }
 
     const std::vector<Parameter>& Arguments () const { return parameters_; }
 
@@ -28,6 +32,7 @@ public:
 
 private:
     std::string            name_;
+    std::string            func_type_;
     std::vector<Parameter> parameters_;
 };
 

@@ -9,7 +9,12 @@ struct Bar {
     float b;
 };
 
-struct Foo : Bar
+struct Baz
+{
+    double d;
+};
+
+struct Foo : Bar, Baz
 {
     Foo(int yy): y(yy) {}
 
@@ -28,6 +33,18 @@ struct Foo : Bar
     }
 };
 
+void func() {}
+void func(int) {}
+void func(double, int) {}
+
+struct S
+{
+    void func() {}
+    void func(int) {}
+    void func(double, int) {}
+    void func(double, int) const {}
+};
+
 int Foo::z = 42;
 
 enum MyEnum
@@ -36,6 +53,7 @@ enum MyEnum
     B,
     C,
 };
+
 
 TEST_CASE ("TYPE BUILDER")
 {
@@ -47,6 +65,10 @@ TEST_CASE ("TYPE BUILDER")
 
     TypeBuilder::NewTypeBuilder<Foo> ()
     .AddBaseType (GetTypeId<Bar>(), BaseCvt(Foo,Bar))
+    .AddConstructor (
+        MethodBuilder::NewMethodBuilder ("Constructor", &Ctor::Of<Foo, int>)
+        .Build ()
+    )
     .AddField (MakeField("x", &Foo::x))
     .AddField (MakeField("y", &Foo::y))
     .AddField (MakeField("z", &Foo::z))
@@ -63,4 +85,14 @@ TEST_CASE ("TYPE BUILDER")
 
     Any f = Foo(45);
     REQUIRE(f.ValuePtr<Bar>() != nullptr);
+
+    auto obj = Ctor::Of<Foo, int>(6);
+    Ref<Baz> bar = obj;
+    REQUIRE (obj != nullptr);
+    obj.Release ();
+    REQUIRE (bar != nullptr);
+
+    auto pf = Overloaded<void()>::Of (func);
+    auto pf2 = Overloaded<void(int)>::Of (&S::func);
+    auto pf3 = Overloaded<void(double,int)const>::Of (&S::func);
 }

@@ -10,18 +10,23 @@ namespace Meta
 {
     class LIBMETA_API GenericType : public Type
     {
-        using FieldContainer     = std::list<std::pair<str, FieldPtr>>;
-        using MethodContainer    = std::list<std::pair<str, MethodPtr>>;
-        using ConstantsContainer = std::list<std::pair<str, ConstantPtr>>;
-        using TypeContainer      = std::list<TypeId>;
+        using FieldContainer       = std::list<std::pair<str, FieldPtr>>;
+        using MethodContainer      = std::list<std::pair<str, MethodPtr>>;
+        using ConstantsContainer   = std::list<std::pair<str, ConstantPtr>>;
+        using TypeContainer        = std::list<TypeId>;
+        using ConstructorContainer = std::list<MethodPtr>;
+
     public:
         using Ptr = Ref<GenericType>;
         using Type::Type;
 
-        void AddField(FieldPtr ptr);
-        void AddMethod(MethodPtr ptr);
-        void AddConstant(ConstantPtr ptr);
-        void AddBaseClass(TypeId id, CastProc cast);
+        void AddField (FieldPtr ptr);
+        void AddMethod (MethodPtr ptr);
+        void AddConstant (ConstantPtr ptr);
+        void AddBaseClass (TypeId id, CastProc cast);
+        void AddConstructor (MethodPtr ptr);
+
+        bool InstantiateWithArgs(Any &obj, Any *argv, size_t argc) const override;
 
         [[nodiscard]] std::vector<FieldPtr>    GetFields () const override;
         [[nodiscard]] FieldPtr                 GetField (sview name) override;
@@ -29,14 +34,17 @@ namespace Meta
         [[nodiscard]] MethodPtr                GetMethod (sview name) const override;
         [[nodiscard]] std::vector<ConstantPtr> GetConstants () const override;
         [[nodiscard]] ConstantPtr              GetConstant (sview name) const override;
-        [[nodiscard]] std::vector<TypePtr>     GetBaseClasses() const override;
+        [[nodiscard]] std::vector<TypePtr>     GetBaseClasses () const override;
         [[nodiscard]] std::vector<TypeId>      GetBaseTypeIds () const override;
-    private:
-        FieldContainer     fields_;
-        MethodContainer    methods_;
-        ConstantsContainer constants_;
-        TypeContainer      base_classes_;
-    };
-}
+        [[nodiscard]] std::vector<MethodPtr>   GetConstructors () const override;
 
-#endif //LIBMETA_GENERIC_TYPE_HPP
+    private:
+        FieldContainer       fields_;
+        MethodContainer      methods_;
+        ConstantsContainer   constants_;
+        TypeContainer        base_classes_;
+        ConstructorContainer constructors_;
+    };
+}  // namespace Meta
+
+#endif  // LIBMETA_GENERIC_TYPE_HPP
