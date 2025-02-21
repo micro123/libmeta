@@ -153,3 +153,8 @@ bool Meta::Type::ConvertFrom(cstr in, const Any& out) const
 {
     return ConvertFrom(Any{in}, out, GetTypeId<cstr>());
 }
+
+Meta::str Meta::AnyToString (const TypePtr &type, const Any &any)
+{
+    return type->ValueToString(any);
+}

@@ -7,9 +7,10 @@
 
 #include "refl/fwd.hpp"
 #include "refl/any.hpp"
+#include "refl/property_container.hpp"
 
 namespace Meta {
-    class LIBMETA_API Constant
+    class LIBMETA_API Constant : public PropertyContainer
     {
     public:
         Constant (sview name, s64 value);

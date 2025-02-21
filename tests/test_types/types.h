@@ -58,6 +58,8 @@ enum CLASS(SomeEnum, All)
 STRUCT(Base1, All)
 {
     int x;
+
+    void foo(int);
 };
 
 STRUCT(Base2, All)
@@ -74,6 +76,9 @@ STRUCT(Derived, All): public Base1, private Base2, protected __internal::Interna
     REFL_BODY(Derived)
 
     int z;
+
+    PROP(name=std::string("bar"))
+    int bar();
 
     void SetValue(int a, int b, int c, int d);
 };

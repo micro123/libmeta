@@ -65,4 +65,6 @@ TEST_CASE ("Base Type Serialization")
     std::cout << data << '\n';
     JsonDeserialize(b, data);
     REQUIRE(memcmp(&d, &other, sizeof(d)) == 0);
+    a["foo"](100);
+    b["bar"]();
 }

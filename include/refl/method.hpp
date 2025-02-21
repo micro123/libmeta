@@ -6,6 +6,7 @@
 #include "refl/any.hpp"
 #include "refl/fwd.hpp"
 #include "refl/method.hpp"
+#include "refl/property_container.hpp"
 namespace Meta
 {
     struct ParameterInfo {
@@ -16,7 +17,7 @@ namespace Meta
 
     using Params = std::vector<ParameterInfo>;
 
-    class LIBMETA_API Method
+    class LIBMETA_API Method : public PropertyContainer
     {
         friend class MethodBuilder;
 

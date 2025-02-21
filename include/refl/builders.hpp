@@ -129,6 +129,11 @@ namespace Meta {
         static Any EnumToString(const Any& value);
         static bool EnumFromString(const Any& obj, const Any& value);
     public:
+        struct PropertyItem {
+            str name;
+            Any value;
+        };
+
         template<typename T>
         static TypeBuilder NewTypeBuilder(sview name = {})
         {
@@ -146,6 +151,8 @@ namespace Meta {
 
         TypeBuilder &AddCastTo(Type::CastProc proc, const TypeId &type_id);
         TypeBuilder &AddConvertFrom(Type::ConvertProc proc, const TypeId &type_id);
+
+        TypeBuilder &WithProperties(const std::initializer_list<PropertyItem> &properties);
 
         template<typename Enum>
         TypeBuilder &AddEnumOperations()

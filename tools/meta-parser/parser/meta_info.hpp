@@ -11,7 +11,7 @@ namespace NativeProperty
 #define PROP(name) constexpr auto name = #name
     PROP (Enabled);
     PROP (Disabled);
-    PROP (Property);
+    PROP (Properties);
 #undef PROP
 }
 

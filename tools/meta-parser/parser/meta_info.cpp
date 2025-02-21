@@ -1,5 +1,6 @@
 #include "meta_info.hpp"
 #include "utilities/str_utils.hpp"
+#include <utilities/clang_utils.hpp>
 MetaInfo::MetaInfo (const Cursor &cursor)
 {
     const auto children = cursor.Children ();
@@ -37,6 +38,10 @@ std::vector<MetaInfo::Property> MetaInfo::ExtractProperties (const Cursor &anno)
     std::vector<Property> ret;
 
     const auto displayName = anno.DisplayName ();
+    if (displayName.empty())
+        return ret;
+
+    // Print(anno);
 
     auto properties = split (displayName, ",");
 
@@ -44,13 +49,24 @@ std::vector<MetaInfo::Property> MetaInfo::ExtractProperties (const Cursor &anno)
 
     for (auto &property_item: properties)
     {
-        auto &&item_details = split (property_item, ":");
-        auto &&temp_string  = trim (item_details[0], white_space_string);
-        if (temp_string.empty ())
+        std::string key, value;
+        auto pos = property_item.find(":");
+        if (pos != std::string::npos)
         {
-            continue;
+            key = property_item.substr(0, pos);
+            value = property_item.substr(pos+1);
         }
-        ret.emplace_back (temp_string, item_details.size () > 1 ? trim (item_details[1], white_space_string) : "");
+        else
+        {
+            key = property_item;
+            value = "";
+        }
+        trim(key, white_space_string);
+        trim(value, white_space_string);
+
+        if (!key.empty()) {
+            ret.emplace_back(key, value);
+        }
     }
 
     return ret;

@@ -60,7 +60,7 @@ std::string join (const std::vector<std::string> &context_list, const std::strin
     return ret_string;
 }
 
-std::string trim (std::string &source_string, const std::string &trim_chars)
+std::string trim (std::string source_string, const std::string &trim_chars)
 {
     size_t left_pos = source_string.find_first_not_of (trim_chars);
     if (left_pos == std::string::npos)

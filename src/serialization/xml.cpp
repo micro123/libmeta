@@ -11,6 +11,7 @@ static void ToXml (const Meta::Any &value, xml_node &node)
     auto type = value.Type ();
     if (!type)
         return;
+    node.append_attribute("type").set_value(type->Name());    
     auto type_ids = type->GetBaseTypeIds();
     for (auto const &id: type_ids) {
         Meta::Any temp;
@@ -20,7 +21,6 @@ static void ToXml (const Meta::Any &value, xml_node &node)
             if (!base_type)
                 continue;
             auto n = node.append_child(base_type->Name());
-            n.append_attribute("class").set_value(id.operator std::string());
             ToXml(temp, n);
         }
     }
@@ -40,7 +40,6 @@ static void ToXml (const Meta::Any &value, xml_node &node)
                 if (cnt <= 1)
                 {
                     auto child = node.append_child (x->Name ());
-                    child.append_attribute ("type").set_value (x->Type ()->Name ());
                     ToXml (x->Get (&value), child);
                 }
                 else
@@ -62,7 +61,7 @@ static void ToXml (const Meta::Any &value, xml_node &node)
 Meta::str Meta::XmlSerialize (const Meta::Any &value, bool formatted)
 {
     xml_document doc;
-    auto         root = doc.append_child ("content");
+    auto         root = doc.append_child ("root");
     ToXml (value, root);
     std::ostringstream oss;
     doc.save (oss, "  ", formatted ? format_indent : format_raw, encoding_utf8);

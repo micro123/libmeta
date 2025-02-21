@@ -3,11 +3,12 @@
 
 #include "refl/fwd.hpp"
 #include "refl/any.hpp"
+#include "refl/property_container.hpp"
 
 #include <string_view>
 
 namespace Meta {
-    class LIBMETA_API Field {
+    class LIBMETA_API Field : public PropertyContainer {
     public:
         Field(sview name);
         virtual ~Field();

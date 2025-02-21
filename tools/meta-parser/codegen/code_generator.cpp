@@ -39,6 +39,7 @@ constexpr auto type_reg_template = R"(
 ## for ctx in contexts
 template<>
 void Meta::CodeGenFor<{{ctx.name}}>::Register() {
+    using namespace Meta::Property; // property types are inside Meta::Property namespace
 
 {# 4. type register bodies #}
 ## for type in ctx.types
@@ -47,6 +48,13 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## for base in type.base_types
     .AddBaseType (GetTypeId<{{base}}>(), BaseCvt({{type.fullname}},{{base}}))
 ## endfor
+## if type.has_properties
+    .WithProperties({
+## for prop in type.properties
+        { "{{prop.name}}", {{prop.value}} },
+## endfor
+    })
+## endif
 ## for ctor in type.constructors
     .AddConstructor(
         MethodBuilder::NewMethodBuilder ("{{ctor.name}}", &Meta::Ctor::Of<{{type.fullname}}{{ctor.type}}>)
@@ -55,12 +63,33 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## endfor
         .Build()
     )
+## if ctor.has_properties
+    .WithProperties({
+## for prop in ctor.properties
+        { "{{prop.name}}", {{prop.value}} },
+## endfor
+    })
+## endif
 ## endfor
 ## for field in type.fields
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
+## if field.has_properties
+    .WithProperties({
+## for prop in field.properties
+        { "{{prop.name}}", {{prop.value}} },
+## endfor
+    })
+## endif
 ## endfor
 ## for const in type.constants
     .AddConstant (MakeConstant ("{{const.name}}", {{const.value}}))
+## if const.has_properties
+    .WithProperties({
+## for prop in const.properties
+        { "{{prop.name}}", {{prop.value}} },
+## endfor
+    })
+## endif
 ## endfor
 ## for method in type.methods
     .AddMethod(
@@ -70,6 +99,13 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## endfor
         .Build()
     )
+## if method.has_properties
+    .WithProperties({
+## for prop in method.properties
+        { "{{prop.name}}", {{prop.value}} },
+## endfor
+    })
+## endif
 ## endfor
 ## if type.is_enum
     .AddEnumOperations<{{type.fullname}}>()
@@ -84,12 +120,28 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## endfor
 )";
 
+static nlohmann::json BuildProperties(const TypeInfo *info)
+{
+    using namespace nlohmann;
+    json arr = json::array();
+    for (auto const &p: info->GetCustomProperties())
+    {
+        json prop = json::object();
+        prop["name"] = p.name;
+        prop["value"] = p.init;
+        arr.emplace_back(std::move(prop));
+    }
+    return arr;
+}
+
 static nlohmann::json BuildConstant(const Constant *c)
 {
     using namespace nlohmann;
     json j = json::object();
     j["name"] = toCamelCase(c->Name ());
     j["value"] = c->Value ();
+    j["has_properties"] = c->HasProperties();
+    j["properties"] = BuildProperties(c);
     return j;
 }
 
@@ -99,6 +151,8 @@ static nlohmann::json BuildField(const Field *f)
     json j = json::object();
     j["name"] = toCamelCase(f->Name ());
     j["fullname"] = f->GetNamespace ().GetFullQualifiedName (f->Name ());
+    j["has_properties"] = f->HasProperties();
+    j["properties"] = BuildProperties(f);
     return j;
 }
 
@@ -108,6 +162,8 @@ static nlohmann::json BuildConstructor(const Function *m)
     json j = json::object();
     j["name"] = "Constructor";
     j["type"] = m->Type ();
+    j["has_properties"] = m->HasProperties();
+    j["properties"] = BuildProperties(m);
     json args = json::array();
     for (auto &x: m->Arguments())
     {
@@ -128,6 +184,8 @@ static nlohmann::json BuildMethod(const Function *m)
     j["name"] = toCamelCase(m->Name ());
     j["fullname"] = m->GetNamespace ().GetFullQualifiedName (m->Name ());
     j["type"] = m->Type ();
+    j["has_properties"] = m->HasProperties();
+    j["properties"] = BuildProperties(m);
     json args = json::array();
     for (auto &x: m->Arguments())
     {
@@ -148,6 +206,8 @@ static nlohmann::json BuildType(const LanguageType &type)
     t["fullname"] = type.FullName();
     t["name"] = type.Name();
     t["is_enum"] = type.IsEnum();
+    t["has_properties"] = type.HasProperties();
+    t["properties"] = BuildProperties(&type);
     // base types
     json base_types = json::array();
     for (auto &x: type.BaseTypes())

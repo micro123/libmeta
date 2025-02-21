@@ -14,7 +14,7 @@ std::string toUpper(std::string& source_string);
 
 std::string join (const std::vector<std::string> &context_list, const std::string& separator);
 
-std::string trim(std::string& source_string, const std::string& trim_chars);
+std::string trim(std::string source_string, const std::string& trim_chars);
 
 std::string toCamelCase(const std::string &input);
 

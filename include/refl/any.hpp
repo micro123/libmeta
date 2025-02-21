@@ -7,7 +7,8 @@
 #include <utility>
 #include "exports.h"
 #include "refl/ref.hpp"
-#include "refl/type.hpp"
+#include "refl/type_id.hpp"
+#include "refl/type_fwd.hpp"
 
 /**
  * 期望 Any 可以:
@@ -281,7 +282,7 @@ namespace Meta
 
                 if constexpr (std::is_same_v<str, T>)
                 {
-                    return type->ValueToString (*this);
+                    return AnyToString(type, *this);
                 }
                 else
                 {
@@ -366,7 +367,7 @@ namespace Meta
         template <typename T>
         Any &AssignValue(T &&t) {
             if (IsValid()) {
-                Type()->ConvertFrom(std::forward<T>(t), *this);
+                AnyFromValue(Type(), std::forward<T>(t), *this);
             } else {
                 *this = Any(std::forward<T>(t));
             }

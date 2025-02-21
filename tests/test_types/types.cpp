@@ -24,4 +24,13 @@ namespace Test {
         z = c;
         w = d;
     }
+
+    void Base1::foo(int) {
+        printf("Base1::foo(int) x = %d\n", x);
+    }
+
+    int Derived::bar() {
+        puts("Derived::bar");
+        return x + y;
+    }
 }

@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include "fwd.hpp"
 #include "utility/constexpr.hpp"
+#include "refl/property_container.hpp"
 
 namespace Meta
 {
@@ -22,7 +23,7 @@ namespace Meta
     template <typename T>
     TypeId GetTypeId ();
 
-    class LIBMETA_API Type
+    class LIBMETA_API Type : public PropertyContainer
     {
     public:
         using CastProc = Any(*)(const Any &in); // this type object to other type
@@ -135,93 +136,12 @@ namespace Meta
         std::unordered_map<TypeId, ConvertProc>   cast_from_;
     };
 
-    namespace details {
-        template <typename T>
-        TypeId GetTypeIdImpl ();
-
-        template <typename T>
-        TypeId GetTypeIdImpl ()
-        {
-            static StringName store(GetTypeName<T>());
-            return store;
-        }
-
-        template <typename T>
-        struct NoPtr
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoPtr<T*>
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoRef
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoRef<T&>
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoRef<Ref<T>>
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoConst
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoConst<const T>
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoVolatile
-        {
-            using type = T;
-        };
-
-        template <typename T>
-        struct NoVolatile<volatile T>
-        {
-            using type = T;
-        };
-    }
-
     template <typename T>
-    TypeId GetTypeId ()
+    void AnyFromValue (const TypePtr &type, T&& value, Any &any)
     {
-        using no_pointer_t = typename details::NoPtr<T>::type;
-        using no_cvref_t = typename details::NoConst<typename details::NoVolatile<typename details::NoRef<no_pointer_t>::type>::type>::type;
-        return details::GetTypeIdImpl<no_cvref_t>();
+        if (type)
+            type->ConvertFrom(std::forward<T>(value), any);
     }
-
-    LIBMETA_API
-    TypePtr TypeOf (const TypeId& id);
-
-    template <typename T>
-    TypePtr TypeOf ()
-    {
-        return TypeOf (GetTypeId<T> ());
-    }
-
-    inline TypePtr NilType() { return TypeOf(NULL_TYPE_ID); }
-
-    template <typename T>
-    constexpr u32 CalcTypeFlags ();
 }  // namespace Meta
 
 #include "type.inl"

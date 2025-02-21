@@ -10,6 +10,7 @@
 #define STRUCT(name, ...) struct ANNO(#__VA_ARGS__) ANNO("Enabled") name
 #define UNION(name, ...)  union  ANNO(#__VA_ARGS__) ANNO("Enabled") name
 #define ENUM(name, ...)   enum   ANNO(#__VA_ARGS__) ANNO("Enabled") name
+#define PROP(...)                ANNO("Properties:" #__VA_ARGS__)
 #define REFL_BODY(...)
 
 #else
@@ -19,6 +20,7 @@
 #define STRUCT(name, ...) struct name
 #define UNION(name, ...)  union  name
 #define ENUM(name, ...)   enum   name
+#define PROP(...)
 #define REFL_BODY(name) \
     friend class Meta::CodeGenFor<name>;\
     friend struct Meta::Ctor;
@@ -29,6 +31,8 @@ namespace Meta {
         static void Register();
     };
     struct Ctor;
+
+    namespace Property {}
 }
 
 #endif
