@@ -14,7 +14,7 @@ find_package(Clang REQUIRED)
 # import LLVM CMake functions
 # include(AddLLVM)
 find_library(CLANG_LIBRARY NAMES libclang clang PATHS ${LLVM_LIBRARY_DIRS} NO_DEFAULT_PATH NO_CACHE NO_SYSTEM_ENVIRONMENT_PATH REQUIRED)
-message(STATUS "Clang library is ${CLANG_LIBRARY}")
+# message(STATUS "Clang library is ${CLANG_LIBRARY}")
 
 # dump_cmake_variables(LLVM)
 # dump_cmake_variables(CLANG)
@@ -76,7 +76,7 @@ function(meta_codegen tgt)
       list(APPEND ALL_HEADERS ${file})
     endif ()
   endforeach()
-  message(STATUS "Target ${tgt} headers: ${ALL_HEADERS}")
+  # message(STATUS "Target ${tgt} headers: ${ALL_HEADERS}")
   # 3. 判断是否需要生成代码
   if (ALL_HEADERS)
     # set(cmp_opts "${BIN_DIR}/compile_options.txt")
