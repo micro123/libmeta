@@ -89,3 +89,29 @@ TEST_CASE ("WriteField")
     i = w->Set(&obj, 40);
     REQUIRE(simple->w == i.ValueRef<decltype(Simple::w)>());
 }
+
+TEST_CASE ("Bit Fields")
+{
+    struct Example {
+        int a:15;
+        int b:13;
+        int c:4;
+    };
+    static_assert(sizeof(Example) == 4);
+
+    auto fa = Meta::BitField<Example, decltype(Example::a)>("a",  0, 15);
+    auto fb = Meta::BitField<Example, decltype(Example::b)>("a", 15, 13);
+    auto fc = Meta::BitField<Example, decltype(Example::c)>("a", 28,  4);
+
+    Meta::Any v = Example{1,-2,-3};
+    REQUIRE(fa->Get(&v) == 1);
+    REQUIRE(fb->Get(&v) == -2);
+    REQUIRE(fc->Get(&v) == -3);
+    
+    fa->Set(&v, 100);
+    fb->Set(&v, -9);
+    fc->Set(&v, -1);
+    REQUIRE(fa->Get(&v) == 100);
+    REQUIRE(fb->Get(&v) == -9);
+    REQUIRE(fc->Get(&v) == -1);
+}

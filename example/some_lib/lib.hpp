@@ -52,6 +52,8 @@ private:
     double dd[5];
     std::string name_;
     SomeData data_;
+    s8 j:3;
+    u8 k:5;
 };
 
 namespace Foo::Bar {
@@ -73,6 +75,9 @@ namespace Foo::Bar {
         };
 
         float x,y,z;
+        int a:15;
+        int b:13;
+        int c:4;
     };
 }
 

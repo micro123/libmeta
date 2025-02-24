@@ -4,6 +4,13 @@ Field::Field (const Cursor &cursor, const Namespace &ns, TypeInfo *parent): Type
 {
     assert(parent);
     name_ = cursor.DisplayName ();
+    is_bit_field_ = cursor.IsBitField();
+    if (is_bit_field_) {
+        offset_ = clang_Cursor_getOffsetOfField(cursor);
+        bits_ = clang_getFieldDeclBitWidth(cursor);
+    } else {
+        offset_ = bits_ = 0;
+    }
 }
 Field::~Field () = default;
 

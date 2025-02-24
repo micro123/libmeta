@@ -68,7 +68,7 @@ STRUCT(Base2, All)
 };
 
 namespace __internal {
-     STRUCT(Internal) { int w; };
+     STRUCT(Internal) { int w; unsigned j:21; int k:11; };
 }
 
 STRUCT(Derived, All): public Base1, private Base2, protected __internal::Internal

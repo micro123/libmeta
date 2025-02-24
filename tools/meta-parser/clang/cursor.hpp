@@ -30,6 +30,7 @@ public:
     [[nodiscard]] bool IsEnumType() const;
     [[nodiscard]] bool IsNamespace() const;
     [[nodiscard]] bool IsAnonymous() const;
+    [[nodiscard]] bool IsBitField() const;
 
     [[nodiscard]] CXCursorKind Kind() const { return cursor_.kind; }
     [[nodiscard]] CursorType Type() const;

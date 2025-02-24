@@ -85,6 +85,11 @@ bool Cursor::IsAnonymous () const
     return clang_Cursor_isAnonymous (cursor_);
 }
 
+bool Cursor::IsBitField () const
+{
+    return clang_Cursor_isBitField(cursor_);
+}
+
 CursorType Cursor::Type () const
 {
     return CursorType (clang_getCursorType(cursor_));

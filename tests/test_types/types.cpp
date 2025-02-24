@@ -23,6 +23,8 @@ namespace Test {
         y = b;
         z = c;
         w = d;
+        j = a + b;
+        k = a - b;
     }
 
     void Base1::foo(int) {

@@ -72,7 +72,11 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## endif
 ## endfor
 ## for field in type.fields
+## if field.bitfield
+    .AddField (BitField<{{type.fullname}}, decltype({{field.fullname}})>("{{field.name}}",  {{field.offset}}, {{field.width}}))
+## else
     .AddField (MakeField ("{{field.name}}", &{{field.fullname}}))
+## endif
 ## if field.has_properties
     .WithProperties({
 ## for prop in field.properties
@@ -153,6 +157,9 @@ static nlohmann::json BuildField(const Field *f)
     j["fullname"] = f->GetNamespace ().GetFullQualifiedName (f->Name ());
     j["has_properties"] = f->HasProperties();
     j["properties"] = BuildProperties(f);
+    j["bitfield"] = f->IsBitField();
+    j["offset"] = f->Offset();
+    j["width"] = f->BitWidth();
     return j;
 }
 
