@@ -206,8 +206,17 @@ bool Meta::AnyCast (const Any &in, Any &out, TypeId dst)
     if (!in.IsValid ())
         return false;
 
-    // 1. check for fundamental types cvt
     auto const src = in.Id ();
+
+
+    // 0. check for same type
+    if (src == dst)
+    {
+        out = in;
+        return true;
+    }
+
+    // 1. check for fundamental types cvt
     auto       key = std::make_pair (src, dst);
     if (g_fundamental_cast_ops.find (key) != end (g_fundamental_cast_ops))
     {
@@ -231,4 +240,14 @@ std::ostream &operator<< (std::ostream &o, const Meta::Any &any)
     else
         o << "nil";
     return o;
+}
+
+Meta::Any Meta::details::IView::Get (TypeId request) const
+{
+    return {};
+}
+
+bool Meta::details::IView::Set (Any source) const
+{
+    return false;
 }

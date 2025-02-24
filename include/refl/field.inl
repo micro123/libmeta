@@ -273,6 +273,29 @@ namespace Meta
             u32 shift_count : 6;  // up to 63
             u32 count;
 
+            class View : public IView {
+            public:
+                View (const BitAccessor *accessor, void *base) : accessor_ (accessor), base_ (base) {}
+                ~View () override {}
+
+                Any Get (TypeId request) const override
+                {
+                    Any in = accessor_->_Read (base_);
+                    Any out;
+                    if (AnyCast (in, out, request))
+                        return out;
+                    return {};
+                }
+                bool Set (Any source) const override
+                {
+                    accessor_->Write (base_, source);
+                    return true;
+                }
+            private:
+                const BitAccessor *accessor_;
+                void              *base_;
+            };
+
             BitAccessor (u32 offset, u32 count)
             {
                 bytes_skip  = offset / 8;
@@ -280,17 +303,9 @@ namespace Meta
                 this->count = count;
             }
 
-            Any Read (const void *base) const
+            Any Read (void *base) const
             {
-                auto      *p = static_cast<const s8 *> (base);
-                T          ret;
-                auto const value_mask = (T {1} << count) - 1;
-                ret                   = (*reinterpret_cast<const T *> (&p[bytes_skip]) >> shift_count) & value_mask;
-                if constexpr (std::is_signed_v<T>)
-                {
-                    _Expand (ret, count);
-                }
-                return ret;
+                return MakeRef(static_cast<IView*>(new View(this, base)));
             }
 
             void Write (void *base, Any any) const
@@ -313,6 +328,18 @@ namespace Meta
             }
 
         private:
+            T _Read(const void *base) const {
+                auto      *p = static_cast<const s8 *> (base);
+                T          ret;
+                auto const value_mask = (T {1} << count) - 1;
+                ret                   = (*reinterpret_cast<const T *> (&p[bytes_skip]) >> shift_count) & value_mask;
+                if constexpr (std::is_signed_v<T>)
+                {
+                    _Expand (ret, count);
+                }
+                return ret;
+            }    
+
             static void _Expand (T &v, u32 bits)
             {
                 const T bit = v & (T (1) << (bits - 1));

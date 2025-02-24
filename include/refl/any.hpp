@@ -167,6 +167,15 @@ namespace Meta
 
             static const AnyOps* Empty ();
         };
+
+        class LIBMETA_API IView {
+        public:
+            virtual ~IView() = default;
+
+            virtual Any Get(TypeId request) const;
+
+            virtual bool Set(Any source) const;
+        };
     }  // namespace details
 
     bool LIBMETA_API AnyCast (const Any &in, Any &out, TypeId dst);

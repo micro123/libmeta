@@ -91,6 +91,11 @@ namespace Meta::details {
         FieldType();
     };
 
+    class ViewType final : public GenericType {
+    public:
+        ViewType();
+    };
+
     void RegisterFundamentalTypes(Registry *reg);
 }
 

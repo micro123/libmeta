@@ -43,6 +43,8 @@ void Meta::details::RegisterFundamentalTypes (Registry *reg)
     assert (ret);
     ret = reg->RegisterType(new DelegateType, Meta::GetTypeId<Delegate>());
     assert (ret);
+    ret = reg->RegisterType(new ViewType, Meta::GetTypeId<IView>());
+    assert (ret);
 }
 
 Meta::details::CStringType::CStringType () : GenericType ("cstr", sizeof (cstr), CalcTypeFlags<cstr> ()) {
@@ -102,6 +104,20 @@ Meta::details::DelegateType::DelegateType () : GenericType("delegate", sizeof(De
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<Delegate>()->ToString();
+        }
+    );
+}
+
+Meta::details::ViewType::ViewType () : GenericType("view", sizeof(Ref<IView>), eTypeIsPtr | eTypeIsRef) {
+    AddConversion<Meta::str>(
+        +[](const Any &value) -> Any {
+            return value.ValuePtr<IView>()->Get(GetTypeId<str>());
+        }
+    );
+    AddConverter<Meta::str>(
+        +[](const Any &out, const Any &in) -> bool {
+            auto view = out.ValuePtr<IView>();
+            return view->Set(in);
         }
     );
 }
