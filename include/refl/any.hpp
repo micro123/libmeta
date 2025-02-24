@@ -282,7 +282,14 @@ namespace Meta
             std::enable_if_t<!std::is_pointer_v<T>>* = nullptr>
         T Value () const
         {
-            if (type_id_ != GetTypeId<T> ())
+            if (type_id_ == GetTypeId<details::IView>())
+            {
+                auto result = ValuePtr<details::IView>()->Get(GetTypeId<T>());
+                if (result.IsValid())
+                    return result.template Value<T>();
+                throw std::bad_cast();
+            }
+            else if (type_id_ != GetTypeId<T> ())
             {
                 // type must be not null
                 auto type = Type ();

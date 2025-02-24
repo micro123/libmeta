@@ -59,6 +59,8 @@ namespace Meta
     LINKAGE_TYPEID(void);
     // str
     LINKAGE_TYPEID(str);
+    // details::IView
+    LINKAGE_TYPEID(details::IView);
     // const char *
     template <>
     TypeId LIBMETA_API GetTypeId<cstr> ();

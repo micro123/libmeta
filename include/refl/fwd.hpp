@@ -14,6 +14,8 @@
 
 namespace Meta
 {
+    namespace details{ class IView; }
+
     FWDC (Type);
     FWDC (Method);
     FWDC (Field);

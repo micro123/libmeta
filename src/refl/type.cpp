@@ -64,6 +64,7 @@ namespace Meta
     LINKAGE_TYPEID(Constant);
     LINKAGE_TYPEID (void);
     LINKAGE_TYPEID (str);
+    LINKAGE_TYPEID (details::IView);
 
     template <>
     TypeId GetTypeId<cstr> ()

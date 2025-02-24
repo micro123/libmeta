@@ -108,7 +108,7 @@ TEST_CASE ("Bit Fields")
     REQUIRE(fb->Get(&v) == -2);
     REQUIRE(fc->Get(&v) == -3);
     
-    fa->Set(&v, 100);
+    fa->Set(&v, "100");
     fb->Set(&v, -9);
     fc->Set(&v, -1);
     REQUIRE(fa->Get(&v) == 100);
