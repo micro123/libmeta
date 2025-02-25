@@ -289,6 +289,10 @@ namespace Meta
                     return result.template Value<T>();
                 throw std::bad_cast();
             }
+            else if (type_id_ == GetTypeId<Any>())
+            {
+                return ValuePtr<Any>()->Value<T>();
+            }
             else if (type_id_ != GetTypeId<T> ())
             {
                 // type must be not null
@@ -299,6 +303,10 @@ namespace Meta
                 if constexpr (std::is_same_v<str, T>)
                 {
                     return AnyToString(type, *this);
+                }
+                else if constexpr (std::is_same_v<Any, std::remove_cv_t<T>>)
+                {
+                    return *this;
                 }
                 else
                 {

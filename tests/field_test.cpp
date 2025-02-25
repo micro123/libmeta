@@ -115,3 +115,21 @@ TEST_CASE ("Bit Fields")
     REQUIRE(fb->Get(&v) == -9);
     REQUIRE(fc->Get(&v) == -1);
 }
+
+TEST_CASE ("Any Field") 
+{
+    struct Example {
+        Meta::Any a;
+        Meta::Any b;
+        Meta::Any c;
+    };
+
+    auto fa = Meta::MakeField("a", &Example::a);
+    auto fb = Meta::MakeField("b", &Example::b);
+    auto fc = Meta::MakeField("c", &Example::c);
+
+    Meta::Any v = Example{1,2,3};
+    REQUIRE(fa->Get(&v) == 1);
+    REQUIRE(fb->Get(&v) == 2);
+    REQUIRE(fc->Get(&v) == 3);
+}

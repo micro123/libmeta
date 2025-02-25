@@ -81,3 +81,15 @@ TEST_CASE ("String Types")
     REQUIRE((cStr["Length"]() == 11));
     std::cout << cStr["Length"]() << std::endl;
 }
+
+static Meta::Any CallMe(Meta::Any value) {
+    std::cout << value << std::endl;
+    return value;
+}
+
+TEST_CASE ("Method Return Any")
+{
+    auto m = Meta::MakeMethod ("CallMe", &CallMe);
+    auto ret = m->Invoke(64);
+    REQUIRE((ret == 64));
+}
