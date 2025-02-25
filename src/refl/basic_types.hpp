@@ -4,6 +4,7 @@
 #include "refl/type.hpp"
 #include "refl/any.hpp"
 #include "refl/generic_type.hpp"
+#include <format>
 
 namespace Meta::details {
     template <typename T>
@@ -13,7 +14,10 @@ namespace Meta::details {
             AddConversion<std::string>(
                 +[](const Any &obj) -> Any {
                     T *ptr = obj.template ValuePtr<T>();
-                    return ptr ? std::to_string(*ptr) : "f32*(null)";
+                    if (ptr) {
+                        return std::to_string(*ptr);
+                    }
+                    return std::format("({}*)null", obj.Type()->Name());
                 }
             );
         }
