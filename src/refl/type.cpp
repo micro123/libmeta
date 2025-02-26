@@ -6,7 +6,7 @@
 
 const Meta::StringName Meta::NULL_TYPE_ID {"nil"};
 
-Meta::Type::Type (sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags) {}
+Meta::Type::Type (TypeId id, sview name, size_t size, u32 flags) : name_ (name), size_ (size), flags_ (flags), id_(id) {}
 
 Meta::Type::~Type () = default;
 
@@ -159,4 +159,23 @@ bool Meta::Type::ConvertFrom(cstr in, const Any& out) const
 Meta::str Meta::AnyToString (const TypePtr &type, const Any &any)
 {
     return type->ValueToString(any);
+}
+
+bool Meta::Type::IsType(Meta::TypeId id) const {
+    bool result = false;
+    if (id == id_)
+    {
+        result = true;
+    }
+    else
+    {
+        auto&& bases = GetBaseClasses();
+        for (auto &x: bases) {
+            if (x->IsType(id)) {
+                result = true;
+                break;
+            }
+        }
+    }
+    return result;
 }

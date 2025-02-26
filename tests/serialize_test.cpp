@@ -68,3 +68,12 @@ TEST_CASE ("Base Type Serialization")
     a["foo"](100);
     b["bar"]();
 }
+
+TEST_CASE ("Type Check")
+{
+    using namespace Meta;
+    auto dtype = TypeOf<Derived>();
+    REQUIRE(dtype->IsType<Base1>());
+    REQUIRE(dtype->IsType<Base2>());
+    REQUIRE(dtype->IsType<__internal::Internal>());
+}

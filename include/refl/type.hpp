@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include "fwd.hpp"
+#include "refl/type_id.hpp"
 #include "utility/constexpr.hpp"
 #include "refl/property_container.hpp"
 
@@ -29,7 +30,7 @@ namespace Meta
         using CastProc = Any(*)(const Any &in); // this type object to other type
         using ConvertProc = bool(*)(const Any &out, const Any &in); // other type object to this type
 
-        Type (sview name, size_t size, u32 flags);
+        Type (TypeId id, sview name, size_t size, u32 flags);
         virtual ~Type ();
 
         Type (const Type &)            = delete;
@@ -71,6 +72,9 @@ namespace Meta
         {
             return flags_ & eTypeIsEnum;
         }
+        inline TypeId Id() const {
+            return id_;
+        }
 
         // 成员信息
         virtual std::vector<FieldPtr> GetFields () const;
@@ -92,6 +96,11 @@ namespace Meta
         // 一般工具
         virtual str                      ValueToString (const Any &obj) const;
         virtual bool                     ValueFromString (const Any &obj, const str& data) const;
+
+        // 类型判断
+        template <typename T>
+        bool IsType() const { return IsType(GetTypeId<T>()); }
+        virtual bool IsType(TypeId id) const;
 
         // 对象创建
         template <typename ... Args>
@@ -131,6 +140,7 @@ namespace Meta
         sview const  name_;
         size_t const size_;
         u32 const    flags_;
+        TypeId const id_;
     protected:
         std::unordered_map<TypeId, CastProc>      cast_to_;
         std::unordered_map<TypeId, ConvertProc>   cast_from_;

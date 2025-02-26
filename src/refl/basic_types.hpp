@@ -10,7 +10,7 @@ namespace Meta::details {
     template <typename T>
     class FundamentalType final : public Type {
     public:
-        FundamentalType(sview name): Type(name, sizeof(T), CalcTypeFlags<T>()) {
+        FundamentalType(sview name): Type(GetTypeId<T>(), name, sizeof(T), CalcTypeFlags<T>()) {
             AddConversion<std::string>(
                 +[](const Any &obj) -> Any {
                     T *ptr = obj.template ValuePtr<T>();

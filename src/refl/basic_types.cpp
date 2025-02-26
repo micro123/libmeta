@@ -8,7 +8,7 @@
 #include "refl/field.hpp"
 #include "refl/constant.hpp"
 
-Meta::details::VoidType::VoidType () : Type (GetTypeName<void> (), 0, 0) {
+Meta::details::VoidType::VoidType () : Type (GetTypeId<void>(), GetTypeName<void> (), 0, 0) {
     AddConversion<Meta::str>(
         +[](const Any &) -> Any {
             return Meta::str{"void"};
@@ -47,7 +47,7 @@ void Meta::details::RegisterFundamentalTypes (Registry *reg)
     assert (ret);
 }
 
-Meta::details::CStringType::CStringType () : GenericType ("cstr", sizeof (cstr), CalcTypeFlags<cstr> ()) {
+Meta::details::CStringType::CStringType () : GenericType (GetTypeId<cstr>(), "cstr", sizeof (cstr), CalcTypeFlags<cstr> ()) {
     AddConversion<std::string>(
         +[](const Any &obj) -> Any {
             return Meta::str{obj.ValueRef<cstr>()};
@@ -56,11 +56,11 @@ Meta::details::CStringType::CStringType () : GenericType ("cstr", sizeof (cstr),
     AddMethod(MakeMethod("Length", +[](const char* str){ return strlen(str); }));
 }
 
-Meta::details::StringType::StringType () : GenericType ("str", sizeof (str), CalcTypeFlags<str> ()) {
+Meta::details::StringType::StringType () : GenericType (GetTypeId<str>(), "str", sizeof (str), CalcTypeFlags<str> ()) {
     AddMethod(MakeMethod("Length", &Meta::str::length));
 }
 
-Meta::details::NullType::NullType () : Type("nil", 0, 0) {
+Meta::details::NullType::NullType () : Type(NULL_TYPE_ID, "nil", 0, 0) {
     AddConversion<Meta::str>(
         +[](const Any &) -> Any {
             return Meta::str{"nil"};
@@ -68,7 +68,7 @@ Meta::details::NullType::NullType () : Type("nil", 0, 0) {
     );
 }
 
-Meta::details::UserType::UserType (): GenericType ("type", sizeof(TypePtr), eTypeIsPtr | eTypeIsRef) {
+Meta::details::UserType::UserType (): GenericType (GetTypeId<Type>(), "type", sizeof(TypePtr), eTypeIsPtr | eTypeIsRef) {
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<Type>()->ToString();
@@ -76,7 +76,7 @@ Meta::details::UserType::UserType (): GenericType ("type", sizeof(TypePtr), eTyp
     );
 }
 
-Meta::details::MethodType::MethodType () : GenericType ("method", sizeof(MethodPtr), eTypeIsPtr | eTypeIsRef) {
+Meta::details::MethodType::MethodType () : GenericType (GetTypeId<Method>(), "method", sizeof(MethodPtr), eTypeIsPtr | eTypeIsRef) {
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<Method>()->ToString();
@@ -84,7 +84,7 @@ Meta::details::MethodType::MethodType () : GenericType ("method", sizeof(MethodP
     );
 }
 
-Meta::details::ConstantType::ConstantType () : GenericType ("constant", sizeof(ConstantPtr), eTypeIsPtr | eTypeIsRef) {
+Meta::details::ConstantType::ConstantType () : GenericType (GetTypeId<Constant>(), "constant", sizeof(ConstantPtr), eTypeIsPtr | eTypeIsRef) {
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<Constant>()->ToString();
@@ -92,7 +92,7 @@ Meta::details::ConstantType::ConstantType () : GenericType ("constant", sizeof(C
     );
 }
 
-Meta::details::FieldType::FieldType () : GenericType("field", sizeof(FieldPtr), eTypeIsPtr | eTypeIsRef) {
+Meta::details::FieldType::FieldType () : GenericType(GetTypeId<Field>(), "field", sizeof(FieldPtr), eTypeIsPtr | eTypeIsRef) {
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<Field>()->ToString();
@@ -100,7 +100,7 @@ Meta::details::FieldType::FieldType () : GenericType("field", sizeof(FieldPtr), 
     );
 }
 
-Meta::details::DelegateType::DelegateType () : GenericType("delegate", sizeof(DelegatePtr), eTypeIsPtr | eTypeIsRef) {
+Meta::details::DelegateType::DelegateType () : GenericType(GetTypeId<Delegate>(), "delegate", sizeof(DelegatePtr), eTypeIsPtr | eTypeIsRef) {
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<Delegate>()->ToString();
@@ -108,7 +108,7 @@ Meta::details::DelegateType::DelegateType () : GenericType("delegate", sizeof(De
     );
 }
 
-Meta::details::ViewType::ViewType () : GenericType("view", sizeof(Ref<IView>), eTypeIsPtr | eTypeIsRef) {
+Meta::details::ViewType::ViewType () : GenericType(GetTypeId<IView>(), "view", sizeof(Ref<IView>), eTypeIsPtr | eTypeIsRef) {
     AddConversion<Meta::str>(
         +[](const Any &value) -> Any {
             return value.ValuePtr<IView>()->Get(GetTypeId<str>());

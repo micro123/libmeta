@@ -138,7 +138,7 @@ namespace Meta {
         static TypeBuilder NewTypeBuilder(sview name = {})
         {
             return {
-                MakeRef<GenericType>(name.empty() ? GetTypeName<T>() : name, sizeof(T), CalcTypeFlags<T> ()),
+                MakeRef<GenericType>(GetTypeId<T>(), name.empty() ? GetTypeName<T>() : name, sizeof(T), CalcTypeFlags<T> ()),
                 GetTypeId<T>()
             };
         }
