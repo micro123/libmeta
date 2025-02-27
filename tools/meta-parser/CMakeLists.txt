@@ -59,6 +59,18 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/system_include.cpp.in ${CMAKE_CURRENT
 target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
 source_group("Generated Code" FILES ${CMAKE_CURRENT_BINARY_DIR}/system_include.cpp)
 
+function(CheckContentHas FILE REG OUT_VAR)
+  # 检查文件内容是否含有 #include "meta-parser.h" 或 #include <meta-parser.h>
+  file(READ ${FILE} file_content LIMIT 4096)
+  string(REGEX MATCH ${REG} match_result ${file_content})
+  # message(STATUS "file ${FILE} match result: ${match_result}")
+  if (match_result)
+    set(${OUT_VAR} ON PARENT_SCOPE)
+  else ()
+    set(${OUT_VAR} OFF PARENT_SCOPE)
+  endif ()
+endfunction()
+
 # 注册目标需要生成反射代码
 function(meta_codegen tgt)
   # message(STATUS "Setting up target ${tgt} code gen")
@@ -73,7 +85,10 @@ function(meta_codegen tgt)
     # 需要 .h/.hpp
     get_filename_component(suffix ${file} EXT)
     if (suffix MATCHES ".h|.hpp")
-      list(APPEND ALL_HEADERS ${file})
+      CheckContentHas(${file} "#include[ ]+[<\"]meta-parser.h[\">]" HAVE_META)
+      if (HAVE_META)
+        list(APPEND ALL_HEADERS ${file})
+      endif ()
     endif ()
   endforeach()
   # message(STATUS "Target ${tgt} headers: ${ALL_HEADERS}")
