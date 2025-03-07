@@ -8,7 +8,7 @@ void sayHello () {
 void MyClass::Inc (int &origin, f32 *f) {
     origin += 5;
     if (f)
-        *f *= this->a;
+        *f *= *f;
     printf("f = %p\n", f);
 }
 

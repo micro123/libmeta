@@ -55,6 +55,9 @@ void Meta::CodeGenFor<{{ctx.name}}>::Register() {
 ## endfor
     })
 ## endif
+## if type.add_default_ctor
+    .AddDefaultConstructor<{{type.fullname}}>("{{type.name}}")
+## endif
 ## for ctor in type.constructors
     .AddConstructor(
         MethodBuilder::NewMethodBuilder ("{{ctor.name}}", &Meta::Ctor::Of<{{type.fullname}}{{ctor.type}}>)
@@ -167,7 +170,7 @@ static nlohmann::json BuildConstructor(const Function *m)
 {
     using namespace nlohmann;
     json j = json::object();
-    j["name"] = "Constructor";
+    j["name"] = m->Name();
     j["type"] = m->Type ();
     j["has_properties"] = m->HasProperties();
     j["properties"] = BuildProperties(m);
@@ -213,6 +216,7 @@ static nlohmann::json BuildType(const LanguageType &type)
     t["fullname"] = type.FullName();
     t["name"] = type.Name();
     t["is_enum"] = type.IsEnum();
+    t["add_default_ctor"] = !type.HasDefaultConstructorDefined();
     t["has_properties"] = type.HasProperties();
     t["properties"] = BuildProperties(&type);
     // base types

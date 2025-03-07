@@ -59,7 +59,7 @@ STRUCT(Base1, All)
 {
     int x;
 
-    void foo(int);
+    void foo(int v);
 };
 
 STRUCT(Base2, All)

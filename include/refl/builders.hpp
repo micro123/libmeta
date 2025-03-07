@@ -7,6 +7,7 @@
 #include "refl/generic_type.hpp"
 #include "refl/field.hpp"
 #include "refl/method.hpp"
+#include <type_traits>
 
 namespace Meta {
     namespace details
@@ -176,6 +177,18 @@ namespace Meta {
             AddCastTo (&EnumToString, GetTypeId<str>());
             AddConvertFrom (&EnumFromString, GetTypeId<str>());
             AddConvertFrom (&EnumFromString, GetTypeId<cstr>());
+            return *this;
+        }
+
+        template <typename T>
+        TypeBuilder &AddDefaultConstructor(sview name) {
+            if constexpr(std::is_default_constructible_v<T>)
+            {
+                return AddConstructor(
+                    MethodBuilder::NewMethodBuilder (name, &Meta::Ctor::Of<T>)
+                    .Build()
+                );
+            }
             return *this;
         }
 

@@ -27,8 +27,8 @@ namespace Test {
         k = a - b;
     }
 
-    void Base1::foo(int) {
-        printf("Base1::foo(int) x = %d\n", x);
+    void Base1::foo(int v) {
+        printf("Base1::foo(int) x = %d, input = %d\n", x, v);
     }
 
     int Derived::bar() {

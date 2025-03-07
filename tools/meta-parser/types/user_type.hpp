@@ -20,6 +20,7 @@ public:
     [[nodiscard]] std::string FullName () const;
     [[nodiscard]] std::string Name () const;
     [[nodiscard]] bool        IsEnum () const;
+    [[nodiscard]] bool        HasDefaultConstructorDefined() const;
 
     const std::list<std::string> &BaseTypes () const;
     const std::list<Field *>     &Fields () const;
@@ -43,6 +44,7 @@ private:
     std::string                custom_name_;  // use custom name instead of Namespace::Type
     bool                       enum_;         // enum type
     bool                       anon_;         // anonymous
+    bool                       default_ctor_; // has default constructor defined
     std::list<std::string>     base_types_;   // base class/struct
     std::list<Field *>         fields_;
     std::list<Function *>      constructors_;

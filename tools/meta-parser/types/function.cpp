@@ -1,6 +1,7 @@
 #include "function.hpp"
 #include "utilities/clang_utils.hpp"
 #include "parser/code_parser.hpp"
+#include <algorithm>
 
 static std::string ArgGetDefault(Cursor c) {
     std::string result;
@@ -51,6 +52,12 @@ Function::Function (const Cursor &cursor, const Namespace &ns, TypeInfo *parent)
 
 }
 Function::~Function () = default;
+
+bool Function::NoArgCallable () const
+{
+    return parameters_.empty() || std::all_of(begin(parameters_), end(parameters_), [](const Parameter &p) { return !p.init_value.empty(); });
+}
+
 bool Function::ShouldCompile () const
 {
     if (parent_->ShouldCompile())

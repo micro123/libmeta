@@ -44,7 +44,7 @@ public:
     static void xxx();
 
 private:
-    struct META()
+    struct
     {
         float x,y,z;
     } vec3f;
@@ -89,7 +89,7 @@ enum CLASS(Van)
     Other = 10086,
 };
 
-enum
+enum STRUCT(Simple)
 {
     Ni,
     Hao,

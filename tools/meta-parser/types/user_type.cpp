@@ -33,6 +33,7 @@ LanguageType::LanguageType (std::string name, const Namespace &ns, TypeInfo *par
     // Print(cursor, false);
     name_ = std::move (name);
     // std::cout << " " << FullName() << '\n';
+    default_ctor_ = false;
     if (!ShouldCompile ())
         return;
     assert (cursor.IsUserType ());
@@ -83,8 +84,11 @@ void LanguageType::ParseDataType (const Cursor &cursor)
         else if (kind == CXCursor_Constructor)
         {
             auto f = new Function (*it, ns, this);
-            if (f->ShouldCompile ())
+            if (f->ShouldCompile ()){
+                if (!default_ctor_ && f->NoArgCallable())
+                    default_ctor_ = true; // mark default construct defined
                 constructors_.emplace_back (f);
+            }
             else
                 delete f;
         }
@@ -237,6 +241,10 @@ std::string LanguageType::Name () const
 bool LanguageType::IsEnum () const
 {
     return enum_;
+}
+bool LanguageType::HasDefaultConstructorDefined () const
+{
+    return default_ctor_;
 }
 bool LanguageType::ShouldCompile () const
 {

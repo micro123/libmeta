@@ -25,6 +25,7 @@ public:
     {
         return func_type_;
     }
+    bool NoArgCallable() const;
 
     const std::vector<Parameter>& Arguments () const { return parameters_; }
 
