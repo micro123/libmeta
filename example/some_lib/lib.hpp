@@ -43,6 +43,8 @@ public:
 
     static void xxx();
 
+    static void yyy() {}
+
 private:
     struct
     {

@@ -168,7 +168,7 @@ namespace Meta
             Any Set (const Any *, Any value, u32 index) const override
             {
                 assert (index < cnt_);
-                if constexpr (std::is_const_v<T>)
+                if constexpr (std::is_const_v<T> || std::is_array_v<T>)
                 {
                     return Get (nullptr, index);
                 }
@@ -236,7 +236,7 @@ namespace Meta
             {
                 assert (index < cnt_);
                 auto t_obj = GetObject (object);
-                if constexpr (std::is_const_v<T>)
+                if constexpr (std::is_const_v<T> || std::is_array_v<T>)
                 {
                     return Get (object, index);
                 }

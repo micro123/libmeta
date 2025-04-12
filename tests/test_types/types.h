@@ -83,6 +83,11 @@ STRUCT(Derived, All): public Base1, private Base2, protected __internal::Interna
     void SetValue(int a, int b, int c, int d);
 };
 
+STRUCT(NDArray)
+{
+    int data[4][5][6];
+};
+
 }
 
 
