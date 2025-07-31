@@ -3,7 +3,7 @@ project(meta-parser C CXX)
 file(GLOB_RECURSE SRC_FILES *.*)
 source_tree(SRC_FILES)
 
-find_package(Clang REQUIRED)
+# find_package(Clang REQUIRED)
 
 # Add path to LLVM modules
 # set(CMAKE_MODULE_PATH
@@ -13,7 +13,7 @@ find_package(Clang REQUIRED)
 
 # import LLVM CMake functions
 # include(AddLLVM)
-find_library(CLANG_LIBRARY NAMES libclang clang PATHS ${LLVM_LIBRARY_DIRS} NO_DEFAULT_PATH NO_CACHE NO_SYSTEM_ENVIRONMENT_PATH REQUIRED)
+# find_library(CLANG_LIBRARY NAMES libclang clang PATHS ${LLVM_LIBRARY_DIRS} NO_DEFAULT_PATH NO_CACHE NO_SYSTEM_ENVIRONMENT_PATH REQUIRED)
 # message(STATUS "Clang library is ${CLANG_LIBRARY}")
 
 # dump_cmake_variables(LLVM)
@@ -21,7 +21,7 @@ find_library(CLANG_LIBRARY NAMES libclang clang PATHS ${LLVM_LIBRARY_DIRS} NO_DE
 
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CLANG_LIBRARY} libmeta_headers)
+target_link_libraries(${PROJECT_NAME} PRIVATE llvm libmeta_headers)
 target_include_directories(
   ${PROJECT_NAME}
   PRIVATE
@@ -36,9 +36,8 @@ if (WIN32)
   add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CLANG_DLL}"
-      "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}>
+      COMMAND_EXPAND_LISTS
     COMMENT "Copy libclang.dll to ${PROJECT_NAME}'s binary direcotry"
   )
 endif ()
