@@ -85,15 +85,19 @@ static void test_ctor()
 
 int main(int argc, char const *argv[])
 {
+#if _WIN32 && __GNUC__
+    setlocale(LC_ALL, ".65001");
+#endif
+
     call_all(&__start_reg, &__stop_reg);
 
     Meta::Registry::Instance ().VisitTypes ([](Meta::TypeId tid, Meta::TypePtr type) -> bool {
-        std::cout << std::format("type {} has id {}\n", type->Name (), tid.operator std::string());
+        std::cout << std::format("id = {:<10}, name = {}\n", tid.operator std::string(), type->Name ());
         PrintType(type);
         return true;
     });
-
-    Meta::Any test = MyClass("你好");
+    [[maybe_unused]] Meta::Any test = MyClass("你好");
+    #if 0
     std::cout << Meta::JsonSerialize(test,true) << std::endl;
     std::cout << Meta::XmlSerialize(test,true) << std::endl;
     std::cout << test["data"]["d"] << std::endl;
@@ -106,6 +110,6 @@ int main(int argc, char const *argv[])
     std::cout << type["Inc"] << '\n';
 
     test_ctor();
-
+#endif
     return 0;
 }
